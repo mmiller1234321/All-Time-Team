@@ -1,0 +1,20 @@
+{
+    "name": "baseball-player-entry",
+    "version": "1.0.0",
+    "description": "A web page for entering baseball player names and positions",
+    "main": "index.js",
+    "scripts": {
+      "start": "node server.js"
+    },
+    "keywords": [
+      "baseball",
+      "players",
+      "entry"
+    ],
+    "author": "Your Name",
+    "license": "MIT",
+    "dependencies": {
+      "express": "^4.17.1"
+    }
+  }
+  
