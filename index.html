@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Name Entry Table</title>
+<style>
+    table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+    th, td {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+    }
+    th {
+        background-color: #f2f2f2;
+    }
+</style>
+</head>
+<body>
+
+<h2>Enter Baseball Players' Names</h2>
+
+<table id="nameTable">
+  <tr>
+    <th id="teamHeader">MLB Team</th>
+    <th>Position</th>
+  </tr>
+  <tr>
+    <td><input type="text" name="playerName1" placeholder="Enter player's name"></td>
+    <td><input type="text" name="playerPosition1" value="C" readonly></td>
+  </tr>
+  <tr>
+    <td><input type="text" name="playerName2" placeholder="Enter player's name"></td>
+    <td><input type="text" name="playerPosition2" value="1B" readonly></td>
+  </tr>
+  <tr>
+    <td><input type="text" name="playerName3" placeholder="Enter player's name"></td>
+    <td><input type="text" name="playerPosition3" value="2B" readonly></td>
+  </tr>
+  <tr>
+    <td><input type="text" name="playerName4" placeholder="Enter player's name"></td>
+    <td><input type="text" name="playerPosition4" value="3B" readonly></td>
+  </tr>
+  <tr>
+    <td><input type="text" name="playerName5" placeholder="Enter player's name"></td>
+    <td><input type="text" name="playerPosition5" value="SS" readonly></td>
+  </tr>
+  <tr>
+    <td><input type="text" name="playerName6" placeholder="Enter player's name"></td>
+    <td><input type="text" name="playerPosition6" value="LF" readonly></td>
+  </tr>
+  <tr>
+    <td><input type="text" name="playerName7" placeholder="Enter player's name"></td>
+    <td><input type="text" name="playerPosition7" value="CF" readonly></td>
+  </tr>
+  <tr>
+    <td><input type="text" name="playerName8" placeholder="Enter player's name"></td>
+    <td><input type="text" name="playerPosition8" value="RF" readonly></td>
+  </tr>
+  <tr>
+    <td><input type="text" name="playerName9" placeholder="Enter player's name"></td>
+    <td><input type="text" name="playerPosition9" value="DH" readonly></td>
+  </tr>
+  <tr>
+    <td><input type="text" name="playerName10" placeholder="Enter player's name"></td>
+    <td><input type="text" name="playerPosition10" value="P" readonly></td>
+  </tr>
+</table>
+
+<button onclick="submitForm()">Submit</button>
+
+<script>
+function submitForm() {
+  var table = document.getElementById("nameTable");
+  var rows = table.getElementsByTagName("tr");
+  var formData = [];
+  for (var i = 1; i < rows.length; i++) {
+    var cells = rows[i].getElementsByTagName("td");
+    var playerName = cells[0].getElementsByTagName("input")[0].value;
+    var playerPosition = cells[1].getElementsByTagName("input")[0].value;
+    if (playerName) {
+      formData.push({ name: playerName, position: playerPosition });
+    }
+  }
+  console.log(formData);
+  // Here you can send the formData to your API
+}
+</script>
+
+</body>
+</html>
