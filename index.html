@@ -5,15 +5,26 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Name Entry Table</title>
 <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+<style>
+  body {
+    background-color: #8FBC8F; /* Green like grass */
+  }
+  .container {
+    background-color: #FAFAD2; /* Sand color */
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 20px;
+  }
+</style>
 </head>
 <body>
 
 <div class="container">
   <h2>Enter Baseball Players' Names</h2>
-  <table class="table table-bordered">
+  <table class="table table-bordered" style="background-color: #FAFAD2;"> <!-- Apply sand color to the table -->
     <thead class="thead-light">
       <tr>
-        <th scope="col">MLB Team</th>
+        <th scope="col" id="teamLabel">MLB Team</th>
         <th scope="col">Position</th>
         <th scope="col">Actions</th>
       </tr>
@@ -88,20 +99,10 @@ function updateTeamLabel() {
   ];
   var currentDate = new Date();
   var currentUTCHours = currentDate.getUTCHours();
-  if (currentUTCHours >= 5 && currentUTCHours < 6) { // Update team label between 12:00 AM and 1:00 AM US Central Time
-    var currentDay = currentDate.getUTCDay();
+  if (currentUTCHours === 5) { // Update team label at 12:00 AM US Central Time
     var randomIndex = Math.floor(Math.random() * teams.length);
     var randomTeam = teams[randomIndex];
-    document.getElementById('teamName1').innerText = randomTeam;
-    document.getElementById('teamName2').innerText = randomTeam;
-    document.getElementById('teamName3').innerText = randomTeam;
-    document.getElementById('teamName4').innerText = randomTeam;
-    document.getElementById('teamName5').innerText = randomTeam;
-    document.getElementById('teamName6').innerText = randomTeam;
-    document.getElementById('teamName7').innerText = randomTeam;
-    document.getElementById('teamName8').innerText = randomTeam;
-    document.getElementById('teamName9').innerText = randomTeam;
-    document.getElementById('teamName10').innerText = randomTeam;
+    document.getElementById('teamLabel').innerText = randomTeam;
   }
 }
 
@@ -110,12 +111,4 @@ function submitForm(rowNumber) {
   var playerName = document.querySelector("[name='playerName" + rowNumber + "']").value;
   var playerPosition = document.getElementsByTagName("tbody")[0].rows[rowNumber - 1].cells[1].innerText;
   console.log("Player Name: " + playerName + ", Player Position: " + playerPosition);
-  // Here you can handle the form submission as needed
-}
-
-// Call the function to update team label once the page loads
-updateTeamLabel();
-</script>
-
-</body>
-</html>
+  //
