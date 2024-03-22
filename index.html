@@ -5,91 +5,116 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Name Entry Table</title>
 <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-<style>
-  body {
-    background-color: #78AB46; /* Grass color */
-    margin: 0;
-    padding: 0;
-  }
-  
-  .container {
-    background-color: #8B4513; /* Dirt color */
-    padding: 20px;
-  }
-</style>
 </head>
 <body>
 
 <div class="container">
   <h2>Enter Baseball Players' Names</h2>
-  <table class="table table-bordered" style="background-color: transparent;">
+  <table class="table table-bordered">
     <thead class="thead-light">
       <tr>
         <th scope="col">MLB Team</th>
         <th scope="col">Position</th>
+        <th scope="col">Actions</th>
       </tr>
     </thead>
     <tbody>
       <tr>
         <td><input type="text" class="form-control" name="playerName1" placeholder="Enter player's name"></td>
-        <td>Catcher</td>
+        <td>C</td>
+        <td><button class="btn btn-primary" onclick="submitForm(1)">Submit</button></td>
       </tr>
       <tr>
         <td><input type="text" class="form-control" name="playerName2" placeholder="Enter player's name"></td>
-        <td>First Baseman</td>
+        <td>1B</td>
+        <td><button class="btn btn-primary" onclick="submitForm(2)">Submit</button></td>
       </tr>
       <tr>
         <td><input type="text" class="form-control" name="playerName3" placeholder="Enter player's name"></td>
-        <td>Second Baseman</td>
+        <td>2B</td>
+        <td><button class="btn btn-primary" onclick="submitForm(3)">Submit</button></td>
       </tr>
       <tr>
         <td><input type="text" class="form-control" name="playerName4" placeholder="Enter player's name"></td>
-        <td>Third Baseman</td>
+        <td>3B</td>
+        <td><button class="btn btn-primary" onclick="submitForm(4)">Submit</button></td>
       </tr>
       <tr>
         <td><input type="text" class="form-control" name="playerName5" placeholder="Enter player's name"></td>
-        <td>Shortstop</td>
+        <td>SS</td>
+        <td><button class="btn btn-primary" onclick="submitForm(5)">Submit</button></td>
       </tr>
       <tr>
         <td><input type="text" class="form-control" name="playerName6" placeholder="Enter player's name"></td>
-        <td>Left Fielder</td>
+        <td>LF</td>
+        <td><button class="btn btn-primary" onclick="submitForm(6)">Submit</button></td>
       </tr>
       <tr>
         <td><input type="text" class="form-control" name="playerName7" placeholder="Enter player's name"></td>
-        <td>Center Fielder</td>
+        <td>CF</td>
+        <td><button class="btn btn-primary" onclick="submitForm(7)">Submit</button></td>
       </tr>
       <tr>
         <td><input type="text" class="form-control" name="playerName8" placeholder="Enter player's name"></td>
-        <td>Right Fielder</td>
+        <td>RF</td>
+        <td><button class="btn btn-primary" onclick="submitForm(8)">Submit</button></td>
       </tr>
       <tr>
         <td><input type="text" class="form-control" name="playerName9" placeholder="Enter player's name"></td>
-        <td>Designated Hitter</td>
+        <td>P</td>
+        <td><button class="btn btn-primary" onclick="submitForm(9)">Submit</button></td>
       </tr>
       <tr>
         <td><input type="text" class="form-control" name="playerName10" placeholder="Enter player's name"></td>
-        <td>Pitcher</td>
+        <td>DH</td>
+        <td><button class="btn btn-primary" onclick="submitForm(10)">Submit</button></td>
       </tr>
     </tbody>
   </table>
-  <button class="btn btn-primary" onclick="submitForm()">Submit</button>
 </div>
 
 <script>
-function submitForm() {
-  var table = document.querySelector(".table");
-  var rows = table.querySelectorAll("tbody tr");
-  var formData = [];
-  rows.forEach(function(row) {
-    var playerName = row.querySelector("[name^='playerName']").value;
-    var playerPosition = row.querySelector("td:last-child").textContent;
-    if (playerName) {
-      formData.push({ name: playerName, position: playerPosition });
-    }
-  });
-  console.log(formData);
-  // Here you can send the formData to your API
+// Function to update MLB team name label dynamically once a day
+function updateTeamLabel() {
+  var teams = [
+    "Arizona Diamondbacks", "Atlanta Braves", "Baltimore Orioles", "Boston Red Sox",
+    "Chicago White Sox", "Chicago Cubs", "Cincinnati Reds", "Cleveland Guardians",
+    "Colorado Rockies", "Detroit Tigers", "Houston Astros", "Kansas City Royals",
+    "Los Angeles Angels", "Los Angeles Dodgers", "Miami Marlins", "Milwaukee Brewers",
+    "Minnesota Twins", "New York Yankees", "New York Mets", "Oakland Athletics",
+    "Philadelphia Phillies", "Pittsburgh Pirates", "San Diego Padres", "San Francisco Giants",
+    "Seattle Mariners", "St. Louis Cardinals", "Tampa Bay Rays", "Texas Rangers",
+    "Toronto Blue Jays", "Washington Nationals"
+  ];
+  var currentDate = new Date();
+  var currentUTCHours = currentDate.getUTCHours();
+  if (currentUTCHours >= 5 && currentUTCHours < 6) { // Update team label between 12:00 AM and 1:00 AM US Central Time
+    var currentDay = currentDate.getUTCDay();
+    var randomIndex = Math.floor(Math.random() * teams.length);
+    var randomTeam = teams[randomIndex];
+    document.getElementById('teamName1').innerText = randomTeam;
+    document.getElementById('teamName2').innerText = randomTeam;
+    document.getElementById('teamName3').innerText = randomTeam;
+    document.getElementById('teamName4').innerText = randomTeam;
+    document.getElementById('teamName5').innerText = randomTeam;
+    document.getElementById('teamName6').innerText = randomTeam;
+    document.getElementById('teamName7').innerText = randomTeam;
+    document.getElementById('teamName8').innerText = randomTeam;
+    document.getElementById('teamName9').innerText = randomTeam;
+    document.getElementById('teamName10').innerText = randomTeam;
+  }
 }
+
+// Function to handle form submission for each row
+function submitForm(rowNumber) {
+  var playerName = document.querySelector("[name='playerName" + rowNumber + "']").value;
+  var playerPosition = document.getElementsByTagName("tbody")[0].rows[rowNumber - 1].cells[1].innerText;
+  console.log("Player Name: " + playerName + ", Player Position: " + playerPosition);
+  // Here you can handle the form submission as needed
+}
+
+// Call the function to update team label once the page loads
+updateTeamLabel();
 </script>
 
 </body>
