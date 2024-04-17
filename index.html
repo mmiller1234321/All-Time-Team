@@ -80,6 +80,29 @@ function updateLabels() {
   document.getElementById('statLabel').innerText = randomStat;
 }
 
+// Function to handle the submission of player names and fetch highest home runs
+function handleSubmit(event) {
+  var playerName = event.target.parentElement.parentElement.children[0].children[0].value;
+  var position = event.target.parentElement.parentElement.children[1].textContent;
+  var team = document.getElementById('teamLabel').textContent;
+
+  // Make AJAX request to backend to fetch highest home runs for the player
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', '/search?playerName=' + playerName + '&position=' + position + '&team=' + team, true);
+  xhr.onload = function () {
+    if (xhr.status === 200) {
+      var statSquare = event.target.parentElement.parentElement.children[2].children[0];
+      statSquare.textContent = xhr.responseText;
+    } else {
+      console.error('Error fetching data:', xhr.statusText);
+    }
+  };
+  xhr.onerror = function () {
+    console.error('Error fetching data.');
+  };
+  xhr.send();
+}
+
 // Function to add rows with input fields for player names, positions, and blank squares for stats
 function addPlayerRows() {
   var positions = ["C", "1B", "2B", "3B", "SS", "LF", "CF", "RF", "P", "DH"];
@@ -114,6 +137,7 @@ function addPlayerRows() {
     submitButton.type = "button";
     submitButton.className = "btn btn-primary";
     submitButton.textContent = "Submit";
+    submitButton.addEventListener('click', handleSubmit);
     submitCell.appendChild(submitButton);
     row.appendChild(submitCell);
     
