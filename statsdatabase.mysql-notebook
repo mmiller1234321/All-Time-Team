@@ -1,0 +1,154 @@
+{
+    "type": "MySQLNotebook",
+    "version": "1.0",
+    "caption": "DB Notebook",
+    "content": "\\about\nSELECT \n    MAX(b.HR) AS max_home_runs\nFROM \n    fielding AS f\nJOIN \n    teams AS t ON f.team_ID = t.ID\nJOIN \n    batting AS b ON f.playerID = b.playerID\nJOIN \n    people AS p ON b.playerID = p.playerID\nWHERE \n    CONCAT(p.nameFirst, ' ', p.nameLast) = 'Ryne Sandberg'\n    AND f.POS = '3B'\n    AND t.name = 'Chicago Cubs';\n    \n",
+    "options": {
+        "tabSize": 4,
+        "indentSize": 4,
+        "insertSpaces": true,
+        "defaultEOL": "LF",
+        "trimAutoWhitespace": true
+    },
+    "viewState": {
+        "cursorState": [
+            {
+                "inSelectionMode": false,
+                "selectionStart": {
+                    "lineNumber": 17,
+                    "column": 1
+                },
+                "position": {
+                    "lineNumber": 17,
+                    "column": 1
+                }
+            }
+        ],
+        "viewState": {
+            "scrollLeft": 0,
+            "firstPosition": {
+                "lineNumber": 2,
+                "column": 1
+            },
+            "firstPositionDeltaTop": 65
+        },
+        "contributionsState": {
+            "editor.contrib.folding": {},
+            "editor.contrib.wordHighlighter": false
+        }
+    },
+    "contexts": [
+        {
+            "state": {
+                "start": 1,
+                "end": 1,
+                "language": "mysql",
+                "result": {
+                    "type": "text",
+                    "text": [
+                        {
+                            "type": 2,
+                            "content": "Welcome to the MySQL Shell - DB Notebook.\n\nPress Ctrl+Enter to execute the code block.\n\nExecute \\sql to switch to SQL, \\js to JavaScript and \\ts to TypeScript mode.\nExecute \\help or \\? for help;",
+                            "language": "ansi"
+                        }
+                    ]
+                },
+                "currentHeight": 122,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 6
+                        },
+                        "contentStart": 0,
+                        "state": 0
+                    }
+                ]
+            },
+            "data": []
+        },
+        {
+            "state": {
+                "start": 2,
+                "end": 16,
+                "language": "mysql",
+                "result": {
+                    "type": "resultIds",
+                    "list": [
+                        "f874996c-77d0-4dde-a615-14885dbc9f01"
+                    ]
+                },
+                "currentHeight": 91.09375,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 322
+                        },
+                        "contentStart": 0,
+                        "state": 0
+                    },
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 322,
+                            "length": 5
+                        },
+                        "contentStart": 321,
+                        "state": 3
+                    }
+                ]
+            },
+            "data": [
+                {
+                    "tabId": "1f72db4f-ebd9-4008-87a0-8fe2dd364f90",
+                    "resultId": "f874996c-77d0-4dde-a615-14885dbc9f01",
+                    "rows": [
+                        {
+                            "0": 40
+                        }
+                    ],
+                    "columns": [
+                        {
+                            "title": "max_home_runs",
+                            "field": "0",
+                            "dataType": {
+                                "type": 2
+                            }
+                        }
+                    ],
+                    "executionInfo": {
+                        "text": "OK, 1 record retrieved in 21.013ms"
+                    },
+                    "totalRowCount": 1,
+                    "hasMoreRows": false,
+                    "currentPage": 0,
+                    "index": 0,
+                    "sql": "SELECT \n    MAX(b.HR) AS max_home_runs\nFROM \n    fielding AS f\nJOIN \n    teams AS t ON f.team_ID = t.ID\nJOIN \n    batting AS b ON f.playerID = b.playerID\nJOIN \n    people AS p ON b.playerID = p.playerID\nWHERE \n    CONCAT(p.nameFirst, ' ', p.nameLast) = 'Ryne Sandberg'\n    AND f.POS = '3B'\n    AND t.name = 'Chicago Cubs';"
+                }
+            ]
+        },
+        {
+            "state": {
+                "start": 17,
+                "end": 17,
+                "language": "mysql",
+                "currentHeight": 180,
+                "statements": [
+                    {
+                        "delimiter": ";",
+                        "span": {
+                            "start": 0,
+                            "length": 0
+                        },
+                        "contentStart": 0,
+                        "state": 0
+                    }
+                ]
+            },
+            "data": []
+        }
+    ]
+}
