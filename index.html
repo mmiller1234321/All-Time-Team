@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>All Time Team</title>
+<title>All Time Teams</title>
 <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 <style>
   body {
@@ -55,6 +55,11 @@
       <!-- Table rows will be generated dynamically -->
     </tbody>
   </table>
+
+  <!-- Total Score -->
+  <div>
+    <p>Total Score: <span id="totalScore"></span></p>
+  </div>
 </div>
 
 <script>
@@ -87,6 +92,7 @@ function handleSubmit(event) {
     var team = document.getElementById('teamLabel').textContent;
     var stat = document.getElementById('statLabel').textContent; // Retrieve the value of the stats label
 
+    // Fetch data for the submitted player
     var xhr = new XMLHttpRequest();
     xhr.open('GET', 'http://localhost:3000/search?playerName=' + playerName + '&position=' + position + '&team=' + team + '&stat=' + stat, true);
     xhr.onload = function () {
@@ -95,14 +101,6 @@ function handleSubmit(event) {
         var statValue = xhr.responseText;
         statSquare.textContent = (statValue === '0') ? '0' : statValue; // Display '0' if no data found
         updateTotalScore(); // Update total score after each submission
-        event.target.disabled = true; // Disable the button after submission
-        playerNameInput.disabled = true; // Disable the input after submission
-
-        // Re-enable input fields after successful submission
-        var allPlayerInputs = document.querySelectorAll('.player-input');
-        allPlayerInputs.forEach(function(input) {
-          input.disabled = false;
-        });
       } else {
         console.error('Error fetching data:', xhr.statusText);
       }
@@ -148,25 +146,11 @@ function addPlayerRows() {
     row.appendChild(submitCell);
     
     tbody.appendChild(row);
+    
+    if (positions[i] === 'P') {
+      break; // Stop adding rows when reaching 'P' position
+    }
   }
-
-  // Add the total score row
-  var totalScoreRow = document.createElement("tr");
-  var totalScoreLabelCell = document.createElement("td");
-  totalScoreLabelCell.textContent = "Total Score";
-  totalScoreRow.appendChild(totalScoreLabelCell);
-
-  var emptyPositionCell = document.createElement("td");
-  totalScoreRow.appendChild(emptyPositionCell);
-
-  var totalScoreCell = document.createElement("td");
-  totalScoreCell.id = "totalScore";
-  totalScoreRow.appendChild(totalScoreCell);
-
-  var emptySubmitCell = document.createElement("td");
-  totalScoreRow.appendChild(emptySubmitCell);
-
-  tbody.appendChild(totalScoreRow);
 }
 
 function updateTotalScore() {
@@ -189,3 +173,4 @@ window.onload = function() {
 
 </body>
 </html>
+
