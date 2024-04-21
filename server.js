@@ -37,7 +37,11 @@ app.get('/search', (req, res) => {
     JOIN teams AS t ON b.teamID = t.teamID
     WHERE CONCAT(p.nameFirst, ' ', p.nameLast) = ? 
       AND f.POS = ?
-      AND t.name = ?
+      AND t.franchID IN (
+        SELECT franchID
+        FROM teams
+        WHERE name = ?
+      )
   `;
 
   connection.query(query, [playerName, position, team], (error, results) => {
