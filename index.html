@@ -85,10 +85,14 @@ function updateLabels() {
 }
 
 function handleSubmit(event) {
-  var playerNameInput = event.target.parentElement.parentElement.children[0].children[0];
+  var submitButton = event.target;
+  if (submitButton.disabled) return; // Check if the button is already disabled
+  submitButton.disabled = true; // Disable the button to prevent multiple submissions
+
+  var playerNameInput = submitButton.parentElement.parentElement.children[0].children[0];
   var playerName = playerNameInput.value.trim(); // Trim whitespace
   if (playerName !== '') {
-    var position = event.target.parentElement.parentElement.children[1].textContent;
+    var position = submitButton.parentElement.parentElement.children[1].textContent;
     var team = document.getElementById('teamLabel').textContent;
     var stat = document.getElementById('statLabel').textContent; // Retrieve the value of the stats label
 
@@ -97,7 +101,7 @@ function handleSubmit(event) {
     xhr.open('GET', 'http://localhost:3000/search?playerName=' + playerName + '&position=' + position + '&team=' + team + '&stat=' + stat, true);
     xhr.onload = function () {
       if (xhr.status === 200) {
-        var statSquare = event.target.parentElement.parentElement.children[2].children[0];
+        var statSquare = submitButton.parentElement.parentElement.children[2].children[0];
         var statValue = xhr.responseText;
         statSquare.textContent = (statValue === '0') ? '0' : statValue; // Display '0' if no data found
         updateTotalScore(); // Update total score after each submission
@@ -173,4 +177,3 @@ window.onload = function() {
 
 </body>
 </html>
-
