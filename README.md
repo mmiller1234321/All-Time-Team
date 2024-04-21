@@ -4,6 +4,8 @@ A game for baseball fans. Coming soon!!!
 
 ## Updates
 
+Are you a fan of Montreal Expos? Historical team information has been updated!!!
+
 Trying to get autocomplete/autosuggest for name entry.
 
 4.20 Runs locally. Still testing. Will update remotely and then check for MVP. Stay Tuned..
