@@ -97,6 +97,12 @@ function handleSubmit(event) {
         updateTotalScore(); // Update total score after each submission
         event.target.disabled = true; // Disable the button after submission
         playerNameInput.disabled = true; // Disable the input after submission
+
+        // Re-enable input fields after successful submission
+        var allPlayerInputs = document.querySelectorAll('.player-input');
+        allPlayerInputs.forEach(function(input) {
+          input.disabled = false;
+        });
       } else {
         console.error('Error fetching data:', xhr.statusText);
       }
@@ -117,7 +123,7 @@ function addPlayerRows() {
     var playerNameCell = document.createElement("td");
     var playerNameInput = document.createElement("input");
     playerNameInput.type = "text";
-    playerNameInput.className = "form-control";
+    playerNameInput.className = "form-control player-input";
     playerNameInput.placeholder = "Enter player's name";
     playerNameCell.appendChild(playerNameInput);
     row.appendChild(playerNameCell);

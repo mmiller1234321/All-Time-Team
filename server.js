@@ -21,13 +21,14 @@ connection.connect((err) => {
   console.log('Connected to MySQL database');
 });
 
+// Search endpoint to fetch player stats
 app.get('/search', (req, res) => {
   const playerName = req.query.playerName;
   const position = req.query.position;
   const team = req.query.team;
   const stat = req.query.stat; // Add stat parameter
 
-  // Adjust the MySQL query to use the dynamically changing team and stat
+  // MySQL query to fetch player stats
   const query = `
     SELECT MAX(b.${stat}) AS max_stat_value
     FROM batting AS b
@@ -55,7 +56,30 @@ app.get('/search', (req, res) => {
   });
 });
 
+// Autocomplete endpoint to fetch player name suggestions
+app.get('/autocomplete', (req, res) => {
+  const query = req.query.query; // Get the query parameter from the request
 
+  // MySQL query to fetch player name suggestions based on the input query
+  const autocompleteQuery = `
+    SELECT nameGiven
+    FROM people
+    WHERE nameGiven LIKE ?
+    LIMIT 10
+  `;
+
+  connection.query(autocompleteQuery, [`%${query}%`], (error, results) => {
+    if (error) {
+      console.error('Error executing autocomplete MySQL query:', error);
+      res.status(500).send('Internal server error');
+    } else {
+      const suggestions = results.map((row) => row.nameGiven);
+      res.json(suggestions);
+    }
+  });
+});
+
+// Server listening on port 3000
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
