@@ -6,9 +6,9 @@ A game for baseball fans. Coming soon!!!
 
 Updated through the 2023 season. 
 
-No more worries about spelling mistakes!!! Autocomplete is function. Also, Howard Johnson/Carney Lansford bug fixed. 
+No more worries about spelling mistakes!!! Autocomplete is functioning. Also, Howard Johnson/Carney Lansford bug fixed. 
 
-Are you a fan of Montreal Expos? Historical team information has been updated!!!
+Are you a fan of the Montreal Expos? Historical team information has been updated!!!
 
 Trying to get autocomplete/autosuggest for name entry.
 
