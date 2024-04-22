@@ -127,6 +127,10 @@ function addPlayerRows() {
     playerNameInput.type = "text";
     playerNameInput.className = "form-control player-input";
     playerNameInput.placeholder = "Enter player's name";
+    playerNameInput.addEventListener('input', function() {
+      // Call the autocomplete function when input changes
+      autocomplete(this);
+    });
     playerNameCell.appendChild(playerNameInput);
     row.appendChild(playerNameCell);
     
@@ -161,102 +165,57 @@ function updateTotalScore() {
   var statSquares = document.querySelectorAll('.stat-square');
   var totalScore = 0;
   statSquares.forEach(function(statSquare) {
-    var statValue = parseInt(statSquare.textContent);const express = require('express');
-const mysql = require('mysql2');
-const cors = require('cors');
-
-const app = express();
-
-app.use(cors());
-
-const connection = mysql.createConnection({
-  host: 'DESKTOP-P6I7QLQ',
-  user: 'root',
-  password: '1102',
-  database: 'lahmansbaseballdb'
-});
-
-connection.connect((err) => {
-  if (err) {
-    console.error('Error connecting to MySQL:', err);
-    return;
-  }
-  console.log('Connected to MySQL database');
-});
-
-// Search endpoint to fetch player stats
-app.get('/search', (req, res) => {
-  const playerName = req.query.playerName;
-  const position = req.query.position;
-  const team = req.query.team;
-  const stat = req.query.stat; // Add stat parameter
-
-  // MySQL query to fetch player stats
-  const query = `
-    SELECT MAX(b.${stat}) AS max_stat_value
-    FROM batting AS b
-    JOIN people AS p ON b.playerID = p.playerID
-    JOIN fielding AS f ON b.playerID = f.playerID
-    JOIN teams AS t ON b.teamID = t.teamID
-    WHERE CONCAT(p.nameFirst, ' ', p.nameLast) = ? 
-      AND f.POS = ?
-      AND t.franchID IN (
-        SELECT franchID
-        FROM teams
-        WHERE name = ?
-      )
-  `;
-
-  connection.query(query, [playerName, position, team], (error, results) => {
-    if (error) {
-      console.error('Error executing MySQL query:', error);
-      res.status(500).send('Internal server error');
-    } else {
-      if (results.length > 0 && results[0].max_stat_value !== null) {
-        const maxStatValue = results[0].max_stat_value;
-        res.send(maxStatValue.toString());
-      } else {
-        console.log('No results found for the query');
-        res.send('0'); // Return '0' if no records found or max_stat_value is null
-      }
-    }
-  });
-});
-
-// Autocomplete endpoint to fetch player name suggestions
-app.get('/autocomplete', (req, res) => {
-  const query = req.query.query; // Get the query parameter from the request
-
-  // MySQL query to fetch player name suggestions based on the input query
-  const autocompleteQuery = `
-    SELECT nameGiven
-    FROM people
-    WHERE nameGiven LIKE ?
-    LIMIT 10
-  `;
-
-  connection.query(autocompleteQuery, [`%${query}%`], (error, results) => {
-    if (error) {
-      console.error('Error executing autocomplete MySQL query:', error);
-      res.status(500).send('Internal server error');
-    } else {
-      const suggestions = results.map((row) => row.nameGiven);
-      res.json(suggestions);
-    }
-  });
-});
-
-// Server listening on port 3000
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
-
+    var statValue = parseInt(statSquare.textContent);
     if (!isNaN(statValue)) {
       totalScore += statValue;
     }
   });
   document.getElementById('totalScore').textContent = totalScore;
+}
+
+// Autocomplete function
+function autocomplete(input) {
+  var currentFocus;
+  var xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = function() {
+    if (this.readyState === 4 && this.status === 200) {
+      var suggestions = JSON.parse(this.responseText);
+      closeAllLists();
+      if (!input.value || suggestions.length === 0) {
+        return false;
+      }
+      currentFocus = -1;
+      var autocompleteList = document.createElement("div");
+      autocompleteList.setAttribute("id", input.id + "autocomplete-list");
+      autocompleteList.setAttribute("class", "autocomplete-items");
+      input.parentNode.appendChild(autocompleteList);
+      for (var i = 0; i < suggestions.length; i++) {
+        var suggestion = suggestions[i];
+        var suggestionItem = document.createElement("div");
+        suggestionItem.innerHTML = "<strong>" + suggestion.substr(0, input.value.length) + "</strong>";
+        suggestionItem.innerHTML += suggestion.substr(input.value.length);
+        suggestionItem.innerHTML += "<input type='hidden' value='" + suggestion + "'>";
+        suggestionItem.addEventListener("click", function(e) {
+          input.value = this.getElementsByTagName("input")[0].value;
+          closeAllLists();
+        });
+        autocompleteList.appendChild(suggestionItem);
+      }
+    }
+  };
+  xhr.open("GET", "http://localhost:3000/autocomplete?query=" + input.value, true);
+  xhr.send();
+  function closeAllLists(elmnt) {
+    var autocompleteItems = document.getElementsByClassName("autocomplete-items");
+    for (var i = 0; i < autocompleteItems.length; i++) {
+      if (elmnt !== autocompleteItems[i] && elmnt !== input) {
+        autocompleteItems[i].parentNode.removeChild(autocompleteItems[i]);
+      }
+    }
+  }
+  document.addEventListener("click", function(e) {
+    closeAllLists(e.target);
+  });
 }
 
 window.onload = function() {

@@ -66,9 +66,9 @@ app.get('/autocomplete', (req, res) => {
 
   // MySQL query to fetch player name suggestions based on the input query
   const autocompleteQuery = `
-    SELECT nameGiven
+    SELECT CONCAT(nameFirst, ' ', nameLast) AS fullName
     FROM people
-    WHERE nameGiven LIKE ?
+    WHERE CONCAT(nameFirst, ' ', nameLast) LIKE ?
     LIMIT 10
   `;
 
@@ -77,7 +77,7 @@ app.get('/autocomplete', (req, res) => {
       console.error('Error executing autocomplete MySQL query:', error);
       res.status(500).send('Internal server error');
     } else {
-      const suggestions = results.map((row) => row.nameGiven);
+      const suggestions = results.map((row) => row.fullName);
       res.json(suggestions);
     }
   });
