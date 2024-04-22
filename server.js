@@ -35,16 +35,17 @@ app.get('/search', (req, res) => {
     JOIN people AS p ON b.playerID = p.playerID
     JOIN fielding AS f ON b.playerID = f.playerID
     JOIN teams AS t ON b.teamID = t.teamID
+    JOIN (
+      SELECT franchID
+      FROM teams
+      WHERE name = ?
+      GROUP BY franchID
+    ) AS t1 ON t.franchID = t1.franchID
     WHERE CONCAT(p.nameFirst, ' ', p.nameLast) = ? 
       AND f.POS = ?
-      AND t.franchID IN (
-        SELECT franchID
-        FROM teams
-        WHERE name = ?
-      )
   `;
 
-  connection.query(query, [playerName, position, team], (error, results) => {
+  connection.query(query, [team, playerName, position], (error, results) => {
     if (error) {
       console.error('Error executing MySQL query:', error);
       res.status(500).send('Internal server error');
