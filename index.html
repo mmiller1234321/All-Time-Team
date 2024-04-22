@@ -63,6 +63,9 @@
 </div>
 
 <script>
+// Array to keep track of submitted player names
+var submittedPlayers = [];
+
 function updateLabels() {
   var teams = [
     "Arizona Diamondbacks", "Atlanta Braves", "Baltimore Orioles", "Boston Red Sox",
@@ -91,7 +94,17 @@ function handleSubmit(event) {
 
   var playerNameInput = submitButton.parentElement.parentElement.children[0].children[0];
   var playerName = playerNameInput.value.trim(); // Trim whitespace
+
+  // Check if the player has already been submitted
+  if (submittedPlayers.includes(playerName)) {
+    alert('Player has already been submitted. Please select a different player.');
+    submitButton.disabled = false; // Re-enable the button
+    return;
+  }
+
   if (playerName !== '') {
+    submittedPlayers.push(playerName); // Add the player to the submitted players list
+
     var position = submitButton.parentElement.parentElement.children[1].textContent;
     var team = document.getElementById('teamLabel').textContent;
     var stat = document.getElementById('statLabel').textContent; // Retrieve the value of the stats label
