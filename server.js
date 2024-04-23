@@ -10,7 +10,7 @@ const connection = mysql.createConnection({
   host: 'DESKTOP-P6I7QLQ',
   user: 'root',
   password: '1102',
-  database: 'lahmansbaseballdb'
+  database: 'baseballdb'
 });
 
 connection.connect((err) => {
@@ -93,7 +93,7 @@ app.get('/search', (req, res) => {
 
 // Autocomplete endpoint to fetch player name suggestions
 app.get('/autocomplete', (req, res) => {
-  const query = req.query.query; // Get the query parameter from the request
+  const query = req.query.query; 
 
   // MySQL query to fetch player name suggestions based on the input query
   const autocompleteQuery = `
