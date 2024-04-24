@@ -1,13 +1,22 @@
 const express = require('express');
-const mysql = require('mysql2');
+const mysql = require('mysql2'); // Changed to mysql2 module for URL parsing
 const cors = require('cors');
+const { URL } = require('url'); // Added URL module import
 
 const app = express();
 app.use(cors());
 
 // Parse the ClearDB database URL
 const dbUrl = process.env.CLEARDB_DATABASE_URL;
-const dbConfig = mysql.parseUrl(dbUrl);
+
+// Create connection using URL components directly
+const dbUrlParts = new URL(dbUrl); // Changed to use URL constructor
+const dbConfig = {
+  host: dbUrlParts.hostname,
+  user: dbUrlParts.username,
+  password: dbUrlParts.password,
+  database: dbUrlParts.pathname.substr(1),
+};
 
 // Establish the connection to the database
 const connection = mysql.createConnection(dbConfig);
