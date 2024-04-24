@@ -41,64 +41,33 @@ app.get('/search', (req, res) => {
   const team = req.query.team;
   const stat = req.query.stat;
 
-  if (team === 'Cleveland Guardians') {
-    const clevelandQuery = `
-      SELECT MAX(b.${stat}) AS max_stat_value
-      FROM batting AS b
-      JOIN people AS p ON b.playerID = p.playerID
-      JOIN fielding AS f ON b.playerID = f.playerID
-      JOIN teams AS t ON b.teamID = t.teamID
-      WHERE CONCAT(p.nameFirst, ' ', p.nameLast) = ? 
-        AND f.POS = ?
-        AND (t.name = 'Cleveland Indians' OR t.name = 'Cleveland Guardians')
-    `;
+  const query = `
+    SELECT MAX(b.${stat}) AS max_stat_value
+    FROM batting AS b
+    JOIN people AS p ON b.playerID = p.playerID
+    JOIN fielding AS f ON b.playerID = f.playerID
+    JOIN teams AS t ON b.teamID = t.teamID
+    WHERE CONCAT(p.nameFirst, ' ', p.nameLast) = ? 
+      AND f.POS = ?
+      AND (t.name = ? OR t.name = ?)
+  `;
 
-    connection.query(clevelandQuery, [playerName, position], (error, results) => {
-      if (error) {
-        console.error('Error executing MySQL query:', error);
-        res.status(500).send('Internal server error');
-      } else {
-        if (results.length > 0 && results[0].max_stat_value !== null) {
-          const maxStatValue = results[0].max_stat_value;
-          res.send(maxStatValue.toString());
-        } else {
-          console.log('No results found for the query');
-          res.send('0');
-        }
-      }
-    });
-  } else {
-    const query = `
-      SELECT MAX(b.${stat}) AS max_stat_value
-      FROM batting AS b
-      JOIN people AS p ON b.playerID = p.playerID
-      JOIN fielding AS f ON b.playerID = f.playerID
-      JOIN teams AS t ON b.teamID = t.teamID
-      JOIN (
-        SELECT franchID
-        FROM teams
-        WHERE name = ?
-        GROUP BY franchID
-      ) AS t1 ON t.franchID = t1.franchID
-      WHERE CONCAT(p.nameFirst, ' ', p.nameLast) = ? 
-        AND f.POS = ?
-    `;
+  const params = [playerName, position, team, 'Cleveland Guardians'];
 
-    connection.query(query, [team, playerName, position], (error, results) => {
-      if (error) {
-        console.error('Error executing MySQL query:', error);
-        res.status(500).send('Internal server error');
+  connection.query(query, params, (error, results) => {
+    if (error) {
+      console.error('Error executing MySQL query:', error);
+      res.status(500).send('Internal server error');
+    } else {
+      if (results.length > 0 && results[0].max_stat_value !== null) {
+        const maxStatValue = results[0].max_stat_value;
+        res.send(maxStatValue.toString());
       } else {
-        if (results.length > 0 && results[0].max_stat_value !== null) {
-          const maxStatValue = results[0].max_stat_value;
-          res.send(maxStatValue.toString());
-        } else {
-          console.log('No results found for the query');
-          res.send('0');
-        }
+        console.log('No results found for the query');
+        res.send('0');
       }
-    });
-  }
+    }
+  });
 });
 
 // Autocomplete endpoint to fetch player name suggestions
