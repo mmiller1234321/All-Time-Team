@@ -24,9 +24,15 @@ const connection = mysql.createConnection(dbConfig);
 connection.connect((err) => {
   if (err) {
     console.error('Error connecting to MySQL:', err);
-    return;
+    process.exit(1); // Exit the process if connection fails
   }
   console.log('Connected to MySQL database');
+});
+
+// Error handling for database connection
+connection.on('error', (err) => {
+  console.error('MySQL connection error:', err);
+  process.exit(1); // Exit the process if connection error occurs
 });
 
 // Search endpoint to fetch player stats
