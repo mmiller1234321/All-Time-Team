@@ -2,16 +2,15 @@ const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
 
-const app = express(); // Define the Express.js app object
-
+const app = express();
 app.use(cors());
 
-const connection = mysql.createConnection({
-  host: 'DESKTOP-P6I7QLQ',
-  user: 'root',
-  password: '1102',
-  database: 'baseballdb'
-});
+// Parse the ClearDB database URL
+const dbUrl = process.env.CLEARDB_DATABASE_URL;
+const dbConfig = mysql.parseUrl(dbUrl);
+
+// Establish the connection to the database
+const connection = mysql.createConnection(dbConfig);
 
 connection.connect((err) => {
   if (err) {
