@@ -7,14 +7,12 @@ const cors = require('cors');
 const app = express();
 app.use(cors());
 
-// Parse JAWSDB_URL to get connection details
-const url = new URL(process.env.JAWSDB_URL);
 const dbConfig = {
-  host: url.hostname,
-  user: url.username,
-  password: url.password,
-  database: url.pathname.substr(1),
-  port: url.port,
+  host: process.env.JAWSDB_HOST,
+  user: process.env.JAWSDB_USER,
+  password: process.env.JAWSDB_PASSWORD,
+  database: process.env.JAWSDB_DATABASE,
+  port: process.env.JAWSDB_PORT, // Assuming you add this environment variable
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
@@ -101,4 +99,3 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
- .
