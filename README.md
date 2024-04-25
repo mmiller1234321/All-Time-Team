@@ -28,3 +28,6 @@ Thank you to http://seanlahman.com/
 mmiller1234321@gmail.com
 
 mysql://bf84d27d34ee23:3cc583f5@us-cluster-east-01.k8s.cleardb.net/heroku_65618fe561d7c61?reconnect=true
+
+
+https://dev.mysql.com/doc/workbench/en/wb-admin-export-import-table.html

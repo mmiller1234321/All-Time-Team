@@ -7,46 +7,17 @@ const cors = require('cors');
 const app = express();
 app.use(cors());
 
+// Create MySQL connection
+const connection = mysql.createConnection(process.env.JAWSDB_URL);
 
-//local connection
-
-const connection = mysql.createConnection({
-  host: '127.0.0.1',
-  user: 'root',
-  password: '1102',
-  database: 'baseballdb'
-});
-
+// Connect to the database
 connection.connect((err) => {
   if (err) {
     console.error('Error connecting to MySQL:', err);
-    return;
+    process.exit(1);
   }
   console.log('Connected to MySQL database');
 });
-// // Create connection configuration object
-// const dbConfig = {
-//   host: process.env.DB_HOST,
-//   user: process.env.DB_USER,
-//   password: process.env.DB_PASSWORD,
-//   database: process.env.DB_DATABASE,
-// };
-
-// // Establish the connection to the database
-// const connection = mysql.createConnection(dbConfig);
-
-// connection.connect((err) => {
-//   if (err) {
-//     console.error('Error connecting to MySQL:', err);
-//     process.exit(1);
-//   }
-//   console.log('Connected to MySQL database');
-// });
-
-// connection.on('error', (err) => {
-//   console.error('MySQL connection error:', err);
-//   process.exit(1);
-// });
 
 // Search endpoint to fetch player stats
 app.get('/search', (req, res) => {
