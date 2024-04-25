@@ -4,22 +4,21 @@
     "description": "A web page for entering baseball player names and positions",
     "main": "index.js",
     "scripts": {
-      "start": "node server.js"
+        "start": "node server.js"
     },
     "keywords": [
-      "baseball",
-      "players",
-      "entry"
+        "baseball",
+        "players",
+        "entry"
     ],
     "author": "Your Name",
     "license": "MIT",
     "dependencies": {
-      "express": "^4.19.2",
-      "mysql": "^2.18.1",
-      "mysql2": "^3.9.6",
-      "python": "^0.0.4",
-      "cors": "^2.8.5" 
+        "cors": "^2.8.5",
+        "dotenv": "^16.4.5",
+        "express": "^4.19.2",
+        "mysql": "^2.18.1",
+        "mysql2": "^3.9.6",
+        "python": "^0.0.4"
     }
-  }
-  
-  
+}
