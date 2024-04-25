@@ -1,38 +1,52 @@
+require('dotenv').config(); // Load environmental variables from .env file
+
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
-const { URL } = require('url');
 
 const app = express();
 app.use(cors());
 
-// Parse the ClearDB database URL
-const dbUrl = process.env.CLEARDB_DATABASE_URL;
-const dbUrlParts = new URL(dbUrl);
 
-// Create connection configuration object
-const dbConfig = {
-  host: dbUrlParts.hostname,
-  user: dbUrlParts.username,
-  password: dbUrlParts.password,
-  database: dbUrlParts.pathname.substr(1),
-};
+//local connection
 
-// Establish the connection to the database
-const connection = mysql.createConnection(dbConfig);
+const connection = mysql.createConnection({
+  host: '127.0.0.1',
+  user: 'root',
+  password: '1102',
+  database: 'baseballdb'
+});
 
 connection.connect((err) => {
   if (err) {
     console.error('Error connecting to MySQL:', err);
-    process.exit(1);
+    return;
   }
   console.log('Connected to MySQL database');
 });
+// // Create connection configuration object
+// const dbConfig = {
+//   host: process.env.DB_HOST,
+//   user: process.env.DB_USER,
+//   password: process.env.DB_PASSWORD,
+//   database: process.env.DB_DATABASE,
+// };
 
-connection.on('error', (err) => {
-  console.error('MySQL connection error:', err);
-  process.exit(1);
-});
+// // Establish the connection to the database
+// const connection = mysql.createConnection(dbConfig);
+
+// connection.connect((err) => {
+//   if (err) {
+//     console.error('Error connecting to MySQL:', err);
+//     process.exit(1);
+//   }
+//   console.log('Connected to MySQL database');
+// });
+
+// connection.on('error', (err) => {
+//   console.error('MySQL connection error:', err);
+//   process.exit(1);
+// });
 
 // Search endpoint to fetch player stats
 app.get('/search', (req, res) => {

@@ -2,7 +2,7 @@
     "name": "baseball-player-entry",
     "version": "1.0.0",
     "description": "A web page for entering baseball player names and positions",
-    "main": "index.js",
+    "main": "server.js", 
     "scripts": {
         "start": "node server.js"
     },
@@ -18,7 +18,6 @@
         "dotenv": "^16.4.5",
         "express": "^4.19.2",
         "mysql": "^2.18.1",
-        "mysql2": "^3.9.6",
-        "python": "^0.0.4"
+        "mysql2": "^3.9.6"
     }
 }
