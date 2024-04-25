@@ -7,12 +7,21 @@ const cors = require('cors');
 const app = express();
 app.use(cors());
 
-// Create MySQL connection pool using JAWSDB_URL
-const pool = mysql.createPool({
+// Parse JAWSDB_URL to get connection details
+const url = new URL(process.env.JAWSDB_URL);
+const dbConfig = {
+  host: url.hostname,
+  user: url.username,
+  password: url.password,
+  database: url.pathname.substr(1),
+  port: url.port,
+  waitForConnections: true,
   connectionLimit: 10,
-  host: process.env.JAWSDB_URL,
-  waitForConnections: true
-});
+  queueLimit: 0
+};
+
+// Create MySQL connection pool
+const pool = mysql.createPool(dbConfig);
 
 // Test the connection
 pool.getConnection((err, connection) => {
