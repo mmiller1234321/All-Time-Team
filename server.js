@@ -7,16 +7,27 @@ const cors = require('cors');
 const app = express();
 app.use(cors());
 
-// Create MySQL connection
-const connection = mysql.createConnection(process.env.JAWSDB_URL);
+// Create MySQL connection pool using JAWSDB_URL
+const pool = mysql.createPool({
+  connectionLimit: 10,
+  host: process.env.JAWSDB_URL,
+  waitForConnections: true
+});
 
-// Connect to the database
-connection.connect((err) => {
+// Test the connection
+pool.getConnection((err, connection) => {
   if (err) {
     console.error('Error connecting to MySQL:', err);
     process.exit(1);
   }
   console.log('Connected to MySQL database');
+  connection.release();
+});
+
+// Error handling for the connection pool
+pool.on('error', (err) => {
+  console.error('MySQL connection pool error:', err);
+  process.exit(1);
 });
 
 // Search endpoint to fetch player stats
@@ -39,7 +50,7 @@ app.get('/search', (req, res) => {
 
   const params = [playerName, position, team, 'Cleveland Guardians'];
 
-  connection.query(query, params, (error, results) => {
+  pool.query(query, params, (error, results) => {
     if (error) {
       console.error('Error executing MySQL query:', error);
       res.status(500).send('Internal server error');
@@ -66,7 +77,7 @@ app.get('/autocomplete', (req, res) => {
     LIMIT 10
   `;
 
-  connection.query(autocompleteQuery, [`%${query}%`], (error, results) => {
+  pool.query(autocompleteQuery, [`%${query}%`], (error, results) => {
     if (error) {
       console.error('Error executing autocomplete MySQL query:', error);
       res.status(500).send('Internal server error');
