@@ -1,6 +1,6 @@
 # ALL TIME TEAM
 
-A game for baseball fans. Coming soon!!!
+A game for baseball fans. Choose the players that have the highest totals for each position and the given team. 
 
 
 ## License
@@ -8,10 +8,6 @@ A game for baseball fans. Coming soon!!!
 This project is licensed under the [CC BY-NC-ND 4.0](https://creativecommons.org/licenses/by-nc-nd/4.0/) license.
 
 ### Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)
-
-This license allows others to download your works and share them with others as long as they credit you, but they can’t change them in any way or use them commercially.
-
-See the [LICENSE](LICENSE) file for the full text of the license.
 
 ## Version 1.0
 
