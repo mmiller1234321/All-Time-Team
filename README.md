@@ -1,6 +1,6 @@
 # ALL TIME TEAM
 
-A game for baseball fans. Choose the players that have the highest totals for each position and the given team. 
+A game for baseball fans. Choose the players that have the highest season totals for each position and the given team. 
 
 
 ## License
