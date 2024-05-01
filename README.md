@@ -9,6 +9,11 @@ This project is licensed under the [CC BY-NC-ND 4.0](https://creativecommons.org
 
 ### Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)
 
+## Project Link
+
+The project is deployed and can be accessed [here](https://alltimeteam-205f3b996ac7.herokuapp.com/).
+
+
 ## Version 1.0
 
 Running remotely off Heroku. Still in testing.. Check it out, let me know if there are any issues. 
@@ -38,8 +43,3 @@ Thank you to http://seanlahman.com/
 ## Comments or Questions
 mmiller1234321@gmail.com
 
-mysql://bf84d27d34ee23:3cc583f5@us-cluster-east-01.k8s.cleardb.net/heroku_65618fe561d7c61?reconnect=true
-
-
-notes:
-https://dev.mysql.com/doc/workbench/en/wb-admin-export-import-table.html
