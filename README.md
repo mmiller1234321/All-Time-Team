@@ -2,6 +2,21 @@
 
 A game for baseball fans. Coming soon!!!
 
+
+## License
+
+This project is licensed under the [CC BY-NC-ND 4.0](https://creativecommons.org/licenses/by-nc-nd/4.0/) license.
+
+### Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)
+
+This license allows others to download your works and share them with others as long as they credit you, but they can’t change them in any way or use them commercially.
+
+See the [LICENSE](LICENSE) file for the full text of the license.
+
+## Version 1.0
+
+Running remotely off Heroku. Still in testing.. Check it out, let me know if there are any issues. 
+
 ## Updates
 
 4.22 Updated through the 2023 season. 
