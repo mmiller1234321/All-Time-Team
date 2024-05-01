@@ -7,19 +7,8 @@ const cors = require('cors');
 const app = express();
 app.use(cors());
 
-const dbConfig = {
-  host: process.env.JAWSDB_HOST,
-  user: process.env.JAWSDB_USER,
-  password: process.env.JAWSDB_PASSWORD,
-  database: process.env.JAWSDB_DATABASE,
-  port: process.env.JAWSDB_PORT, // Assuming you add this environment variable
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
-};
-
-// Create MySQL connection pool
-const pool = mysql.createPool(dbConfig);
+// Create MySQL connection pool using ClearDB connection URL
+const pool = mysql.createPool(process.env.CLEARDB_DATABASE_URL);
 
 // Test the connection
 pool.getConnection((err, connection) => {
