@@ -42,7 +42,6 @@
 
 <div class="container">
   <h2>All Time Teams</h2>
-  <button id="instructionsButton" class="btn btn-info">Instructions</button> <!-- New button for instructions -->
   <table class="table table-bordered">
     <thead>
       <tr>
@@ -238,12 +237,6 @@ function autocomplete(input) {
   });
 }
 
-// Function to display instructions alert
-document.getElementById("instructionsButton").addEventListener("click", function() {
-  var instructions = "Create an all time team! Using the team above, enter a player's name for each position and submit. The player's highest season stat total (while playing for that team) will be displayed in the table. The goal is to get the highest total score possible. Good luck!";
-  alert(instructions);
-});
-
 window.onload = function() {
   updateLabels();
   addPlayerRows();
@@ -252,4 +245,3 @@ window.onload = function() {
 
 </body>
 </html>
-
