@@ -42,7 +42,6 @@
 
 <div class="container">
   <h2>All Time Teams</h2>
-  <button type="button" class="btn btn-primary" id="instructionsButton">Instructions</button>
   <table class="table table-bordered">
     <thead>
       <tr>
@@ -241,11 +240,6 @@ function autocomplete(input) {
 window.onload = function() {
   updateLabels();
   addPlayerRows();
-  
-  // Event listener for the Instructions button
-  document.getElementById('instructionsButton').addEventListener('click', function() {
-    alert("Put together the best team! Enter a player who played for the team above at each position. Your score will be their highest season total for the statistic. Total score is the score for each player added together.");
-  });
 };
 </script>
 
