@@ -37,7 +37,7 @@ app.get('/search', (req, res) => {
   let query;
   let params;
 
-  // Logic for Los Angeles Angels of Anaheim, Cleveland teams, and Washington Nationals
+  // Logic for team associations
   if (team === 'Los Angeles Angels of Anaheim') {
     query = `
       SELECT MAX(b.${stat}) AS max_stat_value
@@ -74,6 +74,54 @@ app.get('/search', (req, res) => {
         AND (t.name = ? OR t.name = ?)
     `;
     params = [playerName, position, team, 'Montreal Expos'];
+  } else if (team === 'San Francisco Giants') {
+    query = `
+      SELECT MAX(b.${stat}) AS max_stat_value
+      FROM batting AS b
+      JOIN people AS p ON b.playerID = p.playerID
+      JOIN fielding AS f ON b.playerID = f.playerID
+      JOIN teams AS t ON b.teamID = t.teamID
+      WHERE CONCAT(p.nameFirst, ' ', p.nameLast) = ? 
+        AND f.POS = ?
+        AND (t.name = ? OR t.name = ?)
+    `;
+    params = [playerName, position, team, 'New York Giants'];
+  } else if (team === 'Los Angeles Dodgers') {
+    query = `
+      SELECT MAX(b.${stat}) AS max_stat_value
+      FROM batting AS b
+      JOIN people AS p ON b.playerID = p.playerID
+      JOIN fielding AS f ON b.playerID = f.playerID
+      JOIN teams AS t ON b.teamID = t.teamID
+      WHERE CONCAT(p.nameFirst, ' ', p.nameLast) = ? 
+        AND f.POS = ?
+        AND (t.name = ? OR t.name = ?)
+    `;
+    params = [playerName, position, team, 'Brooklyn Dodgers'];
+  } else if (team === 'Texas Rangers') {
+    query = `
+      SELECT MAX(b.${stat}) AS max_stat_value
+      FROM batting AS b
+      JOIN people AS p ON b.playerID = p.playerID
+      JOIN fielding AS f ON b.playerID = f.playerID
+      JOIN teams AS t ON b.teamID = t.teamID
+      WHERE CONCAT(p.nameFirst, ' ', p.nameLast) = ? 
+        AND f.POS = ?
+        AND (t.name = ? OR t.name = ?)
+    `;
+    params = [playerName, position, team, 'Washington Senators'];
+  } else if (team === 'Atlanta Braves') {
+    query = `
+      SELECT MAX(b.${stat}) AS max_stat_value
+      FROM batting AS b
+      JOIN people AS p ON b.playerID = p.playerID
+      JOIN fielding AS f ON b.playerID = f.playerID
+      JOIN teams AS t ON b.teamID = t.teamID
+      WHERE CONCAT(p.nameFirst, ' ', p.nameLast) = ? 
+        AND f.POS = ?
+        AND (t.name = ? OR t.name = ?)
+    `;
+    params = [playerName, position, team, 'Milwaukee Braves'];
   } else {
     // Default logic for other teams
     query = `
