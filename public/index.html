@@ -41,7 +41,10 @@
 <body>
 
 <div class="container">
-  <h2>All Time Teams</h2>
+  <div class="d-flex justify-content-between align-items-center">
+    <h2>All Time Teams</h2>
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#instructionsModal">Instructions</button>
+  </div>
   <table class="table table-bordered">
     <thead>
       <tr>
@@ -59,6 +62,26 @@
   <!-- Total Score -->
   <div>
     <p>Total Score: <span id="totalScore"></span></p>
+  </div>
+</div>
+
+<!-- Instructions Modal -->
+<div class="modal fade" id="instructionsModal" tabindex="-1" role="dialog" aria-labelledby="instructionsModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="instructionsModalLabel">Instructions</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>These are the instructions...</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
   </div>
 </div>
 
