@@ -43,9 +43,10 @@ app.get('/search', (req, res) => {
     WHERE CONCAT(p.nameFirst, ' ', p.nameLast) = ? 
       AND f.POS = ?
       AND (t.name = ? OR t.name = ?)
+      AND t.franchID = (SELECT franchID FROM teams WHERE name = ? LIMIT 1)
   `;
 
-  const params = [playerName, position, team, 'Cleveland Guardians'];
+  const params = [playerName, position, team, 'Cleveland Guardians', team];
 
   pool.query(query, params, (error, results) => {
     if (error) {
