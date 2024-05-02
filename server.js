@@ -9,7 +9,7 @@ const app = express();
 app.use(cors());
 
 // Create MySQL connection pool using ClearDB connection URL
-const pool = mysql.createPool(process.env.CLEARDB_DATABASE_URL);
+const pool = mysql.createPool(process.env.CLEARDB_MAUVE_URL);
 
 // Test the connection
 pool.getConnection((err, connection) => {
