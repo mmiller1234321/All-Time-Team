@@ -1,7 +1,7 @@
 {
-    "name": "baseball-player-entry",
+    "name": "all time team",
     "version": "1.0.0",
-    "description": "A web page for entering baseball player names and positions",
+    "description": "A new baseball app that allows users to create their all-time team.",
     "main": "server.js",
     "scripts": {
         "start": "node server.js"
@@ -11,13 +11,16 @@
         "players",
         "entry"
     ],
-    "author": "Your Name",
-    "license": "MIT",
+    "author": "Martin Miller",
+    "license": "CC BY-NC-ND 4.0",
     "dependencies": {
         "cors": "^2.8.5",
         "dotenv": "^16.4.5",
         "express": "^4.19.2",
         "mysql": "^2.18.1",
-        "mysql2": "^3.9.6"
+        "mysql2": "^3.9.6",
+        "jquery": "^3.5.1",
+        "@popperjs/core": "^2.9.2"
     }
 }
+
