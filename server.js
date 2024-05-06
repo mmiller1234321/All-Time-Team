@@ -11,6 +11,9 @@ app.use(cors());
 // Create MySQL connection pool using ClearDB connection URL
 const pool = mysql.createPool(process.env.CLEARDB_MAUVE_URL);
 
+// Cache for storing labels with a TTL of 72 hours
+const labelCache = new Map();
+
 // Test the connection
 pool.getConnection((err, connection) => {
   if (err) {
@@ -34,135 +37,148 @@ app.get('/search', (req, res) => {
   const team = req.query.team;
   const stat = req.query.stat;
 
-  let query;
-  let params;
+  const cacheKey = `${playerName}_${position}_${team}_${stat}`;
 
-  // Logic for team associations
-  if (team === 'Los Angeles Angels of Anaheim') {
-    query = `
-      SELECT MAX(b.${stat}) AS max_stat_value
-      FROM batting AS b
-      JOIN people AS p ON b.playerID = p.playerID
-      JOIN fielding AS f ON b.playerID = f.playerID
-      JOIN teams AS t ON b.teamID = t.teamID
-      WHERE CONCAT(p.nameFirst, ' ', p.nameLast) = ? 
-        AND f.POS = ?
-        AND (t.name = ? OR t.name = ? OR t.name = ?)
-    `;
-    params = [playerName, position, team, 'California Angels', 'Anaheim Angels'];
-  } else if (team === 'Cleveland Indians' || team === 'Cleveland Guardians') {
-    query = `
-      SELECT MAX(b.${stat}) AS max_stat_value
-      FROM batting AS b
-      JOIN people AS p ON b.playerID = p.playerID
-      JOIN fielding AS f ON b.playerID = f.playerID
-      JOIN teams AS t ON b.teamID = t.teamID
-      WHERE CONCAT(p.nameFirst, ' ', p.nameLast) = ? 
-        AND f.POS = ?
-        AND (t.name = ? OR t.name = ?)
-    `;
-    params = [playerName, position, team, 'Cleveland Indians'];
-  } else if (team === 'Washington Nationals') {
-    query = `
-      SELECT MAX(b.${stat}) AS max_stat_value
-      FROM batting AS b
-      JOIN people AS p ON b.playerID = p.playerID
-      JOIN fielding AS f ON b.playerID = f.playerID
-      JOIN teams AS t ON b.teamID = t.teamID
-      WHERE CONCAT(p.nameFirst, ' ', p.nameLast) = ? 
-        AND f.POS = ?
-        AND (t.name = ? OR t.name = ?)
-    `;
-    params = [playerName, position, team, 'Montreal Expos'];
-  } else if (team === 'San Francisco Giants') {
-    query = `
-      SELECT MAX(b.${stat}) AS max_stat_value
-      FROM batting AS b
-      JOIN people AS p ON b.playerID = p.playerID
-      JOIN fielding AS f ON b.playerID = f.playerID
-      JOIN teams AS t ON b.teamID = t.teamID
-      WHERE CONCAT(p.nameFirst, ' ', p.nameLast) = ? 
-        AND f.POS = ?
-        AND (t.name = ? OR t.name = ?)
-    `;
-    params = [playerName, position, team, 'New York Giants'];
-  } else if (team === 'Los Angeles Dodgers') {
-    query = `
-      SELECT MAX(b.${stat}) AS max_stat_value
-      FROM batting AS b
-      JOIN people AS p ON b.playerID = p.playerID
-      JOIN fielding AS f ON b.playerID = f.playerID
-      JOIN teams AS t ON b.teamID = t.teamID
-      WHERE CONCAT(p.nameFirst, ' ', p.nameLast) = ? 
-        AND f.POS = ?
-        AND (t.name = ? OR t.name = ?)
-    `;
-    params = [playerName, position, team, 'Brooklyn Dodgers'];
-  } else if (team === 'Texas Rangers') {
-    query = `
-      SELECT MAX(b.${stat}) AS max_stat_value
-      FROM batting AS b
-      JOIN people AS p ON b.playerID = p.playerID
-      JOIN fielding AS f ON b.playerID = f.playerID
-      JOIN teams AS t ON b.teamID = t.teamID
-      WHERE CONCAT(p.nameFirst, ' ', p.nameLast) = ? 
-        AND f.POS = ?
-        AND (t.name = ? OR t.name = ?)
-    `;
-    params = [playerName, position, team, 'Washington Senators'];
-  } else if (team === 'Atlanta Braves') {
-    query = `
-      SELECT MAX(b.${stat}) AS max_stat_value
-      FROM batting AS b
-      JOIN people AS p ON b.playerID = p.playerID
-      JOIN fielding AS f ON b.playerID = f.playerID
-      JOIN teams AS t ON b.teamID = t.teamID
-      WHERE CONCAT(p.nameFirst, ' ', p.nameLast) = ? 
-        AND f.POS = ?
-        AND (t.name = ? OR t.name = ?)
-    `;
-    params = [playerName, position, team, 'Milwaukee Braves'];
-  } else if (team === 'Oakland Athletics' || team === 'Kansas City Athletics' || team === 'Philadelphia Athletics') {
-    query = `
-      SELECT MAX(b.${stat}) AS max_stat_value
-      FROM batting AS b
-      JOIN people AS p ON b.playerID = p.playerID
-      JOIN fielding AS f ON b.playerID = f.playerID
-      JOIN teams AS t ON b.teamID = t.teamID
-      WHERE CONCAT(p.nameFirst, ' ', p.nameLast) = ? 
-        AND f.POS = ?
-        AND (t.name = ? OR t.name = ? OR t.name = ?)
-    `;
-    params = [playerName, position, team, 'Kansas City Athletics', 'Philadelphia Athletics'];
+  // Check if label exists in cache
+  if (labelCache.has(cacheKey)) {
+    const cachedResult = labelCache.get(cacheKey);
+    console.log('Retrieved from cache');
+    res.send(cachedResult.toString());
   } else {
-    // Default logic for other teams
-    query = `
-      SELECT MAX(b.${stat}) AS max_stat_value
-      FROM batting AS b
-      JOIN people AS p ON b.playerID = p.playerID
-      JOIN fielding AS f ON b.playerID = f.playerID
-      JOIN teams AS t ON b.teamID = t.teamID
-      WHERE CONCAT(p.nameFirst, ' ', p.nameLast) = ? 
-        AND f.POS = ?
-        AND t.name = ?
-    `;
-    params = [playerName, position, team];
-  }
+    let query;
+    let params;
 
-  pool.query(query, params, (error, results) => {
-    if (error) {
-      console.error('Error executing MySQL query:', error);
-      res.status(500).send('Internal server error');
+    // Logic for team associations
+    if (team === 'Los Angeles Angels of Anaheim') {
+      query = `
+        SELECT MAX(b.${stat}) AS max_stat_value
+        FROM batting AS b
+        JOIN people AS p ON b.playerID = p.playerID
+        JOIN fielding AS f ON b.playerID = f.playerID
+        JOIN teams AS t ON b.teamID = t.teamID
+        WHERE CONCAT(p.nameFirst, ' ', p.nameLast) = ? 
+          AND f.POS = ?
+          AND (t.name = ? OR t.name = ? OR t.name = ?)
+      `;
+      params = [playerName, position, team, 'California Angels', 'Anaheim Angels'];
+    } else if (team === 'Cleveland Indians' || team === 'Cleveland Guardians') {
+      query = `
+        SELECT MAX(b.${stat}) AS max_stat_value
+        FROM batting AS b
+        JOIN people AS p ON b.playerID = p.playerID
+        JOIN fielding AS f ON b.playerID = f.playerID
+        JOIN teams AS t ON b.teamID = t.teamID
+        WHERE CONCAT(p.nameFirst, ' ', p.nameLast) = ? 
+          AND f.POS = ?
+          AND (t.name = ? OR t.name = ?)
+      `;
+      params = [playerName, position, team, 'Cleveland Indians'];
+    } else if (team === 'Washington Nationals') {
+      query = `
+        SELECT MAX(b.${stat}) AS max_stat_value
+        FROM batting AS b
+        JOIN people AS p ON b.playerID = p.playerID
+        JOIN fielding AS f ON b.playerID = f.playerID
+        JOIN teams AS t ON b.teamID = t.teamID
+        WHERE CONCAT(p.nameFirst, ' ', p.nameLast) = ? 
+          AND f.POS = ?
+          AND (t.name = ? OR t.name = ?)
+      `;
+      params = [playerName, position, team, 'Montreal Expos'];
+    } else if (team === 'San Francisco Giants') {
+      query = `
+        SELECT MAX(b.${stat}) AS max_stat_value
+        FROM batting AS b
+        JOIN people AS p ON b.playerID = p.playerID
+        JOIN fielding AS f ON b.playerID = f.playerID
+        JOIN teams AS t ON b.teamID = t.teamID
+        WHERE CONCAT(p.nameFirst, ' ', p.nameLast) = ? 
+          AND f.POS = ?
+          AND (t.name = ? OR t.name = ?)
+      `;
+      params = [playerName, position, team, 'New York Giants'];
+    } else if (team === 'Los Angeles Dodgers') {
+      query = `
+        SELECT MAX(b.${stat}) AS max_stat_value
+        FROM batting AS b
+        JOIN people AS p ON b.playerID = p.playerID
+        JOIN fielding AS f ON b.playerID = f.playerID
+        JOIN teams AS t ON b.teamID = t.teamID
+        WHERE CONCAT(p.nameFirst, ' ', p.nameLast) = ? 
+          AND f.POS = ?
+          AND (t.name = ? OR t.name = ?)
+      `;
+      params = [playerName, position, team, 'Brooklyn Dodgers'];
+    } else if (team === 'Texas Rangers') {
+      query = `
+        SELECT MAX(b.${stat}) AS max_stat_value
+        FROM batting AS b
+        JOIN people AS p ON b.playerID = p.playerID
+        JOIN fielding AS f ON b.playerID = f.playerID
+        JOIN teams AS t ON b.teamID = t.teamID
+        WHERE CONCAT(p.nameFirst, ' ', p.nameLast) = ? 
+          AND f.POS = ?
+          AND (t.name = ? OR t.name = ?)
+      `;
+      params = [playerName, position, team, 'Washington Senators'];
+    } else if (team === 'Atlanta Braves') {
+      query = `
+        SELECT MAX(b.${stat}) AS max_stat_value
+        FROM batting AS b
+        JOIN people AS p ON b.playerID = p.playerID
+        JOIN fielding AS f ON b.playerID = f.playerID
+        JOIN teams AS t ON b.teamID = t.teamID
+        WHERE CONCAT(p.nameFirst, ' ', p.nameLast) = ? 
+          AND f.POS = ?
+          AND (t.name = ? OR t.name = ?)
+      `;
+      params = [playerName, position, team, 'Milwaukee Braves'];
+    } else if (team === 'Oakland Athletics' || team === 'Kansas City Athletics' || team === 'Philadelphia Athletics') {
+      query = `
+        SELECT MAX(b.${stat}) AS max_stat_value
+        FROM batting AS b
+        JOIN people AS p ON b.playerID = p.playerID
+        JOIN fielding AS f ON b.playerID = f.playerID
+        JOIN teams AS t ON b.teamID = t.teamID
+        WHERE CONCAT(p.nameFirst, ' ', p.nameLast) = ? 
+          AND f.POS = ?
+          AND (t.name = ? OR t.name = ? OR t.name = ?)
+      `;
+      params = [playerName, position, team, 'Kansas City Athletics', 'Philadelphia Athletics'];
     } else {
-      if (results.length > 0 && results[0].max_stat_value !== null) {
-        const maxStatValue = results[0].max_stat_value;
-        res.send(maxStatValue.toString());
-      } else {
-        console.log('No results found for the query');
-        res.send('0');
-      }
+      // Default logic for other teams
+      query = `
+        SELECT MAX(b.${stat}) AS max_stat_value
+        FROM batting AS b
+        JOIN people AS p ON b.playerID = p.playerID
+        JOIN fielding AS f ON b.playerID = f.playerID
+        JOIN teams AS t ON b.teamID = t.teamID
+        WHERE CONCAT(p.nameFirst, ' ', p.nameLast) = ? 
+          AND f.POS = ?
+          AND t.name = ?
+      `;
+      params = [playerName, position, team];
     }
-  });
+
+    // Perform the database query
+    pool.query(query, params, (error, results) => {
+      if (error) {
+        console.error('Error executing MySQL query:', error);
+        res.status(500).send('Internal server error');
+      } else {
+        if (results.length > 0 && results[0].max_stat_value !== null) {
+          const maxStatValue = results[0].max_stat_value;
+          // Cache the result with a TTL of 72 hours
+          labelCache.set(cacheKey, maxStatValue, 72 * 60 * 60 * 1000); // 72 hours in milliseconds
+          console.log('Added to cache');
+          res.send(maxStatValue.toString());
+        } else {
+          console.log('No results found for the query');
+          res.send('0');
+        }
+      }
+    });
+  }
 });
 
 // Autocomplete endpoint to fetch player name suggestions
