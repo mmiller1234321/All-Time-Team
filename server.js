@@ -195,6 +195,18 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// Automatic team and stat update after 72 hours
+const updateInterval = 72 * 60 * 60 * 1000; // 72 hours in milliseconds
+
+function updateTeamAndStat() {
+  // Logic to update team and stat goes here
+  console.log('Updating team and stat...');
+}
+
+updateTeamAndStat(); // Initial update
+
+setInterval(updateTeamAndStat, updateInterval); // Schedule periodic updates
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
