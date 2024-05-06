@@ -92,18 +92,28 @@
 // Array to keep track of submitted player names
 var submittedPlayers = [];
 
-// Function to fetch team and stat labels from the server
-function updateLabelsFromDatabase() {
-  fetch('/getLabels')
-    .then(response => response.json())
-    .then(data => {
-      document.getElementById('teamLabel').innerText = data.teamLabel;
-      document.getElementById('statLabel').innerText = data.statLabel;
-    })
-    .catch(error => console.error('Error fetching labels:', error));
+function updateLabels() {
+  //Add new labels, All Star NL/AL, Divison, Hall of Famers, other 
+  var teams = [
+    "Arizona Diamondbacks", "Atlanta Braves", "Baltimore Orioles", "Boston Red Sox",
+    "Chicago White Sox", "Chicago Cubs", "Cincinnati Reds", "Cleveland Guardians",
+    "Colorado Rockies", "Detroit Tigers", "Houston Astros", "Kansas City Royals",
+    "Los Angeles Angels of Anaheim", "Los Angeles Dodgers", "Miami Marlins", "Milwaukee Brewers",
+    "Minnesota Twins", "New York Yankees", "New York Mets", "Oakland Athletics",
+    "Philadelphia Phillies", "Pittsburgh Pirates", "San Diego Padres", "San Francisco Giants",
+    "Seattle Mariners", "St. Louis Cardinals", "Tampa Bay Rays", "Texas Rangers",
+    "Toronto Blue Jays", "Washington Nationals"
+  ];
+  var randomTeamIndex = Math.floor(Math.random() * teams.length);
+  var randomTeam = teams[randomTeamIndex];
+  document.getElementById('teamLabel').innerText = randomTeam;
+
+  var stats = ["r", "h", "2b", "3b", "hr", "rbi", "sb", "bb", "ibb"]; //add additional stats here
+  var randomStatIndex = Math.floor(Math.random() * stats.length);
+  var randomStat = stats[randomStatIndex];
+  document.getElementById('statLabel').innerText = randomStat;
 }
 
-// Function to handle form submission
 function handleSubmit(event) {
   var submitButton = event.target;
   if (submitButton.disabled) return; // Check if the button is already disabled
@@ -126,8 +136,12 @@ function handleSubmit(event) {
     var team = document.getElementById('teamLabel').textContent;
     var stat = document.getElementById('statLabel').textContent; // Retrieve the value of the stats label
 
+    // Dynamically determine the base URL
+    var baseUrl = window.location.protocol + '//' + window.location.hostname;
+
+    // Fetch data for the submitted player
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', '/search?playerName=' + playerName + '&position=' + position + '&team=' + team + '&stat=' + stat, true);
+    xhr.open('GET', baseUrl + '/search?playerName=' + playerName + '&position=' + position + '&team=' + team + '&stat=' + stat, true);
     xhr.onload = function () {
       if (xhr.status === 200) {
         var statSquare = submitButton.parentElement.parentElement.children[2].children[0];
@@ -145,20 +159,6 @@ function handleSubmit(event) {
   }
 }
 
-// Function to calculate total score
-function updateTotalScore() {
-  var statSquares = document.querySelectorAll('.stat-square');
-  var totalScore = 0;
-  statSquares.forEach(function(statSquare) {
-    var statValue = parseInt(statSquare.textContent);
-    if (!isNaN(statValue)) {
-      totalScore += statValue;
-    }
-  });
-  document.getElementById('totalScore').textContent = totalScore;
-}
-
-// Function to add player rows dynamically
 function addPlayerRows() {
   var positions = ["C", "1B", "2B", "3B", "SS", "OF", "OF", "OF", "P"];
   var tbody = document.getElementById("playerRows");
@@ -170,6 +170,10 @@ function addPlayerRows() {
     playerNameInput.type = "text";
     playerNameInput.className = "form-control player-input";
     playerNameInput.placeholder = "Enter player's name";
+    playerNameInput.addEventListener('input', function() {
+      // Call the autocomplete function when input changes
+      autocomplete(this);
+    });
     playerNameCell.appendChild(playerNameInput);
     row.appendChild(playerNameCell);
     
@@ -198,6 +202,18 @@ function addPlayerRows() {
       break; // Stop adding rows when reaching 'P' position
     }
   }
+}
+
+function updateTotalScore() {
+  var statSquares = document.querySelectorAll('.stat-square');
+  var totalScore = 0;
+  statSquares.forEach(function(statSquare) {
+    var statValue = parseInt(statSquare.textContent);
+    if (!isNaN(statValue)) {
+      totalScore += statValue;
+    }
+  });
+  document.getElementById('totalScore').textContent = totalScore;
 }
 
 // Autocomplete function
@@ -230,7 +246,9 @@ function autocomplete(input) {
       }
     }
   };
-  xhr.open("GET", "/autocomplete?query=" + input.value, true);
+  // Dynamically determine the base URL
+  var baseUrl = window.location.protocol + '//' + window.location.hostname;
+  xhr.open("GET", baseUrl + "/autocomplete?query=" + input.value, true);
   xhr.send();
   function closeAllLists(elmnt) {
     var autocompleteItems = document.getElementsByClassName("autocomplete-items");
@@ -246,7 +264,7 @@ function autocomplete(input) {
 }
 
 window.onload = function() {
-  updateLabelsFromDatabase();
+  updateLabels();
   addPlayerRows();
   
   // Trigger the modal when the instructions button is clicked

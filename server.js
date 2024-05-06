@@ -3,6 +3,7 @@ require('dotenv').config(); // Load environmental variables from .env file
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
+const path = require('path'); // Import the path module
 
 const app = express();
 app.use(cors());
@@ -26,59 +27,7 @@ pool.on('error', (err) => {
   process.exit(1);
 });
 
-// Endpoint to retrieve team and stat labels from the database
-app.get('/getLabels', (req, res) => {
-  const currentTime = new Date();
-  const seventyTwoHoursAgo = new Date(currentTime.getTime() - 72 * 60 * 60 * 1000); // 72 hours ago
-
-  pool.query('SELECT * FROM generated_tables WHERE last_used < ?', [seventyTwoHoursAgo], (error, results) => {
-    if (error) {
-      console.error('Error retrieving labels from the database:', error);
-      res.status(500).send('Internal server error');
-    } else {
-      if (results.length > 0) {
-        // Filter out pairs that have been used within the last 72 hours
-        const unusedPairs = results.filter(pair => pair.last_used === null || new Date(pair.last_used) < seventyTwoHoursAgo);
-        
-        if (unusedPairs.length > 0) {
-          // Randomly select a pair of team and stat labels
-          const randomIndex = Math.floor(Math.random() * unusedPairs.length);
-          const randomPair = unusedPairs[randomIndex];
-          
-          // Update the timestamp for the selected pair
-          pool.query('UPDATE generated_tables SET last_used = ? WHERE id = ?', [currentTime, randomPair.id], (updateError) => {
-            if (updateError) {
-              console.error('Error updating last_used timestamp:', updateError);
-            }
-          });
-
-          // Send the selected pair of labels in the response
-          res.json({ teamLabel: randomPair.team_name, statLabel: randomPair.stat_name });
-        } else {
-          console.log('No unused pairs found, selecting new pair');
-          // If no unused pairs found, randomly select a new pair from all available options
-          const randomIndex = Math.floor(Math.random() * results.length);
-          const randomPair = results[randomIndex];
-
-          // Update the timestamp for the selected pair
-          pool.query('UPDATE generated_tables SET last_used = ? WHERE id = ?', [currentTime, randomPair.id], (updateError) => {
-            if (updateError) {
-              console.error('Error updating last_used timestamp:', updateError);
-            }
-          });
-
-          // Send the selected pair of labels in the response
-          res.json({ teamLabel: randomPair.team_name, statLabel: randomPair.stat_name });
-        }
-      } else {
-        // If no pairs found, send an empty response
-        res.json({});
-      }
-    }
-  });
-});
-
-// Endpoint to search for player stats
+// Search endpoint to fetch player stats
 app.get('/search', (req, res) => {
   const playerName = req.query.playerName;
   const position = req.query.position;
@@ -88,10 +37,103 @@ app.get('/search', (req, res) => {
   let query;
   let params;
 
-  // Build the SQL query based on team name
+  // Logic for team associations
   if (team === 'Los Angeles Angels of Anaheim') {
-    // Logic for Los Angeles Angels of Anaheim
-    // Similar logic for other teams
+    query = `
+      SELECT MAX(b.${stat}) AS max_stat_value
+      FROM batting AS b
+      JOIN people AS p ON b.playerID = p.playerID
+      JOIN fielding AS f ON b.playerID = f.playerID
+      JOIN teams AS t ON b.teamID = t.teamID
+      WHERE CONCAT(p.nameFirst, ' ', p.nameLast) = ? 
+        AND f.POS = ?
+        AND (t.name = ? OR t.name = ? OR t.name = ?)
+    `;
+    params = [playerName, position, team, 'California Angels', 'Anaheim Angels'];
+  } else if (team === 'Cleveland Indians' || team === 'Cleveland Guardians') {
+    query = `
+      SELECT MAX(b.${stat}) AS max_stat_value
+      FROM batting AS b
+      JOIN people AS p ON b.playerID = p.playerID
+      JOIN fielding AS f ON b.playerID = f.playerID
+      JOIN teams AS t ON b.teamID = t.teamID
+      WHERE CONCAT(p.nameFirst, ' ', p.nameLast) = ? 
+        AND f.POS = ?
+        AND (t.name = ? OR t.name = ?)
+    `;
+    params = [playerName, position, team, 'Cleveland Indians'];
+  } else if (team === 'Washington Nationals') {
+    query = `
+      SELECT MAX(b.${stat}) AS max_stat_value
+      FROM batting AS b
+      JOIN people AS p ON b.playerID = p.playerID
+      JOIN fielding AS f ON b.playerID = f.playerID
+      JOIN teams AS t ON b.teamID = t.teamID
+      WHERE CONCAT(p.nameFirst, ' ', p.nameLast) = ? 
+        AND f.POS = ?
+        AND (t.name = ? OR t.name = ?)
+    `;
+    params = [playerName, position, team, 'Montreal Expos'];
+  } else if (team === 'San Francisco Giants') {
+    query = `
+      SELECT MAX(b.${stat}) AS max_stat_value
+      FROM batting AS b
+      JOIN people AS p ON b.playerID = p.playerID
+      JOIN fielding AS f ON b.playerID = f.playerID
+      JOIN teams AS t ON b.teamID = t.teamID
+      WHERE CONCAT(p.nameFirst, ' ', p.nameLast) = ? 
+        AND f.POS = ?
+        AND (t.name = ? OR t.name = ?)
+    `;
+    params = [playerName, position, team, 'New York Giants'];
+  } else if (team === 'Los Angeles Dodgers') {
+    query = `
+      SELECT MAX(b.${stat}) AS max_stat_value
+      FROM batting AS b
+      JOIN people AS p ON b.playerID = p.playerID
+      JOIN fielding AS f ON b.playerID = f.playerID
+      JOIN teams AS t ON b.teamID = t.teamID
+      WHERE CONCAT(p.nameFirst, ' ', p.nameLast) = ? 
+        AND f.POS = ?
+        AND (t.name = ? OR t.name = ?)
+    `;
+    params = [playerName, position, team, 'Brooklyn Dodgers'];
+  } else if (team === 'Texas Rangers') {
+    query = `
+      SELECT MAX(b.${stat}) AS max_stat_value
+      FROM batting AS b
+      JOIN people AS p ON b.playerID = p.playerID
+      JOIN fielding AS f ON b.playerID = f.playerID
+      JOIN teams AS t ON b.teamID = t.teamID
+      WHERE CONCAT(p.nameFirst, ' ', p.nameLast) = ? 
+        AND f.POS = ?
+        AND (t.name = ? OR t.name = ?)
+    `;
+    params = [playerName, position, team, 'Washington Senators'];
+  } else if (team === 'Atlanta Braves') {
+    query = `
+      SELECT MAX(b.${stat}) AS max_stat_value
+      FROM batting AS b
+      JOIN people AS p ON b.playerID = p.playerID
+      JOIN fielding AS f ON b.playerID = f.playerID
+      JOIN teams AS t ON b.teamID = t.teamID
+      WHERE CONCAT(p.nameFirst, ' ', p.nameLast) = ? 
+        AND f.POS = ?
+        AND (t.name = ? OR t.name = ?)
+    `;
+    params = [playerName, position, team, 'Milwaukee Braves'];
+  } else if (team === 'Oakland Athletics' || team === 'Kansas City Athletics' || team === 'Philadelphia Athletics') {
+    query = `
+      SELECT MAX(b.${stat}) AS max_stat_value
+      FROM batting AS b
+      JOIN people AS p ON b.playerID = p.playerID
+      JOIN fielding AS f ON b.playerID = f.playerID
+      JOIN teams AS t ON b.teamID = t.teamID
+      WHERE CONCAT(p.nameFirst, ' ', p.nameLast) = ? 
+        AND f.POS = ?
+        AND (t.name = ? OR t.name = ? OR t.name = ?)
+    `;
+    params = [playerName, position, team, 'Kansas City Athletics', 'Philadelphia Athletics'];
   } else {
     // Default logic for other teams
     query = `
@@ -107,7 +149,6 @@ app.get('/search', (req, res) => {
     params = [playerName, position, team];
   }
 
-  // Execute the SQL query
   pool.query(query, params, (error, results) => {
     if (error) {
       console.error('Error executing MySQL query:', error);
@@ -124,7 +165,7 @@ app.get('/search', (req, res) => {
   });
 });
 
-// Endpoint for autocomplete suggestions
+// Autocomplete endpoint to fetch player name suggestions
 app.get('/autocomplete', (req, res) => {
   const query = req.query.query;
 
@@ -135,7 +176,6 @@ app.get('/autocomplete', (req, res) => {
     LIMIT 10
   `;
 
-  // Execute the autocomplete SQL query
   pool.query(autocompleteQuery, [`%${query}%`], (error, results) => {
     if (error) {
       console.error('Error executing autocomplete MySQL query:', error);
@@ -147,12 +187,12 @@ app.get('/autocomplete', (req, res) => {
   });
 });
 
-// Serve static files
-app.use(express.static('public'));
+// Serve the static files from the 'public' directory
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Catch-all route to serve index.html
 app.get('*', (req, res) => {
-  res.sendFile(__dirname + '/public/index.html');
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 const PORT = process.env.PORT || 3000;
