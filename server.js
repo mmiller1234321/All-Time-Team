@@ -151,7 +151,7 @@ app.get('/search', (req, res) => {
 
   pool.query(query, params, (error, results) => {
     if (error) {
-      console.error('Error executing MySQL query:', error);
+      console.error('Error executing MySQL query for search:', error);
       res.status(500).send('Internal server error');
     } else {
       if (results.length > 0 && results[0].max_stat_value !== null) {
@@ -178,7 +178,7 @@ app.get('/autocomplete', (req, res) => {
 
   pool.query(autocompleteQuery, [`%${query}%`], (error, results) => {
     if (error) {
-      console.error('Error executing autocomplete MySQL query:', error);
+      console.error('Error executing MySQL query for autocomplete:', error);
       res.status(500).send('Internal server error');
     } else {
       const suggestions = results.map((row) => row.fullName);
