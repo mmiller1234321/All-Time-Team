@@ -37,19 +37,39 @@ app.get('/getLabels', (req, res) => {
       res.status(500).send('Internal server error');
     } else {
       if (results.length > 0) {
-        // Randomly select a pair of team and stat labels
-        const randomIndex = Math.floor(Math.random() * results.length);
-        const randomPair = results[randomIndex];
+        // Filter out pairs that have been used within the last 72 hours
+        const unusedPairs = results.filter(pair => pair.last_used === null || new Date(pair.last_used) < seventyTwoHoursAgo);
         
-        // Update the timestamp for the selected pair
-        pool.query('UPDATE generated_tables SET last_used = ? WHERE id = ?', [currentTime, randomPair.id], (updateError) => {
-          if (updateError) {
-            console.error('Error updating last_used timestamp:', updateError);
-          }
-        });
+        if (unusedPairs.length > 0) {
+          // Randomly select a pair of team and stat labels
+          const randomIndex = Math.floor(Math.random() * unusedPairs.length);
+          const randomPair = unusedPairs[randomIndex];
+          
+          // Update the timestamp for the selected pair
+          pool.query('UPDATE generated_tables SET last_used = ? WHERE id = ?', [currentTime, randomPair.id], (updateError) => {
+            if (updateError) {
+              console.error('Error updating last_used timestamp:', updateError);
+            }
+          });
 
-        // Send the selected pair of labels in the response
-        res.json({ teamLabel: randomPair.team_name, statLabel: randomPair.stat_name });
+          // Send the selected pair of labels in the response
+          res.json({ teamLabel: randomPair.team_name, statLabel: randomPair.stat_name });
+        } else {
+          console.log('No unused pairs found, selecting new pair');
+          // If no unused pairs found, randomly select a new pair from all available options
+          const randomIndex = Math.floor(Math.random() * results.length);
+          const randomPair = results[randomIndex];
+
+          // Update the timestamp for the selected pair
+          pool.query('UPDATE generated_tables SET last_used = ? WHERE id = ?', [currentTime, randomPair.id], (updateError) => {
+            if (updateError) {
+              console.error('Error updating last_used timestamp:', updateError);
+            }
+          });
+
+          // Send the selected pair of labels in the response
+          res.json({ teamLabel: randomPair.team_name, statLabel: randomPair.stat_name });
+        }
       } else {
         // If no pairs found, send an empty response
         res.json({});
