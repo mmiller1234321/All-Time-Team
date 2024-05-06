@@ -92,26 +92,9 @@
 // Array to keep track of submitted player names
 var submittedPlayers = [];
 
-function updateLabels() {
-  //Add new labels, All Star NL/AL, Divison, Hall of Famers, other 
-  var teams = [
-    "Arizona Diamondbacks", "Atlanta Braves", "Baltimore Orioles", "Boston Red Sox",
-    "Chicago White Sox", "Chicago Cubs", "Cincinnati Reds", "Cleveland Guardians",
-    "Colorado Rockies", "Detroit Tigers", "Houston Astros", "Kansas City Royals",
-    "Los Angeles Angels of Anaheim", "Los Angeles Dodgers", "Miami Marlins", "Milwaukee Brewers",
-    "Minnesota Twins", "New York Yankees", "New York Mets", "Oakland Athletics",
-    "Philadelphia Phillies", "Pittsburgh Pirates", "San Diego Padres", "San Francisco Giants",
-    "Seattle Mariners", "St. Louis Cardinals", "Tampa Bay Rays", "Texas Rangers",
-    "Toronto Blue Jays", "Washington Nationals"
-  ];
-  var randomTeamIndex = Math.floor(Math.random() * teams.length);
-  var randomTeam = teams[randomTeamIndex];
-  document.getElementById('teamLabel').innerText = randomTeam;
-
-  var stats = ["r", "h", "2b", "3b", "hr", "rbi", "sb", "bb", "ibb"]; //add additional stats here
-  var randomStatIndex = Math.floor(Math.random() * stats.length);
-  var randomStat = stats[randomStatIndex];
-  document.getElementById('statLabel').innerText = randomStat;
+function updateLabels(team, stat) {
+  document.getElementById('teamLabel').innerText = team;
+  document.getElementById('statLabel').innerText = stat;
 }
 
 function handleSubmit(event) {
@@ -169,111 +152,73 @@ function addPlayerRows() {
     var playerNameInput = document.createElement("input");
     playerNameInput.type = "text";
     playerNameInput.className = "form-control player-input";
-    playerNameInput.placeholder = "Enter player's name";
-    playerNameInput.addEventListener('input', function() {
-      // Call the autocomplete function when input changes
-      autocomplete(this);
-    });
+    playerNameInput.placeholder = "Enter Player Name";
     playerNameCell.appendChild(playerNameInput);
     row.appendChild(playerNameCell);
-    
+
     var positionCell = document.createElement("td");
     positionCell.textContent = positions[i];
     row.appendChild(positionCell);
-    
+
     var statCell = document.createElement("td");
     var statSquare = document.createElement("div");
     statSquare.className = "stat-square";
     statCell.appendChild(statSquare);
     row.appendChild(statCell);
-    
+
     var submitCell = document.createElement("td");
     var submitButton = document.createElement("button");
     submitButton.type = "button";
     submitButton.className = "btn btn-primary";
     submitButton.textContent = "Submit";
-    submitButton.addEventListener('click', handleSubmit);
+    submitButton.addEventListener("click", handleSubmit);
     submitCell.appendChild(submitButton);
     row.appendChild(submitCell);
-    
+
     tbody.appendChild(row);
-    
-    if (positions[i] === 'P') {
-      break; // Stop adding rows when reaching 'P' position
-    }
   }
 }
 
 function updateTotalScore() {
-  var statSquares = document.querySelectorAll('.stat-square');
+  var totalScoreElement = document.getElementById('totalScore');
   var totalScore = 0;
-  statSquares.forEach(function(statSquare) {
-    var statValue = parseInt(statSquare.textContent);
-    if (!isNaN(statValue)) {
-      totalScore += statValue;
-    }
+  var statSquares = document.querySelectorAll('.stat-square');
+  statSquares.forEach(function (square) {
+    totalScore += parseInt(square.textContent) || 0; // ParseInt returns NaN if the text is not a valid number
   });
-  document.getElementById('totalScore').textContent = totalScore;
+  totalScoreElement.textContent = totalScore;
 }
 
-// Autocomplete function
-function autocomplete(input) {
-  var currentFocus;
+// Function to fetch random team and stat from the server
+function fetchRandomTeamAndStat() {
   var xhr = new XMLHttpRequest();
-  xhr.onreadystatechange = function() {
-    if (this.readyState === 4 && this.status === 200) {
-      var suggestions = JSON.parse(this.responseText);
-      closeAllLists();
-      if (!input.value || suggestions.length === 0) {
-        return false;
-      }
-      currentFocus = -1;
-      var autocompleteList = document.createElement("div");
-      autocompleteList.setAttribute("id", input.id + "autocomplete-list");
-      autocompleteList.setAttribute("class", "autocomplete-items");
-      input.parentNode.appendChild(autocompleteList);
-      for (var i = 0; i < suggestions.length; i++) {
-        var suggestion = suggestions[i];
-        var suggestionItem = document.createElement("div");
-        suggestionItem.innerHTML = "<strong>" + suggestion.substr(0, input.value.length) + "</strong>";
-        suggestionItem.innerHTML += suggestion.substr(input.value.length);
-        suggestionItem.innerHTML += "<input type='hidden' value='" + suggestion + "'>";
-        suggestionItem.addEventListener("click", function(e) {
-          input.value = this.getElementsByTagName("input")[0].value;
-          closeAllLists();
-        });
-        autocompleteList.appendChild(suggestionItem);
-      }
+  xhr.open('GET', '/randomTeamAndStat', true);
+  xhr.onload = function () {
+    if (xhr.status === 200) {
+      var data = JSON.parse(xhr.responseText);
+      updateLabels(data.team, data.stat); // Update labels with random team and stat
+    } else {
+      console.error('Error fetching random team and stat:', xhr.statusText);
     }
   };
-  // Dynamically determine the base URL
-  var baseUrl = window.location.protocol + '//' + window.location.hostname;
-  xhr.open("GET", baseUrl + "/autocomplete?query=" + input.value, true);
+  xhr.onerror = function () {
+    console.error('Error fetching random team and stat.');
+  };
   xhr.send();
-  function closeAllLists(elmnt) {
-    var autocompleteItems = document.getElementsByClassName("autocomplete-items");
-    for (var i = 0; i < autocompleteItems.length; i++) {
-      if (elmnt !== autocompleteItems[i] && elmnt !== input) {
-        autocompleteItems[i].parentNode.removeChild(autocompleteItems[i]);
-      }
-    }
-  }
-  document.addEventListener("click", function(e) {
-    closeAllLists(e.target);
-  });
 }
 
-window.onload = function() {
-  updateLabels();
-  addPlayerRows();
-  
-  // Trigger the modal when the instructions button is clicked
-  document.getElementById('instructionsButton').addEventListener('click', function() {
-    $('#instructionsModal').modal('show');
-  });
-};
-</script>
+document.addEventListener('DOMContentLoaded', function () {
+  addPlayerRows(); // Add player rows to the table dynamically
+  fetchRandomTeamAndStat(); // Fetch random team and stat when the page loads
+  setInterval(fetchRandomTeamAndStat, 72 * 60 * 60 * 1000); // Fetch new random team and stat every 72 hours
+  updateTotalScore(); // Update total score initially
+});
 
+// Show instructions modal
+document.getElementById('instructionsButton').addEventListener('click', function () {
+  $('#instructionsModal').modal('show');
+});
+</script>
 </body>
 </html>
 
