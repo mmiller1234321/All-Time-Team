@@ -61,6 +61,9 @@
 // Array to keep track of submitted player names
 var submittedPlayers = [];
 
+// Client-side cache for autocomplete suggestions
+var suggestionsCache = {};
+
 function updateLabels() {
   // Add new labels, All Star NL/AL, Division, Hall of Famers, other 
   var teams = [
@@ -190,37 +193,48 @@ function autocomplete(input) {
   var currentFocus;
   var inputValue = input.value.trim(); // Trim whitespace
 
+  // Check if suggestions for the input value are already cached
+  if (inputValue in suggestionsCache) {
+    showSuggestions(input, suggestionsCache[inputValue]);
+    return;
+  }
+
   var xhr = new XMLHttpRequest();
   xhr.onreadystatechange = function() {
     if (this.readyState === 4 && this.status === 200) {
       var suggestions = JSON.parse(this.responseText);
-      closeAllLists();
-      if (!input.value || suggestions.length === 0) {
-        return false;
-      }
-      currentFocus = -1;
-      var autocompleteList = document.createElement("div");
-      autocompleteList.setAttribute("id", input.id + "autocomplete-list");
-      autocompleteList.setAttribute("class", "autocomplete-items");
-      input.parentNode.appendChild(autocompleteList);
-      for (var i = 0; i < suggestions.length; i++) {
-        var suggestion = suggestions[i];
-        var suggestionItem = document.createElement("div");
-        suggestionItem.innerHTML = "<strong>" + suggestion.substr(0, input.value.length) + "</strong>";
-        suggestionItem.innerHTML += suggestion.substr(input.value.length);
-        suggestionItem.innerHTML += "<input type='hidden' value='" + suggestion + "'>";
-        suggestionItem.addEventListener("click", function(e) {
-          input.value = this.getElementsByTagName("input")[0].value;
-          closeAllLists();
-        });
-        autocompleteList.appendChild(suggestionItem);
-      }
+      suggestionsCache[inputValue] = suggestions; // Cache the suggestions for future use
+      showSuggestions(input, suggestions);
     }
   };
   // Dynamically determine the base URL
   var baseUrl = window.location.protocol + '//' + window.location.hostname;
   xhr.open("GET", baseUrl + "/autocomplete?query=" + inputValue, true);
   xhr.send();
+}
+
+function showSuggestions(input, suggestions) {
+  closeAllLists();
+  if (!input.value || suggestions.length === 0) {
+    return false;
+  }
+  currentFocus = -1;
+  var autocompleteList = document.createElement("div");
+  autocompleteList.setAttribute("id", input.id + "autocomplete-list");
+  autocompleteList.setAttribute("class", "autocomplete-items");
+  input.parentNode.appendChild(autocompleteList);
+  for (var i = 0; i < suggestions.length; i++) {
+    var suggestion = suggestions[i];
+    var suggestionItem = document.createElement("div");
+    suggestionItem.innerHTML = "<strong>" + suggestion.substr(0, input.value.length) + "</strong>";
+    suggestionItem.innerHTML += suggestion.substr(input.value.length);
+    suggestionItem.innerHTML += "<input type='hidden' value='" + suggestion + "'>";
+    suggestionItem.addEventListener("click", function(e) {
+      input.value = this.getElementsByTagName("input")[0].value;
+      closeAllLists();
+    });
+    autocompleteList.appendChild(suggestionItem);
+  }
 }
 
 function closeAllLists(elmnt) {
@@ -249,5 +263,4 @@ window.onload = function() {
 
 </body>
 </html>
-
 
