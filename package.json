@@ -2,9 +2,9 @@
     "name": "all time team",
     "version": "1.0.0",
     "description": "A new baseball app that allows users to create their all-time team.",
-    "main": "server.js",
+    "main": "server/server.js",
     "scripts": {
-        "start": "node server.js"
+        "start": "node server/server.js"
     },
     "keywords": [
         "baseball",
