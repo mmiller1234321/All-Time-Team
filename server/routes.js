@@ -6,10 +6,9 @@ const router = express.Router();
 
 // Define route handler for the homepage
 router.get('/', (req, res) => {
-  // Handle logic for the homepage here
-  res.send('Welcome to the homepage');
+  // Send the index.html file located in the 'public' directory
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
-
 // Search endpoint to fetch player stats
 router.get('/search', (req, res) => {
   const playerName = req.query.playerName;
