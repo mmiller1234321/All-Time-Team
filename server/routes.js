@@ -4,6 +4,12 @@ const pool = require('./db'); // Import the database connection
 
 const router = express.Router();
 
+// Define route handler for the homepage
+router.get('/', (req, res) => {
+  // Handle logic for the homepage here
+  res.send('Welcome to the homepage');
+});
+
 // Search endpoint to fetch player stats
 router.get('/search', (req, res) => {
   const playerName = req.query.playerName;
