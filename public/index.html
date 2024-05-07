@@ -249,34 +249,20 @@ function autocomplete(input) {
 window.onload = function() {
   // Fetch team and stat labels from the server
   // Endpoint to fetch random team and stat labels
-app.get('/randomData', (req, res) => {
-  // Query to fetch random team and stat labels from the database
-  const query = `
-    SELECT team_name, stat_name
-    FROM generated_tables
-    ORDER BY RAND()
-    LIMIT 1
-  `;
-  
-  // Execute the query
-  pool.query(query, (error, results) => {
-    if (error) {
-      console.error('Error executing MySQL query:', error);
-      res.status(500).json({ error: 'Internal server error' });
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', '/randomData', true);
+  xhr.onload = function () {
+    if (xhr.status === 200) {
+      var data = JSON.parse(xhr.responseText);
+      updateLabels(data.team, data.stat);
     } else {
-      if (results.length > 0) {
-        const randomData = {
-          team: results[0].team_name,
-          stat: results[0].stat_name
-        };
-        res.json(randomData); // Send the random team and stat labels as JSON response
-      } else {
-        console.log('No results found for the query');
-        res.status(404).json({ error: 'Data not found' });
-      }
+      console.error('Error fetching data:', xhr.statusText);
     }
-  });
-});
+  };
+  xhr.onerror = function () {
+    console.error('Error fetching data.');
+  };
+  xhr.send();
 
   // Trigger the modal when the instructions button is clicked
   document.getElementById('instructionsButton').addEventListener('click', function() {
@@ -287,3 +273,4 @@ app.get('/randomData', (req, res) => {
 
 </body>
 </html>
+
