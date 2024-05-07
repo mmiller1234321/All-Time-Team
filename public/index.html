@@ -92,26 +92,9 @@
 // Array to keep track of submitted player names
 var submittedPlayers = [];
 
-function updateLabels() {
-  //Add new labels, All Star NL/AL, Divison, Hall of Famers, other 
-  var teams = [
-    "Arizona Diamondbacks", "Atlanta Braves", "Baltimore Orioles", "Boston Red Sox",
-    "Chicago White Sox", "Chicago Cubs", "Cincinnati Reds", "Cleveland Guardians",
-    "Colorado Rockies", "Detroit Tigers", "Houston Astros", "Kansas City Royals",
-    "Los Angeles Angels of Anaheim", "Los Angeles Dodgers", "Miami Marlins", "Milwaukee Brewers",
-    "Minnesota Twins", "New York Yankees", "New York Mets", "Oakland Athletics",
-    "Philadelphia Phillies", "Pittsburgh Pirates", "San Diego Padres", "San Francisco Giants",
-    "Seattle Mariners", "St. Louis Cardinals", "Tampa Bay Rays", "Texas Rangers",
-    "Toronto Blue Jays", "Washington Nationals"
-  ];
-  var randomTeamIndex = Math.floor(Math.random() * teams.length);
-  var randomTeam = teams[randomTeamIndex];
-  document.getElementById('teamLabel').innerText = randomTeam;
-
-  var stats = ["r", "h", "2b", "3b", "hr", "rbi", "sb", "bb", "ibb"]; //add additional stats here
-  var randomStatIndex = Math.floor(Math.random() * stats.length);
-  var randomStat = stats[randomStatIndex];
-  document.getElementById('statLabel').innerText = randomStat;
+function updateLabels(team, stat) {
+  document.getElementById('teamLabel').innerText = team;
+  document.getElementById('statLabel').innerText = stat;
 }
 
 function handleSubmit(event) {
@@ -264,9 +247,24 @@ function autocomplete(input) {
 }
 
 window.onload = function() {
-  updateLabels();
-  addPlayerRows();
-  
+  // Fetch team and stat labels from the server
+  var xhr = new XMLHttpRequest();
+  var baseUrl = window.location.protocol + '//' + window.location.hostname;
+  xhr.open('GET', baseUrl + '/randomData', true);
+  xhr.onload = function () {
+    if (xhr.status === 200) {
+      var data = JSON.parse(xhr.responseText);
+      updateLabels(data.team, data.stat);
+      addPlayerRows(); // Add player rows after labels are updated
+    } else {
+      console.error('Error fetching team and stat labels:', xhr.statusText);
+    }
+  };
+  xhr.onerror = function () {
+    console.error('Error fetching team and stat labels.');
+  };
+  xhr.send();
+
   // Trigger the modal when the instructions button is clicked
   document.getElementById('instructionsButton').addEventListener('click', function() {
     $('#instructionsModal').modal('show');
