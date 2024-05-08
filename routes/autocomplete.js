@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const pool = require('../db'); // Assuming you have a database connection pool initialized
+const pool = require('../db/db.js'); // Assuming you have a database connection pool initialized
 
 router.get('/', (req, res) => {
   const query = req.query.query;
