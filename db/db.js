@@ -1,3 +1,4 @@
+require('dotenv').config();
 const mysql = require('mysql2');
 
 // Create MySQL connection pool using ClearDB connection URL
@@ -20,3 +21,4 @@ pool.on('error', (err) => {
 });
 
 module.exports = pool;
+
