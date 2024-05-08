@@ -1,26 +1,33 @@
 // Array to keep track of submitted player names
 var submittedPlayers = [];
+var lockedTeam = null;
+var lockedStat = null;
 
 function updateLabels() {
-  // Add new labels, All Star NL/AL, Division, Hall of Famers, other 
-  var teams = [
-    "Arizona Diamondbacks", "Atlanta Braves", "Baltimore Orioles", "Boston Red Sox",
-    "Chicago White Sox", "Chicago Cubs", "Cincinnati Reds", "Cleveland Guardians",
-    "Colorado Rockies", "Detroit Tigers", "Houston Astros", "Kansas City Royals",
-    "Los Angeles Angels of Anaheim", "Los Angeles Dodgers", "Miami Marlins", "Milwaukee Brewers",
-    "Minnesota Twins", "New York Yankees", "New York Mets", "Oakland Athletics",
-    "Philadelphia Phillies", "Pittsburgh Pirates", "San Diego Padres", "San Francisco Giants",
-    "Seattle Mariners", "St. Louis Cardinals", "Tampa Bay Rays", "Texas Rangers",
-    "Toronto Blue Jays", "Washington Nationals"
-  ];
-  var randomTeamIndex = Math.floor(Math.random() * teams.length);
-  var randomTeam = teams[randomTeamIndex];
-  document.getElementById('teamLabel').innerText = randomTeam;
+  // Lock team and stat name labels for 72 hours
+  if (!lockedTeam || !lockedStat || Date.now() - lockedTeam.timestamp >= 72 * 60 * 60 * 1000) {
+    // Add new labels, All Star NL/AL, Division, Hall of Famers, other 
+    var teams = [
+      "Arizona Diamondbacks", "Atlanta Braves", "Baltimore Orioles", "Boston Red Sox",
+      "Chicago White Sox", "Chicago Cubs", "Cincinnati Reds", "Cleveland Guardians",
+      "Colorado Rockies", "Detroit Tigers", "Houston Astros", "Kansas City Royals",
+      "Los Angeles Angels of Anaheim", "Los Angeles Dodgers", "Miami Marlins", "Milwaukee Brewers",
+      "Minnesota Twins", "New York Yankees", "New York Mets", "Oakland Athletics",
+      "Philadelphia Phillies", "Pittsburgh Pirates", "San Diego Padres", "San Francisco Giants",
+      "Seattle Mariners", "St. Louis Cardinals", "Tampa Bay Rays", "Texas Rangers",
+      "Toronto Blue Jays", "Washington Nationals"
+    ];
+    var randomTeamIndex = Math.floor(Math.random() * teams.length);
+    var randomTeam = teams[randomTeamIndex];
+    document.getElementById('teamLabel').innerText = randomTeam;
+    lockedTeam = { team: randomTeam, timestamp: Date.now() };
 
-  var stats = ["r", "h", "2b", "3b", "hr", "rbi", "sb", "bb", "ibb"]; // Add additional stats here
-  var randomStatIndex = Math.floor(Math.random() * stats.length);
-  var randomStat = stats[randomStatIndex];
-  document.getElementById('statLabel').innerText = randomStat;
+    var stats = ["r", "h", "2b", "3b", "hr", "rbi", "sb", "bb", "ibb"]; // Add additional stats here
+    var randomStatIndex = Math.floor(Math.random() * stats.length);
+    var randomStat = stats[randomStatIndex];
+    document.getElementById('statLabel').innerText = randomStat;
+    lockedStat = { stat: randomStat, timestamp: Date.now() };
+  }
 
   // Add player rows
   addPlayerRows();
