@@ -15,7 +15,7 @@ The project is deployed and can be accessed [here](https://alltimeteam-205f3b996
 
 ## Version 1.1
 
-1st board is set. 
+1st board is set. Pirates and hits!!!!
 
 ## Version 1.0
 
