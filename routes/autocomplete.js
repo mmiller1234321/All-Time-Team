@@ -1,43 +1,28 @@
-// autocomplete.js
 const express = require('express');
 const router = express.Router();
-const axios = require('axios');
+const pool = require('../pool'); // Assuming you have a database connection pool initialized
 
 router.get('/', (req, res) => {
-  var currentFocus;
-  var xhr = new XMLHttpRequest();
-  xhr.onreadystatechange = function() {
-    if (this.readyState === 4 && this.status === 200) {
-      var suggestions = JSON.parse(this.responseText);
-      closeAllLists();
-      if (!input.value || suggestions.length === 0) {
-        return false;
-      }
-      currentFocus = -1;
-      var autocompleteList = document.createElement("div");
-      autocompleteList.setAttribute("id", input.id + "autocomplete-list");
-      autocompleteList.setAttribute("class", "autocomplete-items");
-      input.parentNode.appendChild(autocompleteList);
-      
-      for (var i = 0; i < suggestions.length; i++) {
-        var suggestion = suggestions[i];
-        var suggestionItem = document.createElement("div");
-        suggestionItem.innerHTML = "<strong>" + suggestion.substr(0, input.value.length) + "</strong>";
-        suggestionItem.innerHTML += suggestion.substr(input.value.length);
-        suggestionItem.innerHTML += "<input type='hidden' value='" + suggestion + "'>";
-        suggestionItem.addEventListener("click", function(e) {
-          input.value = this.getElementsByTagName("input")[0].value;
-          closeAllLists();
-        });
-        autocompleteList.appendChild(suggestionItem);
-      }
+  const query = req.query.query;
+
+  const autocompleteQuery = `
+    SELECT CONCAT(nameFirst, ' ', nameLast) AS fullName
+    FROM people
+    WHERE CONCAT(nameFirst, ' ', nameLast) LIKE ?
+    LIMIT 10
+  `;
+
+  pool.query(autocompleteQuery, [`%${query}%`], (error, results) => {
+    if (error) {
+      console.error('Error executing autocomplete MySQL query:', error);
+      res.status(500).send('Internal server error');
+    } else {
+      const suggestions = results.map((row) => row.fullName);
+      res.json(suggestions);
     }
-  };
-  // Dynamically determine the base URL
-  var baseUrl = window.location.origin; // Use window.location.origin to get the base URL
-  xhr.open("GET", baseUrl + "/autocomplete?query=" + encodeURIComponent(input.value), true); // Encode input value
-  xhr.send();
+  });
 });
 
 module.exports = router;
+
 

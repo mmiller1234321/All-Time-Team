@@ -57,7 +57,7 @@ function handleSubmit(event) {
     var stat = document.getElementById('statLabel').textContent; // Retrieve the value of the stats label
 
     // Dynamically determine the base URL
-    var baseUrl = window.location.protocol + '//' + window.location.hostname;
+    var baseUrl = window.location.origin;
 
     // Fetch data for the submitted player
     var xhr = new XMLHttpRequest();
@@ -150,13 +150,8 @@ function autocomplete(input) {
       autocompleteList.setAttribute("class", "autocomplete-items");
       input.parentNode.appendChild(autocompleteList);
       
-      // Filter suggestions based on input value
-      var filteredSuggestions = suggestions.filter(function(suggestion) {
-        return suggestion.toLowerCase().startsWith(input.value.toLowerCase());
-      });
-
-      for (var i = 0; i < filteredSuggestions.length; i++) {
-        var suggestion = filteredSuggestions[i];
+      for (var i = 0; i < suggestions.length; i++) {
+        var suggestion = suggestions[i];
         var suggestionItem = document.createElement("div");
         suggestionItem.innerHTML = "<strong>" + suggestion.substr(0, input.value.length) + "</strong>";
         suggestionItem.innerHTML += suggestion.substr(input.value.length);
@@ -170,8 +165,8 @@ function autocomplete(input) {
     }
   };
   // Dynamically determine the base URL
-  var baseUrl = window.location.protocol + '//' + window.location.hostname;
-  xhr.open("GET", baseUrl + "/autocomplete?query=" + input.value, true);
+  var baseUrl = window.location.origin;
+  xhr.open("GET", baseUrl + "/autocomplete?query=" + encodeURIComponent(input.value), true);
   xhr.send();
 }
 
