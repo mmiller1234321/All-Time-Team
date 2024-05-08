@@ -1,5 +1,9 @@
-// Autocomplete function
-function autocomplete(input) {
+// autocomplete.js
+const express = require('express');
+const router = express.Router();
+const axios = require('axios');
+
+router.get('/', (req, res) => {
   var currentFocus;
   var xhr = new XMLHttpRequest();
   xhr.onreadystatechange = function() {
@@ -33,5 +37,7 @@ function autocomplete(input) {
   var baseUrl = window.location.origin; // Use window.location.origin to get the base URL
   xhr.open("GET", baseUrl + "/autocomplete?query=" + encodeURIComponent(input.value), true); // Encode input value
   xhr.send();
-}
+});
+
+module.exports = router;
 
