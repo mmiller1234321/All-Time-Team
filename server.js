@@ -16,7 +16,6 @@ app.use('/search', require('./routes/search'));
 app.use('/autocomplete', require('./routes/autocomplete'));
 app.use('/generateTeamStatPair', require('./routes/generateTeamStatPair'));
 
-
 // Catch-all route to serve index.html
 app.get('*', (req, res) => {
   res.status(404).send('Page not found');
