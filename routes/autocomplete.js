@@ -3,9 +3,9 @@ const router = express.Router();
 const pool = require('../db/db.js'); // Assuming you have a database connection pool initialized
 
 router.get('/', (req, res) => {
-  const query = req.query.query;
+  const partialQuery = req.query.query; // Get partial input value
 
-  // Use placeholders (?) for parameters to prevent SQL injection
+  // Adjust the autocomplete query to handle partial input value
   const autocompleteQuery = `
     SELECT CONCAT(nameFirst, ' ', nameLast) AS fullName
     FROM people
@@ -13,7 +13,7 @@ router.get('/', (req, res) => {
     LIMIT 10
   `;
 
-  pool.query(autocompleteQuery, [`%${query}%`], (error, results) => {
+  pool.query(autocompleteQuery, [`%${partialQuery}%`], (error, results) => {
     if (error) {
       console.error('Error executing autocomplete MySQL query:', error);
       res.status(500).json({ error: 'Internal server error' }); // Send error response as JSON
@@ -25,5 +25,6 @@ router.get('/', (req, res) => {
 });
 
 module.exports = router;
+
 
 

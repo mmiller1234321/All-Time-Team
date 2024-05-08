@@ -164,6 +164,14 @@ function autocomplete(input) {
       }
     }
   };
+
+  // Send AJAX request with partial input value
+  var baseUrl = window.location.origin;
+  var partialInputValue = input.value.substring(0, input.selectionStart);
+  xhr.open("GET", baseUrl + "/autocomplete?query=" + encodeURIComponent(partialInputValue), true);
+  xhr.send();
+}
+
   // Dynamically determine the base URL
   var baseUrl = window.location.origin;
   xhr.open("GET", baseUrl + "/autocomplete?query=" + encodeURIComponent(input.value), true);
