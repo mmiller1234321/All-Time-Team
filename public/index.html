@@ -91,10 +91,37 @@
 <script>
 // Array to keep track of submitted player names
 var submittedPlayers = [];
+var lockedTeam = null;
+var lockedStat = null;
 
-function updateLabels(team, stat) {
-  document.getElementById('teamLabel').innerText = team;
-  document.getElementById('statLabel').innerText = stat;
+function updateLabels() {
+  // Lock team and stat name labels for 72 hours
+  if (!lockedTeam || !lockedStat || Date.now() - lockedTeam.timestamp >= 72 * 60 * 60 * 1000) {
+    // Add new labels, All Star NL/AL, Division, Hall of Famers, other 
+    var teams = [
+      "Arizona Diamondbacks", "Atlanta Braves", "Baltimore Orioles", "Boston Red Sox",
+      "Chicago White Sox", "Chicago Cubs", "Cincinnati Reds", "Cleveland Guardians",
+      "Colorado Rockies", "Detroit Tigers", "Houston Astros", "Kansas City Royals",
+      "Los Angeles Angels of Anaheim", "Los Angeles Dodgers", "Miami Marlins", "Milwaukee Brewers",
+      "Minnesota Twins", "New York Yankees", "New York Mets", "Oakland Athletics",
+      "Philadelphia Phillies", "Pittsburgh Pirates", "San Diego Padres", "San Francisco Giants",
+      "Seattle Mariners", "St. Louis Cardinals", "Tampa Bay Rays", "Texas Rangers",
+      "Toronto Blue Jays", "Washington Nationals"
+    ];
+    var randomTeamIndex = Math.floor(Math.random() * teams.length);
+    var randomTeam = teams[randomTeamIndex];
+    document.getElementById('teamLabel').innerText = randomTeam;
+    lockedTeam = { team: randomTeam, timestamp: Date.now() };
+
+    var stats = ["r", "h", "2b", "3b", "hr", "rbi", "sb", "bb", "ibb"]; // Add additional stats here
+    var randomStatIndex = Math.floor(Math.random() * stats.length);
+    var randomStat = stats[randomStatIndex];
+    document.getElementById('statLabel').innerText = randomStat;
+    lockedStat = { stat: randomStat, timestamp: Date.now() };
+  }
+
+  // Add player rows
+  addPlayerRows();
 }
 
 function handleSubmit(event) {
@@ -145,6 +172,7 @@ function handleSubmit(event) {
 function addPlayerRows() {
   var positions = ["C", "1B", "2B", "3B", "SS", "OF", "OF", "OF", "P"];
   var tbody = document.getElementById("playerRows");
+  tbody.innerHTML = ''; // Clear existing rows
   for (var i = 0; i < 9; i++) {
     var row = document.createElement("tr");
     
@@ -233,37 +261,24 @@ function autocomplete(input) {
   var baseUrl = window.location.protocol + '//' + window.location.hostname;
   xhr.open("GET", baseUrl + "/autocomplete?query=" + input.value, true);
   xhr.send();
-  function closeAllLists(elmnt) {
-    var autocompleteItems = document.getElementsByClassName("autocomplete-items");
-    for (var i = 0; i < autocompleteItems.length; i++) {
-      if (elmnt !== autocompleteItems[i] && elmnt !== input) {
-        autocompleteItems[i].parentNode.removeChild(autocompleteItems[i]);
-      }
-    }
-  }
-  document.addEventListener("click", function(e) {
-    closeAllLists(e.target);
-  });
 }
 
-window.onload = function() {
-  // Fetch team and stat labels from the server
-  // Endpoint to fetch random team and stat labels
-  var xhr = new XMLHttpRequest();
-  xhr.open('GET', '/randomData', true);
-  xhr.onload = function () {
-    if (xhr.status === 200) {
-      var data = JSON.parse(xhr.responseText);
-      updateLabels(data.team, data.stat);
-    } else {
-      console.error('Error fetching data:', xhr.statusText);
+function closeAllLists(elmnt) {
+  var autocompleteItems = document.getElementsByClassName("autocomplete-items");
+  for (var i = 0; i < autocompleteItems.length; i++) {
+    if (elmnt !== autocompleteItems[i] && elmnt !== input) {
+      autocompleteItems[i].parentNode.removeChild(autocompleteItems[i]);
     }
-  };
-  xhr.onerror = function () {
-    console.error('Error fetching data.');
-  };
-  xhr.send();
+  }
+}
 
+document.addEventListener("click", function(e) {
+  closeAllLists(e.target);
+});
+
+window.onload = function() {
+  updateLabels();
+  
   // Trigger the modal when the instructions button is clicked
   document.getElementById('instructionsButton').addEventListener('click', function() {
     $('#instructionsModal').modal('show');
@@ -273,4 +288,3 @@ window.onload = function() {
 
 </body>
 </html>
-

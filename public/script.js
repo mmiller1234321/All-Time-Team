@@ -187,9 +187,4 @@ document.addEventListener("click", function(e) {
 
 window.onload = function() {
   updateLabels();
-  
-  // Trigger the modal when the instructions button is clicked
-  document.getElementById('instructionsButton').addEventListener('click', function() {
-    $('#instructionsModal').modal('show');
-  });
 };
