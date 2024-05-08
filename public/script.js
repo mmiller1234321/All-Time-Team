@@ -21,6 +21,9 @@ function updateLabels() {
   var randomStatIndex = Math.floor(Math.random() * stats.length);
   var randomStat = stats[randomStatIndex];
   document.getElementById('statLabel').innerText = randomStat;
+
+  // Add player rows
+  addPlayerRows();
 }
 
 function handleSubmit(event) {
@@ -71,6 +74,7 @@ function handleSubmit(event) {
 function addPlayerRows() {
   var positions = ["C", "1B", "2B", "3B", "SS", "OF", "OF", "OF", "P"];
   var tbody = document.getElementById("playerRows");
+  tbody.innerHTML = ''; // Clear existing rows
   for (var i = 0; i < 9; i++) {
     var row = document.createElement("tr");
     
@@ -176,7 +180,6 @@ document.addEventListener("click", function(e) {
 
 window.onload = function() {
   updateLabels();
-  addPlayerRows();
   
   // Trigger the modal when the instructions button is clicked
   document.getElementById('instructionsButton').addEventListener('click', function() {
