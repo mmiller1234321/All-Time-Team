@@ -2,7 +2,7 @@
 var submittedPlayers = [];
 
 function updateLabels() {
-  //Add new labels, All Star NL/AL, Divison, Hall of Famers, other 
+  // Add new labels, All Star NL/AL, Division, Hall of Famers, other 
   var teams = [
     "Arizona Diamondbacks", "Atlanta Braves", "Baltimore Orioles", "Boston Red Sox",
     "Chicago White Sox", "Chicago Cubs", "Cincinnati Reds", "Cleveland Guardians",
@@ -17,7 +17,7 @@ function updateLabels() {
   var randomTeam = teams[randomTeamIndex];
   document.getElementById('teamLabel').innerText = randomTeam;
 
-  var stats = ["r", "h", "2b", "3b", "hr", "rbi", "sb", "bb", "ibb"]; //add additional stats here
+  var stats = ["r", "h", "2b", "3b", "hr", "rbi", "sb", "bb", "ibb"]; // Add additional stats here
   var randomStatIndex = Math.floor(Math.random() * stats.length);
   var randomStat = stats[randomStatIndex];
   document.getElementById('statLabel').innerText = randomStat;
