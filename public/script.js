@@ -38,7 +38,8 @@ function handleSubmit(event) {
   if (submitButton.disabled) return; // Check if the button is already disabled
   submitButton.disabled = true; // Disable the button to prevent multiple submissions
 
-  var playerNameInput = submitButton.parentElement.parentElement.children[0].children[0];
+  var row = submitButton.closest('tr');
+  var playerNameInput = row.querySelector('.player-input');
   var playerName = playerNameInput.value.trim(); // Trim whitespace
 
   // Check if the player has already been submitted
@@ -51,7 +52,7 @@ function handleSubmit(event) {
   if (playerName !== '') {
     submittedPlayers.push(playerName); // Add the player to the submitted players list
 
-    var position = submitButton.parentElement.parentElement.children[1].textContent;
+    var position = row.children[1].textContent;
     var team = document.getElementById('teamLabel').textContent;
     var stat = document.getElementById('statLabel').textContent; // Retrieve the value of the stats label
 
@@ -63,7 +64,7 @@ function handleSubmit(event) {
     xhr.open('GET', baseUrl + '/search?playerName=' + playerName + '&position=' + position + '&team=' + team + '&stat=' + stat, true);
     xhr.onload = function () {
       if (xhr.status === 200) {
-        var statSquare = submitButton.parentElement.parentElement.children[2].children[0];
+        var statSquare = row.querySelector('.stat-square');
         var statValue = xhr.responseText;
         statSquare.textContent = (statValue === '0') ? '0' : statValue; // Display '0' if no data found
         updateTotalScore(); // Update total score after each submission
@@ -82,7 +83,7 @@ function addPlayerRows() {
   var positions = ["C", "1B", "2B", "3B", "SS", "OF", "OF", "OF", "P"];
   var tbody = document.getElementById("playerRows");
   tbody.innerHTML = ''; // Clear existing rows
-  for (var i = 0; i < 9; i++) {
+  positions.forEach(function(position) {
     var row = document.createElement("tr");
     
     var playerNameCell = document.createElement("td");
@@ -98,7 +99,7 @@ function addPlayerRows() {
     row.appendChild(playerNameCell);
     
     var positionCell = document.createElement("td");
-    positionCell.textContent = positions[i];
+    positionCell.textContent = position;
     row.appendChild(positionCell);
     
     var statCell = document.createElement("td");
@@ -117,11 +118,7 @@ function addPlayerRows() {
     row.appendChild(submitCell);
     
     tbody.appendChild(row);
-    
-    if (positions[i] === 'P') {
-      break; // Stop adding rows when reaching 'P' position
-    }
-  }
+  });
 }
 
 function updateTotalScore() {
@@ -152,8 +149,14 @@ function autocomplete(input) {
       autocompleteList.setAttribute("id", input.id + "autocomplete-list");
       autocompleteList.setAttribute("class", "autocomplete-items");
       input.parentNode.appendChild(autocompleteList);
-      for (var i = 0; i < suggestions.length; i++) {
-        var suggestion = suggestions[i];
+      
+      // Filter suggestions based on input value
+      var filteredSuggestions = suggestions.filter(function(suggestion) {
+        return suggestion.toLowerCase().startsWith(input.value.toLowerCase());
+      });
+
+      for (var i = 0; i < filteredSuggestions.length; i++) {
+        var suggestion = filteredSuggestions[i];
         var suggestionItem = document.createElement("div");
         suggestionItem.innerHTML = "<strong>" + suggestion.substr(0, input.value.length) + "</strong>";
         suggestionItem.innerHTML += suggestion.substr(input.value.length);
@@ -187,4 +190,9 @@ document.addEventListener("click", function(e) {
 
 window.onload = function() {
   updateLabels();
+  
+  // Trigger the modal when the instructions button is clicked
+  document.getElementById('instructionsButton').addEventListener('click', function() {
+    $('#instructionsModal').modal('show');
+  });
 };
