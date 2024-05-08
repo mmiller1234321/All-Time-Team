@@ -172,12 +172,6 @@ function autocomplete(input) {
   xhr.send();
 }
 
-  // Dynamically determine the base URL
-  var baseUrl = window.location.origin;
-  xhr.open("GET", baseUrl + "/autocomplete?query=" + encodeURIComponent(input.value), true);
-  xhr.send();
-}
-
 function closeAllLists(elmnt) {
   var autocompleteItems = document.getElementsByClassName("autocomplete-items");
   for (var i = 0; i < autocompleteItems.length; i++) {
