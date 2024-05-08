@@ -13,6 +13,9 @@ This project is licensed under the [CC BY-NC-ND 4.0](https://creativecommons.org
 
 The project is deployed and can be accessed [here](https://alltimeteam-205f3b996ac7.herokuapp.com/).
 
+## Version 1.1
+
+1st board is set. 
 
 ## Version 1.0
 
