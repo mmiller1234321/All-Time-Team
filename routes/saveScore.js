@@ -1,11 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const pool = require('../db/db.js'); // Import your database pool
+const pool = require('../db/db.js');
 
 router.post('/', (req, res) => {
   const { totalScore, teamName, statName } = req.body;
 
-  // Save the total score, team name, and stat name to the database
   pool.query(
     'INSERT INTO generated_tables (team_name, stat_name, total_score) VALUES (?, ?, ?)',
     [teamName, statName, totalScore],
@@ -22,3 +21,4 @@ router.post('/', (req, res) => {
 });
 
 module.exports = router;
+
