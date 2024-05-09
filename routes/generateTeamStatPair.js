@@ -31,7 +31,6 @@ router.get('/', (req, res, next) => {
   }
 });
 
-module.exports = { router, teamName, statName };
-
+module.exports = router;
 
 

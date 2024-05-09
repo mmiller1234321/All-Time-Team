@@ -1,10 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../db/db.js');
-const { teamName, statName } = require('./generateTeamStatPair.js');
 
 router.post('/', (req, res) => {
-  const { totalScore } = req.body;
+  const { totalScore, teamName, statName } = req.body;
 
   pool.query(
     'INSERT INTO generated_tables (team_name, stat_name, total_score) VALUES (?, ?, ?)',
@@ -22,5 +21,4 @@ router.post('/', (req, res) => {
 });
 
 module.exports = router;
-
 
