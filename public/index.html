@@ -116,18 +116,20 @@ function handleSubmit(event) {
     submittedPlayers.push(playerName); // Add the player to the submitted players list
 
     var position = submitButton.parentElement.parentElement.children[1].textContent;
+    var team = document.getElementById('teamLabel').textContent;
+    var stat = document.getElementById('statLabel').textContent; // Retrieve the value of the stats label
 
     // Dynamically determine the base URL
     var baseUrl = window.location.protocol + '//' + window.location.hostname;
 
     // Fetch data for the submitted player
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', baseUrl + '/search?playerName=' + playerName + '&position=' + position + '&team=' + localStorage.getItem('lockedTeam') + '&stat=' + localStorage.getItem('lockedStat'), true);
+    xhr.open('GET', baseUrl + '/search?playerName=' + playerName + '&position=' + position + '&team=' + team + '&stat=' + stat, true);
     xhr.onload = function () {
       if (xhr.status === 200) {
         var statSquare = submitButton.parentElement.parentElement.children[2].children[0];
         var statValue = xhr.responseText;
-        statSquare.textContent = (statValue === '0') ? '0' : statValue; // Display '0' if no data found
+        statSquare.textContent = (statValue === 'null') ? 'N/A' : statValue; // Display 'N/A' if no data found
         updateTotalScore(); // Update total score after each submission
       } else {
         console.error('Error fetching data:', xhr.statusText);
@@ -139,6 +141,7 @@ function handleSubmit(event) {
     xhr.send();
   }
 }
+
 
 function addPlayerRows() {
   var positions = ["C", "1B", "2B", "3B", "SS", "OF", "OF", "OF", "P"];
