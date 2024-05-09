@@ -129,7 +129,7 @@ function handleSubmit(event) {
       if (xhr.status === 200) {
         var statSquare = submitButton.parentElement.parentElement.children[2].children[0];
         var statValue = xhr.responseText;
-        statSquare.textContent = (statValue === 'null') ? 'N/A' : statValue; // Display 'N/A' if no data found
+        statSquare.textContent = (statValue === 'null') ? 'N/A' : statValue; // Display 'N/A' if no data found. I'm trying here to handle the case where the player did not play that position or for that team (N/A instead of 0 in this case)
         updateTotalScore(); // Update total score after each submission
       } else {
         console.error('Error fetching data:', xhr.statusText);
