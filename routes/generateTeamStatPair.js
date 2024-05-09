@@ -4,7 +4,7 @@ const mysql = require('mysql2');
 const NodeCache = require('node-cache');
 
 // Create MySQL connection pool using ClearDB connection URL
-const pool = mysql.createPool(process.env.CLEARDB_MAUVE_URL);
+const pool = require('../db/db.js');
 
 // Create a cache with a TTL of 72 hours (in seconds)
 const cache = new NodeCache({ stdTTL: 259200 });
