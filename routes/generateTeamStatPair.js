@@ -4,13 +4,12 @@ const pool = require('../db/db.js');
 const NodeCache = require('node-cache');
 
 const cache = new NodeCache({ stdTTL: 259200 }); // Cache expires after 72 hours
-let lastFetchedIndex = 0; // Counter to keep track of the last fetched index
 let milwaukeeRBIDone = false; // Flag to track if Milwaukee Brewers and RBI condition has been processed
 
 // Function to fetch the next row from the database
 function fetchNextRow() {
-  // Fetch the next row from the database based on the last fetched index
-  pool.query('SELECT * FROM generated_tables LIMIT ?, 1', [lastFetchedIndex], (error, results) => {
+  // Fetch the first row from the database
+  pool.query('SELECT * FROM generated_tables LIMIT 1', (error, results) => {
     if (error) {
       console.error('Error executing MySQL query:', error);
     } else {
@@ -30,7 +29,6 @@ function fetchNextRow() {
         });
 
         cache.set('teamStatPair', teamStatPair);
-        lastFetchedIndex++; // Increment the last fetched index
 
         // Check if Milwaukee Brewers and RBI condition is met and it hasn't been processed before
         if (!milwaukeeRBIDone && teamName === "Milwaukee Brewers" && statName === "RBI") {
@@ -40,13 +38,13 @@ function fetchNextRow() {
           setTimeout(fetchNextRow, 72 * 60 * 60 * 1000);
         }
       } else {
-        console.log('No more team and stat pairs found in the database');
+        console.log('No team and stat pairs found in the database');
       }
     }
   });
 }
 
-// Fetch the next row on server start
+// Fetch the first row on server start
 fetchNextRow();
 
 // Route to handle fetching the team and stat pair
