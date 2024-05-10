@@ -5,6 +5,7 @@ const NodeCache = require('node-cache');
 
 const cache = new NodeCache({ stdTTL: 259200 }); // Cache expires after 72 hours
 let lastFetchedIndex = 0; // Counter to keep track of the last fetched index
+let milwaukeeRBIDone = false; // Flag to track if Milwaukee Brewers and RBI condition has been processed
 
 // Function to fetch the next row from the database
 function fetchNextRow() {
@@ -30,6 +31,14 @@ function fetchNextRow() {
 
         cache.set('teamStatPair', teamStatPair);
         lastFetchedIndex++; // Increment the last fetched index
+
+        // Check if Milwaukee Brewers and RBI condition is met and it hasn't been processed before
+        if (!milwaukeeRBIDone && teamName === "Milwaukee Brewers" && statName === "RBI") {
+          // Set flag to true to indicate it has been processed
+          milwaukeeRBIDone = true;
+          // Start timer for 72 hours
+          setTimeout(fetchNextRow, 72 * 60 * 60 * 1000);
+        }
       } else {
         console.log('No more team and stat pairs found in the database');
       }
@@ -39,10 +48,6 @@ function fetchNextRow() {
 
 // Fetch the next row on server start
 fetchNextRow();
-
-// Set up timer to fetch the next row after 72 hours (in milliseconds)
-const millisecondsIn72Hours = 72 * 60 * 60 * 1000;
-setTimeout(fetchNextRow, millisecondsIn72Hours);
 
 // Route to handle fetching the team and stat pair
 router.get('/', (req, res, next) => {
@@ -55,6 +60,7 @@ router.get('/', (req, res, next) => {
 });
 
 module.exports = router;
+
 
 
 
