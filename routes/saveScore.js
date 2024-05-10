@@ -3,11 +3,11 @@ const router = express.Router();
 const pool = require('../db/db.js');
 
 router.post('/', (req, res) => {
-  const { totalScore, teamName, statName } = req.body;
+  const { totalScore, teamName, statName, gameboardId } = req.body;
 
   pool.query(
-    'INSERT INTO generated_tables (team_name, stat_name, total_score) VALUES (?, ?, ?)',
-    [teamName, statName, totalScore],
+    'INSERT INTO games (team_name, stat_name, total_score, gameboard_id) VALUES (?, ?, ?, ?)',
+    [teamName, statName, totalScore, gameboardId],
     (error, results, fields) => {
       if (error) {
         console.error('Error inserting total score:', error);
@@ -21,6 +21,8 @@ router.post('/', (req, res) => {
 });
 
 module.exports = router;
+
+
 
 
 
