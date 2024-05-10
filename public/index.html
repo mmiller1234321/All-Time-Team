@@ -132,12 +132,16 @@ function handleSubmit(event) {
         statSquare.textContent = (statValue === 'null') ? 'N/A' : statValue; // Display 'N/A' if no data found. I'm trying here to handle the case where the player did not play that position or for that team (N/A instead of 0 in this case)
         updateTotalScore(); // Update total score after each submission
         
-        // After updating the total score, save it to the server
-        var totalScore = document.getElementById('totalScore').textContent;
-        var xhrSave = new XMLHttpRequest();
-        xhrSave.open('POST', baseUrl + '/save-score', true);
-        xhrSave.setRequestHeader('Content-Type', 'application/json');
-        xhrSave.send(JSON.stringify({ totalScore, team, stat }));
+        // After updating the total score, check if all submit buttons are disabled
+        var allDisabled = [...document.querySelectorAll('button.btn-primary')].every(button => button.disabled);
+        if (allDisabled) {
+          // If all submit buttons are disabled, send the total score to the server
+          var totalScore = document.getElementById('totalScore').textContent;
+          var xhrSave = new XMLHttpRequest();
+          xhrSave.open('POST', baseUrl + '/save-score', true);
+          xhrSave.setRequestHeader('Content-Type', 'application/json');
+          xhrSave.send(JSON.stringify({ totalScore, team, stat }));
+        }
       } else {
         console.error('Error fetching data:', xhr.statusText);
       }

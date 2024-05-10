@@ -10,15 +10,17 @@ router.post('/', (req, res) => {
     [teamName, statName, totalScore],
     (error, results, fields) => {
       if (error) {
-        console.error('Error saving total score:', error);
-        res.status(500).json({ error: 'An error occurred while saving total score' });
+        console.error('Error inserting total score:', error);
+        res.status(500).json({ error: 'An error occurred while inserting total score' });
       } else {
-        console.log('Total score saved successfully');
-        res.status(200).json({ message: 'Total score saved successfully' });
+        console.log('Total score inserted successfully');
+        res.status(200).json({ message: 'Total score inserted successfully' });
       }
     }
   );
 });
 
 module.exports = router;
+
+
 
