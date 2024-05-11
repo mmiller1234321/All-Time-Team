@@ -52,7 +52,28 @@ router.get('/', (req, res, next) => {
   });
 });
 
+// Route to handle fetching the gameboard
+router.get('/fetch-gameboard', (req, res, next) => {
+  pool.query('SELECT team_name, stat_name FROM gameboard ORDER BY date ASC LIMIT 1', (error, results) => {
+    if (error) {
+      console.error('Error fetching team and stat pair:', error);
+      res.status(500).send('Internal Server Error');
+    } else {
+      if (results.length > 0) {
+        const teamName = results[0].team_name;
+        const statName = results[0].stat_name;
+        res.json({ team: teamName, stat: statName });
+      } else {
+        console.log('No team and stat pairs found in the gameboard table');
+        res.status(404).send('No team and stat pairs found');
+      }
+    }
+  });
+});
+
 module.exports = router;
+
+
 
 
 
