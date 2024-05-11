@@ -13,9 +13,8 @@ function fetchNextRow() {
         const teamName = results[0].team_name;
         const statName = results[0].stat_name;
         
-        // Insert the fetched data into the gameboard table with the current date
-        const currentDate = new Date().toISOString().slice(0, 19).replace('T', ' '); // Get current date
-        pool.query('INSERT INTO gameboard (team_name, stat_name, date) VALUES (?, ?, ?)', [teamName, statName, currentDate], (error, results) => {
+        // Insert the fetched data into the gameboard table without the date
+        pool.query('INSERT INTO gameboard (team_name, stat_name) VALUES (?, ?)', [teamName, statName], (error, results) => {
           if (error) {
             console.error('Error inserting data into gameboard table:', error);
             // Continue even if there's an error inserting into gameboard table
