@@ -96,10 +96,10 @@ var submittedPlayers = [];
 function fetchTeamStatPair() {
   // Dynamically determine the base URL
   var baseUrl = window.location.protocol + '//' + window.location.hostname;
-  fetch(baseUrl + '/generateTeamStatPair')
+  fetch(baseUrl + '/fetch-gameboard')
     .then(response => response.json())
     .then(data => {
-      updateLabels(data.team, data.stat);
+      updateLabels(data.team_name, data.stat_name);
     })
     .catch(error => {
       console.error('Error fetching team and stat pair:', error);
@@ -302,5 +302,4 @@ window.onload = function() {
 
 </body>
 </html>
-
 

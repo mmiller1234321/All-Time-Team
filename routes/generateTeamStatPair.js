@@ -1,15 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../db/db.js');
-const NodeCache = require('node-cache');
-
-const cache = new NodeCache({ stdTTL: 259200 }); // Cache expires after 72 hours
-let milwaukeeRBIDone = false; // Flag to track if Milwaukee Brewers and RBI condition has been processed
 
 // Function to fetch the next row from the database
 function fetchNextRow() {
   // Fetch the first row from the database
-  pool.query('SELECT * FROM generated_tables LIMIT 1', (error, results) => {
+  pool.query('SELECT * FROM generated_tables ORDER BY date ASC LIMIT 1', (error, results) => {
     if (error) {
       console.error('Error executing MySQL query:', error);
     } else {
@@ -28,15 +24,8 @@ function fetchNextRow() {
           }
         });
 
-        cache.set('teamStatPair', teamStatPair);
-
-        // Check if Milwaukee Brewers and RBI condition is met and it hasn't been processed before
-        if (!milwaukeeRBIDone && teamName === "Milwaukee Brewers" && statName === "RBI") {
-          // Set flag to true to indicate it has been processed
-          milwaukeeRBIDone = true;
-          // Start timer for 72 hours
-          setTimeout(fetchNextRow, 72 * 60 * 60 * 1000);
-        }
+        // Start timer for 72 hours
+        setTimeout(fetchNextRow, 72 * 60 * 60 * 1000);
       } else {
         console.log('No team and stat pairs found in the database');
       }
@@ -49,12 +38,21 @@ fetchNextRow();
 
 // Route to handle fetching the team and stat pair
 router.get('/', (req, res, next) => {
-  const cachedData = cache.get('teamStatPair');
-  if (cachedData) {
-    res.json(cachedData);
-  } else {
-    res.status(404).send('No team and stat pairs found');
-  }
+  pool.query('SELECT team_name, stat_name FROM gameboard ORDER BY date ASC LIMIT 1', (error, results) => {
+    if (error) {
+      console.error('Error fetching team and stat pair:', error);
+      res.status(500).send('Internal Server Error');
+    } else {
+      if (results.length > 0) {
+        const teamName = results[0].team_name;
+        const statName = results[0].stat_name;
+        res.json({ team: teamName, stat: statName });
+      } else {
+        console.log('No team and stat pairs found in the gameboard table');
+        res.status(404).send('No team and stat pairs found');
+      }
+    }
+  });
 });
 
 module.exports = router;
