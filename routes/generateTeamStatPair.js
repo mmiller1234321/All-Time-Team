@@ -4,20 +4,17 @@ const pool = require('../db/db.js');
 
 // Function to fetch the next row from the database
 function fetchNextRow() {
-  // Fetch the first row from the database
-  pool.query('SELECT * FROM generated_tables ORDER BY date ASC LIMIT 1', (error, results) => {
+  // Fetch the first row from the generated_tables table
+  pool.query('SELECT team_name, stat_name FROM generated_tables ORDER BY date ASC LIMIT 1', (error, results) => {
     if (error) {
       console.error('Error executing MySQL query:', error);
     } else {
       if (results.length > 0) {
         const teamName = results[0].team_name;
         const statName = results[0].stat_name;
-        const totalScore = results[0].total_score;
-        const teamStatPair = { team: teamName, stat: statName, totalScore: totalScore };
         
         // Insert the fetched data into the gameboard table
-        const currentDate = new Date().toISOString().slice(0, 19).replace('T', ' '); // Get current date
-        pool.query('INSERT INTO gameboard (team_name, stat_name, date) VALUES (?, ?, ?)', [teamName, statName, currentDate], (error, results) => {
+        pool.query('INSERT INTO gameboard (team_name, stat_name) VALUES (?, ?)', [teamName, statName], (error, results) => {
           if (error) {
             console.error('Error inserting data into gameboard table:', error);
             // Continue even if there's an error inserting into gameboard table
@@ -56,6 +53,7 @@ router.get('/', (req, res, next) => {
 });
 
 module.exports = router;
+
 
 
 
