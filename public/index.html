@@ -161,70 +161,147 @@ function handleSubmit(event) {
               var gameboardId = data.gameboardId;
 
               // Send the total score along with the team, stat, and gameboardId to the server
-              saveScore(totalScore, team, stat);
+              var xhrSave = new XMLHttpRequest();
+              xhrSave.open('POST', baseUrl + '/save-score', true);
+              xhrSave.setRequestHeader('Content-Type', 'application/json');
+              xhrSave.send(JSON.stringify({ totalScore, team, stat, gameboardId }));
             })
             .catch(error => {
               console.error('Error fetching gameboardId:', error);
             });
         }
+      } else {
+        console.error('Error fetching data:', xhr.statusText);
       }
+    };
+    xhr.onerror = function () {
+      console.error('Error fetching data.');
     };
     xhr.send();
   }
 }
 
+// Function to add player rows dynamically
+function addPlayerRows() {
+  var positions = ["C", "1B", "2B", "3B", "SS", "OF", "OF", "OF", "P"];
+  var tbody = document.getElementById("playerRows");
+  for (var i = 0; i < 9; i++) {
+    var row = document.createElement("tr");
+    
+    var playerNameCell = document.createElement("td");
+    var playerNameInput = document.createElement("input");
+    playerNameInput.type = "text";
+    playerNameInput.className = "form-control player-input";
+    playerNameInput.placeholder = "Enter player's name";
+    playerNameInput.addEventListener('input', function() {
+      // Call the autocomplete function when input changes
+      autocomplete(this);
+    });
+    playerNameCell.appendChild(playerNameInput);
+    row.appendChild(playerNameCell);
+    
+    var positionCell = document.createElement("td");
+    positionCell.textContent = positions[i];
+    row.appendChild(positionCell);
+    
+    var statCell = document.createElement("td");
+    var statSquare = document.createElement("div");
+    statSquare.className = "stat-square";
+    statCell.appendChild(statSquare);
+    row.appendChild(statCell);
+    
+    var submitCell = document.createElement("td");
+    var submitButton = document.createElement("button");
+    submitButton.type = "button";
+    submitButton.className = "btn btn-primary";
+    submitButton.textContent = "Submit";
+    submitButton.addEventListener('click', handleSubmit);
+    submitCell.appendChild(submitButton);
+    row.appendChild(submitCell);
+    
+    tbody.appendChild(row);
+    
+    if (positions[i] === 'P') {
+      break; // Stop adding rows when reaching 'P' position
+    }
+  }
+}
+
 // Function to update total score
 function updateTotalScore() {
-  var totalScore = 0;
   var statSquares = document.querySelectorAll('.stat-square');
-  statSquares.forEach(square => {
-    var value = square.textContent;
-    if (value !== 'N/A') { // Only add to total score if the value is not 'N/A'
-      totalScore += parseInt(value);
+  var totalScore = 0;
+  statSquares.forEach(function(statSquare) {
+    var statValue = parseInt(statSquare.textContent);
+    if (!isNaN(statValue)) {
+      totalScore += statValue;
     }
   });
   document.getElementById('totalScore').textContent = totalScore;
 }
 
-// Function to handle saving total score to the games table
-function saveScore(totalScore, teamName, statName) {
-  // Prepare the data to be sent
-  const data = {
-    totalScore: totalScore,
-    teamName: teamName,
-    statName: statName
-  };
-
-  // Send the data using a POST request
-  fetch('/save-score', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(data)
-  })
-  .then(response => {
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
+// Autocomplete function
+function autocomplete(input) {
+  var currentFocus;
+  var xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = function() {
+    if (this.readyState === 4 && this.status === 200) {
+      var suggestions = JSON.parse(this.responseText);
+      closeAllLists();
+      if (!input.value || suggestions.length === 0) {
+        return false;
+      }
+      currentFocus = -1;
+      var autocompleteList = document.createElement("div");
+      autocompleteList.setAttribute("id", input.id + "autocomplete-list");
+      autocompleteList.setAttribute("class", "autocomplete-items");
+      input.parentNode.appendChild(autocompleteList);
+      for (var i = 0; i < suggestions.length; i++) {
+        var suggestion = suggestions[i];
+        var suggestionItem = document.createElement("div");
+        suggestionItem.innerHTML = "<strong>" + suggestion.substr(0, input.value.length) + "</strong>";
+        suggestionItem.innerHTML += suggestion.substr(input.value.length);
+        suggestionItem.innerHTML += "<input type='hidden' value='" + suggestion + "'>";
+        suggestionItem.addEventListener("click", function(e) {
+          input.value = this.getElementsByTagName("input")[0].value;
+          closeAllLists();
+        });
+        autocompleteList.appendChild(suggestionItem);
+      }
     }
-    console.log('Total score saved successfully');
-    // Optionally, you can handle success response here
-  })
-  .catch(error => {
-    console.error('Error saving total score:', error);
-    // Optionally, you can handle error here
+  };
+  // Dynamically determine the base URL
+  var baseUrl = window.location.protocol + '//' + window.location.hostname;
+  xhr.open("GET", baseUrl + "/autocomplete?query=" + input.value, true);
+  xhr.send();
+  function closeAllLists(elmnt) {
+    var autocompleteItems = document.getElementsByClassName("autocomplete-items");
+    for (var i = 0; i < autocompleteItems.length; i++) {
+      if (elmnt !== autocompleteItems[i] && elmnt !== input) {
+        autocompleteItems[i].parentNode.removeChild(autocompleteItems[i]);
+      }
+    }
+  }
+  document.addEventListener("click", function(e) {
+    closeAllLists(e.target);
   });
 }
 
-// Event listener for the instructions button
-document.getElementById('instructionsButton').addEventListener('click', function () {
-  $('#instructionsModal').modal('show');
-});
+window.onload = function() {
+  // Fetch initial team and stat pair
+  fetchTeamStatPair();
 
-// Fetch team and stat pair on page load
-fetchTeamStatPair();
+  addPlayerRows();
+  
+  // Trigger the modal when the instructions button is clicked
+  document.getElementById('instructionsButton').addEventListener('click', function() {
+    $('#instructionsModal').modal('show');
+  });
+};
 </script>
+
 </body>
 </html>
+
 
 
