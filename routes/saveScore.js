@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db/db.js');
 
+// POST route to save total score along with team_name and stat_name into games table
 router.post('/', (req, res) => {
   const { totalScore, teamName, statName } = req.body;
 
@@ -36,6 +37,7 @@ router.post('/', (req, res) => {
 });
 
 module.exports = router;
+
 
 
 
