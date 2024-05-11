@@ -52,8 +52,9 @@ app.get('/fetch-gameboard', (req, res) => {
       res.status(500).send('Internal Server Error');
     } else {
       if (results.length > 0) {
-        const { team_name, stat_name } = results[0];
-        res.json({ team_name, stat_name}); // Send response with team_name and stat_name
+        const teamName = results[0].team_name;
+        const statName = results[0].stat_name;
+        res.json({ team_name: teamName, stat_name: statName }); // Send response with team_name and stat_name
       } else {
         console.log('No team and stat pairs found in the gameboard table');
         res.status(404).send('No team and stat pairs found');
@@ -78,4 +79,3 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-
