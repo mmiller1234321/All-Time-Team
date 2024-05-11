@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const pool = require('./db/db'); // Import pool object
+const pool = require('./db/db.js'); // Import pool object
 const app = express();
 
 // Load environmental variables from .env file
