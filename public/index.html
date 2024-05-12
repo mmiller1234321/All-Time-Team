@@ -164,6 +164,11 @@ function handleSubmit(event) {
               var xhrSave = new XMLHttpRequest();
               xhrSave.open('POST', baseUrl + '/save-score', true);
               xhrSave.setRequestHeader('Content-Type', 'application/json');
+              xhrSave.onreadystatechange = function() {
+                if (xhrSave.readyState === XMLHttpRequest.DONE) {
+                  console.log('Response from save-score:', xhrSave.responseText);
+                }
+              };
               xhrSave.send(JSON.stringify({ totalScore, team, stat, gameboardId }));
             })
             .catch(error => {
