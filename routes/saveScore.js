@@ -26,7 +26,7 @@ router.post('/', (req, res) => {
               console.error('Error inserting total score:', error);
               res.status(500).json({ error: 'An error occurred while inserting total score' });
             } else {
-              console.log('Total score inserted successfully');
+              console.log('Total score inserted successfully:', totalScore); // Log the total score
               res.status(200).json({ message: 'Total score inserted successfully' });
             }
           }
@@ -37,6 +37,7 @@ router.post('/', (req, res) => {
 });
 
 module.exports = router;
+
 
 
 
