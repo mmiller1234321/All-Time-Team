@@ -184,6 +184,7 @@ function handleSubmit(event) {
     };
     xhr.send();
   }
+  console.log('Submit button clicked');
 }
 
 // Function to add player rows dynamically
@@ -243,6 +244,7 @@ function updateTotalScore() {
     }
   });
   document.getElementById('totalScore').textContent = totalScore;
+  console.log('Total score updated:', totalScore);
 }
 
 // Autocomplete function
@@ -302,11 +304,15 @@ window.onload = function() {
   document.getElementById('instructionsButton').addEventListener('click', function() {
     $('#instructionsModal').modal('show');
   });
+
+  // Log when the page loads
+  console.log('Page loaded');
 };
 </script>
 
 </body>
 </html>
+
 
 
 
