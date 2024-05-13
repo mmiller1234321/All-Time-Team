@@ -138,6 +138,8 @@ function handleSubmit(event) {
         submissionButtonCount--;
         if (submissionButtonCount === 0) {
           var totalScore = document.getElementById('totalScore').textContent;
+          console.log('All buttons submitted. Total Score:', totalScore);
+          sendFinalScore(totalScore, team, stat, gameboardId);
           alert('All buttons submitted!\nTotal Score: ' + totalScore);
         }
         checkAllButtonsSubmitted();
@@ -156,16 +158,12 @@ function handleSubmit(event) {
 function checkAllButtonsSubmitted() {
   var allDisabled = [...document.querySelectorAll('button.btn-primary')].every(button => button.disabled);
   if (allDisabled) {
+    console.log('All buttons have been submitted');
     sendFinalScore();
   }
 }
 
-function sendFinalScore() {
-  var totalScore = document.getElementById('totalScore').textContent;
-  var team = document.getElementById('teamLabel').textContent;
-  var stat = document.getElementById('statLabel').textContent;
-  var gameboardId = document.getElementById('teamLabel').getAttribute('data-gameboard-id');
-
+function sendFinalScore(totalScore, team, stat, gameboardId) {
   var baseUrl = window.location.protocol + '//' + window.location.hostname;
   fetch(baseUrl + '/saveScore', {
     method: 'POST',
