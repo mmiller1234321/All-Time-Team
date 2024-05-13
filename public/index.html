@@ -68,7 +68,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="instructionsModalLabel">Instructions</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <button type="button" the close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
@@ -91,10 +91,10 @@ var submissionButtonCount = 9;
 
 function fetchTeamStatPair() {
   var baseUrl = window.location.protocol + '//' + window.location.hostname;
-  fetch(baseUrl + '/fetch-gameboard')
+  fetch(baseUrl + '/team-stat-pair')
     .then(response => response.json())
     .then(data => {
-      updateLabels(data.team_name, data.stat_name, data.gameboard_id);
+      updateLabels(data.team, data.stat, data.gameboard_id);
     })
     .catch(error => {
       console.error('Error fetching team and stat pair:', error);
@@ -125,10 +125,11 @@ function handleSubmit(event) {
     var position = submitButton.parentElement.parentElement.children[1].textContent;
     var team = document.getElementById('teamLabel').textContent;
     var stat = document.getElementById('statLabel').textContent;
+    var gameboardId = document.getElementById('teamLabel').getAttribute('data-gameboard-id');
 
     var baseUrl = window.location.protocol + '//' + window.location.hostname;
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', baseUrl + '/search?playerName=' + playerName + '&position=' + position + '&team=' + team + '&stat=' + stat, true);
+    xhr.open('GET', baseUrl + '/search?playerName=' + playerName + '&position=' + position + '&team=' + team + '&stat=' + stat + '&gameboardId=' + gameboardId, true);
     xhr.onload = function () {
       if (xhr.status === 200) {
         var statSquare = submitButton.parentElement.parentElement.children[2].children[0];
@@ -269,7 +270,7 @@ function autocomplete(input) {
   function closeAllLists(elmnt) {
     var autocompleteItems = document.getElementsByClassName("autocomplete-items");
     for (var i = 0; i < autocompleteItems.length; i++) {
-      if (elmnt !== autocompleteItems[i] && elmnt !== input) {
+      if (elmnt !== autocompleteItems[i] and elmnt !== input) {
         autocompleteItems[i].parentNode.removeChild(autocompleteItems[i]);
       }
     }
@@ -291,6 +292,7 @@ window.onload = function() {
 
 </body>
 </html>
+
 
 
 
