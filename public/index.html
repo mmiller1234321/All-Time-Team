@@ -118,6 +118,9 @@ document.addEventListener("DOMContentLoaded", function() {
       input.type = "text";
       input.className = "form-control";
       input.placeholder = "Enter player's name";
+      input.addEventListener('input', function() {
+        autocomplete(this);
+      });
       cellName.appendChild(input);
 
       var cellPosition = row.insertCell(1);
@@ -135,6 +138,42 @@ document.addEventListener("DOMContentLoaded", function() {
       button.addEventListener('click', handleSubmit);
       cellSubmit.appendChild(button);
     });
+  }
+
+  function autocomplete(inputElement) {
+    var currentFocus;
+    var baseUrl = window.location.protocol + '//' + window.location.hostname;
+    fetch(baseUrl + "/autocomplete?query=" + inputElement.value)
+      .then(response => response.json())
+      .then(suggestions => {
+        closeAllLists(inputElement);
+        if (!inputElement.value || suggestions.length === 0) return false;
+        var autocompleteList = document.createElement("div");
+        autocompleteList.setAttribute("id", inputElement.id + "autocomplete-list");
+        autocompleteList.setAttribute("class", "autocomplete-items");
+        inputElement.parentNode.appendChild(autocompleteList);
+        suggestions.forEach(suggestion => {
+          var item = document.createElement("div");
+          item.innerHTML = "<strong>" + suggestion.substr(0, inputElement.value.length) + "</strong>";
+          item.innerHTML += suggestion.substr(inputElement.value.length);
+          item.innerHTML += "<input type='hidden' value='" + suggestion + "'>";
+          item.addEventListener("click", function(e) {
+            inputElement.value = this.getElementsByTagName("input")[0].value;
+            closeAllLists(inputElement);
+          });
+          autocompleteList.appendChild(item);
+        });
+      })
+      .catch(error => console.error('Error fetching autocomplete suggestions:', error));
+  }
+
+  function closeAllLists(elmnt) {
+    var autocompleteItems = document.getElementsByClassName("autocomplete-items");
+    for (var i = 0; i < autocompleteItems.length; i++) {
+      if (elmnt !== autocompleteItems[i] && elmnt !== elmnt) {
+        autocompleteItems[i].parentNode.removeChild(autocompleteItems[i]);
+      }
+    }
   }
 
   function handleSubmit(event) {
