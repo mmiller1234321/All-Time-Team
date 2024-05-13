@@ -177,22 +177,12 @@ document.addEventListener("DOMContentLoaded", function() {
     var baseUrl = window.location.protocol + '//' + window.location.hostname;
     xhr.open("GET", baseUrl + "/autocomplete?query=" + inputElement.value, true);
     xhr.send();
-    
-    function closeAllLists(elmnt) {
-      var autocompleteItems = document.getElementsByClassName("autocomplete-items");
-      for (var i = 0; i < autocompleteItems.length; i++) {
-        if (elmnt !== autocompleteItems[i] && elmnt !== inputElement) {
-          autocompleteItems[i].parentNode.removeChild(autocompleteItems[i]);
-        }
-      }
-    }
   }
-
 
   function closeAllLists(elmnt) {
     var autocompleteItems = document.getElementsByClassName("autocomplete-items");
     for (var i = 0; i < autocompleteItems.length; i++) {
-      if (elmnt !== autocompleteItems[i] && elmnt !== elmnt) {
+      if (elmnt !== autocompleteItems[i] && elmnt !== inputElement) {
         autocompleteItems[i].parentNode.removeChild(autocompleteItems[i]);
       }
     }
@@ -265,14 +255,19 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById('totalScore').textContent = totalScore;
   }
 
-  function sendFinalScore(totalScore, id) {
+  function sendFinalScore(totalScore, gameboard_id) {  // Updated to match the backend
     var team = teamLabelValue; // Use global variable for team label value
     var stat = statLabelValue; // Use global variable for stat label value
     var baseUrl = window.location.protocol + '//' + window.location.hostname;
     fetch(baseUrl + '/saveScore', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ team_name: team, stat_name: stat, total_score: totalScore, id: id }) // Adjusted the keys
+      body: JSON.stringify({
+        total_score: totalScore,
+        team_name: team,
+        stat_name: stat,
+        gameboard_id: gameboard_id  // Corrected to match the server expectation
+      })
     })
     .then(response => response.json())
     .then(result => console.log('Response from save-score:', result.message))
