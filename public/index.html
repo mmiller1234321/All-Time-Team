@@ -136,7 +136,9 @@ function handleSubmit(event) {
         var statValue = xhr.responseText;
         statSquare.textContent = (statValue === 'null') ? 'N/A' : statValue;
         updateTotalScore();
-        checkAllButtonsSubmitted();
+        if (--submissionButtonCount === 0) {
+          sendFinalScore(); // This will now also handle the alert after saving the score
+        }
       } else {
         console.error('Error fetching data:', xhr.statusText);
       }
@@ -147,11 +149,6 @@ function handleSubmit(event) {
     xhr.send();
   }
   console.log('Submit button clicked');
-  submissionButtonCount--;
-  if (submissionButtonCount === 0) {
-    var totalScore = document.getElementById('totalScore').textContent;
-    alert('All buttons submitted!\nTotal Score: ' + totalScore);
-  }
 }
 
 function checkAllButtonsSubmitted() {
@@ -162,21 +159,18 @@ function checkAllButtonsSubmitted() {
 }
 
 function sendFinalScore() {
-  console.log("Sending final score..."); // Confirming function trigger
   var totalScore = parseInt(document.getElementById('totalScore').textContent, 10);
   var team = document.getElementById('teamLabel').textContent;
   var stat = document.getElementById('statLabel').textContent;
 
-  console.log(`Sending score: ${totalScore}, Team: ${team}, Stat: ${stat}`); // Debug info
-
   var baseUrl = window.location.protocol + '//' + window.location.hostname;
 
-  fetch(baseUrl + '/gameboardId') // Make sure this endpoint correctly returns a gameboardId
+  fetch(baseUrl + '/gameboardId')
     .then(response => response.json())
     .then(data => {
       var gameboardId = data.gameboardId;
 
-      fetch(baseUrl + '/saveScore', { // Ensure correct endpoint
+      fetch(baseUrl + '/saveScore', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -186,11 +180,11 @@ function sendFinalScore() {
       .then(response => response.json())
       .then(result => {
         console.log('Response from save-score:', result.message);
-        alert('Score saved successfully!');
+        alert(`All buttons submitted!\nTotal Score: ${totalScore}`); // Alert moved here after score is confirmed saved
       })
       .catch(error => {
         console.error('Failed to save score:', error);
-        alert('Failed to save score.');
+        alert(`Failed to save score: ${error.message}`);
       });
     })
     .catch(error => {
@@ -290,7 +284,7 @@ function autocomplete(input) {
   function closeAllLists(elmnt) {
     var autocompleteItems = document.getElementsByClassName("autocomplete-items");
     for (var i = 0; i < autocompleteItems.length; i++) {
-      if (elmnt !== autocompleteItems[i] && elmnt !== input) {
+      if (elmnt !== autocompleteItems[i] and elmnt !== input) {
         autocompleteItems[i].parentNode.removeChild(autocompleteItems[i]);
       }
     }
@@ -312,6 +306,7 @@ window.onload = function() {
 
 </body>
 </html>
+
 
 
 
