@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../db/db.js');
-
+// check out post '/'
 router.post('/', (req, res) => {
   const { totalScore, teamName, statName, gameboardId } = req.body;
 
-  console.log('Attempting to insert score:', totalScore, 'for team:', teamName, 'and stat:', statName, 'with gameboard ID:', gameboardId);
+  console.log('Attempting to insert score:', totalScore, 'for team:', teamName, 'and stat:', statName, 'with gameboard ID:', gameboardId); //are all the values being passed in correctly?
 
   pool.query(
     'INSERT INTO games (team_name, stat_name, total_score, gameboard_id) VALUES (?, ?, ?, ?)',
@@ -22,7 +22,7 @@ router.post('/', (req, res) => {
   );
 });
 
-module.exports = router;
+module.exports = router; // check this post request to see if it is working correctly 
 
 
 

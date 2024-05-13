@@ -39,13 +39,12 @@
 </style>
 </head>
 <body>
-
 <div class="container">
   <div class="d-flex justify-content-between align-items-center">
     <h2>All Time Teams</h2>
     <button type="button" class="btn btn-primary" id="instructionsButton">Instructions</button>
   </div>
-  <table class="table table-bordered">
+  <table class="table table-bordered"> 
     <thead>
       <tr>
         <th id="teamLabel"></th>
@@ -55,7 +54,7 @@
       </tr>
     </thead>
     <tbody id="playerRows">
-      <!-- Table rows will be generated dynamically -->
+      <!-- Table rows will be generated dynamically, add data attribute using setAtrribute or Dataset -->
     </tbody>
   </table>
 
@@ -95,16 +94,17 @@ function fetchTeamStatPair() {
   fetch(baseUrl + '/fetch-gameboard')
     .then(response => response.json())
     .then(data => {
-      updateLabels(data.team_name, data.stat_name);
+      updateLabels(data.team_name, data.stat_name, data.gameboard_id);
     })
     .catch(error => {
       console.error('Error fetching team and stat pair:', error);
     });
 }
 
-function updateLabels(team, stat) {
+function updateLabels(team, stat, gameboardId) {
   document.getElementById('teamLabel').innerText = team;
   document.getElementById('statLabel').innerText = stat;
+  document.getElementById('teamLabel').setAttribute('data-gameboard-id', gameboardId);
 }
 
 function handleSubmit(event) {
@@ -164,28 +164,19 @@ function sendFinalScore() {
   var totalScore = document.getElementById('totalScore').textContent;
   var team = document.getElementById('teamLabel').textContent;
   var stat = document.getElementById('statLabel').textContent;
+  var gameboardId = document.getElementById('teamLabel').getAttribute('data-gameboard-id');
 
   var baseUrl = window.location.protocol + '//' + window.location.hostname;
-
-  fetch(baseUrl + '/gameboardId')
-    .then(response => response.json())
-    .then(data => {
-      var gameboardId = data.gameboardId;
-
-      fetch(baseUrl + '/saveScore', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ totalScore, team, stat, gameboardId })
-      })
-      .then(response => response.json())
-      .then(result => console.log('Response from save-score:', result.message))
-      .catch(error => console.error('Failed to save score:', error));
-    })
-    .catch(error => {
-      console.error('Error fetching gameboardId:', error);
-    });
+  fetch(baseUrl + '/saveScore', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ totalScore, team, stat, gameboardId })
+  })
+  .then(response => response.json())
+  .then(result => console.log('Response from save-score:', result.message))
+  .catch(error => console.error('Failed to save score:', error));
 }
 
 function addPlayerRows() {
@@ -302,6 +293,7 @@ window.onload = function() {
 
 </body>
 </html>
+
 
 
 
