@@ -54,7 +54,7 @@
       </tr>
     </thead>
     <tbody id="playerRows">
-      <!-- Table rows will be generated dynamically, add data attribute using setAtrribute or Dataset -->
+      <!-- Table rows will be generated dynamically -->
     </tbody>
   </table>
 
@@ -77,7 +77,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-      </div> 
+      </div>
     </div>
   </div>
 </div>
@@ -91,7 +91,7 @@ var submissionButtonCount = 9;
 
 function fetchTeamStatPair() {
   var baseUrl = window.location.protocol + '//' + window.location.hostname;
-  fetch(baseUrl + '/team-stat-pair')
+  fetch(baseUrl + '/generateTeamStatPair/team-stat-pair') // Adjusted to use the correct route
     .then(response => response.json())
     .then(data => {
       updateLabels(data.team, data.stat, data.gameboard_id);
@@ -280,6 +280,7 @@ function autocomplete(input) {
   });
 }
 
+
 window.onload = function() {
   fetchTeamStatPair();
   addPlayerRows();
@@ -292,7 +293,6 @@ window.onload = function() {
 
 </body>
 </html>
-
 
 
 
