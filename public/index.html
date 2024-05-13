@@ -142,43 +142,53 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 
   function autocomplete(inputElement) {
-    var currentFocus;
-    var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function() {
-      if (this.readyState === 4 && this.status === 200) {
-        var suggestions = JSON.parse(this.responseText);
-        closeAllLists();
-        if (!inputElement.value || suggestions.length === 0) {
-          return false;
-        }
-        currentFocus = -1;
-        var autocompleteList = document.createElement("div");
-        autocompleteList.setAttribute("id", inputElement.id + "autocomplete-list");
-        autocompleteList.setAttribute("class", "autocomplete-items");
-        inputElement.parentNode.appendChild(autocompleteList);
-        for (var i = 0; i < suggestions.length; i++) {
-          var suggestion = suggestions[i];
-          var suggestionItem = document.createElement("div");
-          suggestionItem.innerHTML = "<strong>" + suggestion.substr(0, inputElement.value.length) + "</strong>";
-          suggestionItem.innerHTML += suggestion.substr(inputElement.value.length);
-          suggestionItem.innerHTML += "<input type='hidden' value='" + suggestion + "'>";
-          suggestionItem.addEventListener("click", function(e) {
-            inputElement.value = this.getElementsByTagName("input")[0].value;
-            closeAllLists();
-          });
-          autocompleteList.appendChild(suggestionItem);
-        }
+  var currentFocus;
+  var xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = function() {
+    if (this.readyState === 4 && this.status === 200) {
+      var suggestions = JSON.parse(this.responseText);
+      closeAllLists();
+      if (!inputElement.value || suggestions.length === 0) {
+        return false;
       }
-    };
-    var baseUrl = window.location.protocol + '//' + window.location.hostname;
-    xhr.open("GET", baseUrl + "/autocomplete?query=" + inputElement.value, true);
-    xhr.send();
-  }
-
+      currentFocus = -1;
+      var autocompleteList = document.createElement("div");
+      autocompleteList.setAttribute("id", inputElement.id + "autocomplete-list");
+      autocompleteList.setAttribute("class", "autocomplete-items");
+      inputElement.parentNode.appendChild(autocompleteList);
+      for (var i = 0; i < suggestions.length; i++) {
+        var suggestion = suggestions[i];
+        var suggestionItem = document.createElement("div");
+        suggestionItem.innerHTML = "<strong>" + suggestion.substr(0, inputElement.value.length) + "</strong>";
+        suggestionItem.innerHTML += suggestion.substr(inputElement.value.length);
+        suggestionItem.innerHTML += "<input type='hidden' value='" + suggestion + "'>";
+        suggestionItem.addEventListener("click", function(e) {
+          inputElement.value = this.getElementsByTagName("input")[0].value;
+          closeAllLists();
+        });
+        autocompleteList.appendChild(suggestionItem);
+      }
+    }
+  };
+  var baseUrl = window.location.protocol + '//' + window.location.hostname;
+  xhr.open("GET", baseUrl + "/autocomplete?query=" + inputElement.value, true);
+  xhr.send();
+  
   function closeAllLists(elmnt) {
     var autocompleteItems = document.getElementsByClassName("autocomplete-items");
     for (var i = 0; i < autocompleteItems.length; i++) {
       if (elmnt !== autocompleteItems[i] && elmnt !== inputElement) {
+        autocompleteItems[i].parentNode.removeChild(autocompleteItems[i]);
+      }
+    }
+  }
+}
+
+
+  function closeAllLists(elmnt) {
+    var autocompleteItems = document.getElementsByClassName("autocomplete-items");
+    for (var i = 0; i < autocompleteItems.length; i++) {
+      if (elmnt !== autocompleteItems[i] && elmnt !== elmnt) {
         autocompleteItems[i].parentNode.removeChild(autocompleteItems[i]);
       }
     }
@@ -219,14 +229,8 @@ document.addEventListener("DOMContentLoaded", function() {
           submissionButtonCount--;
           if (enabledSubmitButtons === 0) { // If all submit buttons are disabled
             var totalScore = document.getElementById('totalScore').textContent;
-            var teamName = document.getElementById('teamLabel').textContent;
-            var statName = document.getElementById('statLabel').textContent;
-            var gameId = document.getElementById('teamLabel').getAttribute('data-id');
-
-            // Send data to server
-            sendGameData(teamName, statName, totalScore, gameId);
-
-            // Display alert
+            console.log('All buttons submitted. Total Score:', totalScore);
+            sendFinalScore(totalScore, id); // Update to send the correct information
             alert('All buttons submitted!\nTotal Score: ' + totalScore);
           }
         } else {
@@ -257,12 +261,14 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById('totalScore').textContent = totalScore;
   }
 
-  function sendGameData(teamName, statName, totalScore, gameId) {
+  function sendFinalScore(totalScore, id) {
+    var team = document.getElementById('teamLabel').textContent;
+    var stat = document.getElementById('statLabel').textContent;
     var baseUrl = window.location.protocol + '//' + window.location.hostname;
     fetch(baseUrl + '/saveScore', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ team_name: teamName, stat_name: statName, total_score: totalScore, id: gameId })
+      body: JSON.stringify({ team_name: team, stat_name: stat, total_score: totalScore, id: id }) // Adjusted the keys
     })
     .then(response => response.json())
     .then(result => console.log('Response from save-score:', result.message))
@@ -279,7 +285,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
 </body>
 </html>
-
 
 
 
