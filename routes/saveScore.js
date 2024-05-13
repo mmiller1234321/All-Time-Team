@@ -4,13 +4,13 @@ const pool = require('../db/db.js');
 
 // Route to handle saving scores
 router.post('/', (req, res) => {
-  const { totalScore, teamName, statName, id } = req.body;
+  const { total_score, team_name, stat_name, id } = req.body;
 
-  console.log('Attempting to insert score:', totalScore, 'for team:', teamName, 'and stat:', statName, 'with ID:', id);
+  console.log('Attempting to insert score:', total_score, 'for team:', team_name, 'and stat:', stat_name, 'with ID:', id);
 
   pool.query(
     'INSERT INTO games (team_name, stat_name, total_score, id) VALUES (?, ?, ?, ?)',
-    [teamName, statName, totalScore, id],
+    [team_name, stat_name, total_score, id],
     (error, results) => {
       if (error) {
         console.error('Error inserting total score:', error);
@@ -24,6 +24,7 @@ router.post('/', (req, res) => {
 });
 
 module.exports = router;
+
 
 
 
