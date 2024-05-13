@@ -284,7 +284,7 @@ function autocomplete(input) {
   function closeAllLists(elmnt) {
     var autocompleteItems = document.getElementsByClassName("autocomplete-items");
     for (var i = 0; i < autocompleteItems.length; i++) {
-      if (elmnt !== autocompleteItems[i] and elmnt !== input) {
+      if (elmnt !== autocompleteItems[i] && elmnt !== input) {
         autocompleteItems[i].parentNode.removeChild(autocompleteItems[i]);
       }
     }
