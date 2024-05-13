@@ -90,6 +90,8 @@ document.addEventListener("DOMContentLoaded", function() {
   var submittedPlayers = [];
   var submissionButtonCount = 9;
   var enabledSubmitButtons = submissionButtonCount; // Track the number of enabled submit buttons
+  var teamLabelValue = ''; // Variable to store team label value
+  var statLabelValue = ''; // Variable to store stat label value
 
   function fetchTeamStatPair() {
     var baseUrl = window.location.protocol + '//' + window.location.hostname;
@@ -104,6 +106,8 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 
   function updateLabels(team, stat, id) {
+    teamLabelValue = team; // Save team label value globally
+    statLabelValue = stat; // Save stat label value globally
     document.getElementById('teamLabel').innerText = team;
     document.getElementById('statLabel').innerText = stat;
     document.getElementById('teamLabel').setAttribute('data-id', id);
@@ -213,8 +217,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
     if (playerName !== '') {
       var position = row.cells[1].textContent;
-      var team = document.getElementById('teamLabel').textContent;
-      var stat = document.getElementById('statLabel').textContent;
+      var team = teamLabelValue; // Use global variable for team label value
+      var stat = statLabelValue; // Use global variable for stat label value
       var id = document.getElementById('teamLabel').getAttribute('data-id');
 
       var baseUrl = window.location.protocol + '//' + window.location.hostname;
@@ -262,8 +266,8 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 
   function sendFinalScore(totalScore, id) {
-    var team = document.getElementById('teamLabel').textContent;
-    var stat = document.getElementById('statLabel').textContent;
+    var team = teamLabelValue; // Use global variable for team label value
+    var stat = statLabelValue; // Use global variable for stat label value
     var baseUrl = window.location.protocol + '//' + window.location.hostname;
     fetch(baseUrl + '/saveScore', {
       method: 'POST',
@@ -275,6 +279,7 @@ document.addEventListener("DOMContentLoaded", function() {
     .catch(error => console.error('Failed to save score:', error));
   }
 
+  // Initial setup
   fetchTeamStatPair();
   addPlayerRows();
   document.getElementById('instructionsButton').addEventListener('click', function() {
@@ -285,6 +290,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
 </body>
 </html>
+
+
 
 
 
