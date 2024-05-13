@@ -44,7 +44,7 @@
     <h2>All Time Teams</h2>
     <button type="button" class="btn btn-primary" id="instructionsButton">Instructions</button>
   </div>
-  <table class="table table-bordered"> 
+  <table class="table table-bordered">
     <thead>
       <tr>
         <th id="teamLabel"></th>
@@ -91,20 +91,20 @@ var submissionButtonCount = 9;
 
 function fetchTeamStatPair() {
   var baseUrl = window.location.protocol + '//' + window.location.hostname;
-  fetch(baseUrl + '/generateTeamStatPair/team-stat-pair') // Adjusted to use the correct route
+  fetch(baseUrl + '/generateTeamStatPair/team-stat-pair')
     .then(response => response.json())
     .then(data => {
-      updateLabels(data.team, data.stat, data.gameboard_id);
+      updateLabels(data.team, data.stat, data.id);
     })
     .catch(error => {
       console.error('Error fetching team and stat pair:', error);
     });
 }
 
-function updateLabels(team, stat, gameboardId) {
+function updateLabels(team, stat, id) {
   document.getElementById('teamLabel').innerText = team;
   document.getElementById('statLabel').innerText = stat;
-  document.getElementById('teamLabel').setAttribute('data-gameboard-id', gameboardId);
+  document.getElementById('teamLabel').setAttribute('data-id', id);
 }
 
 function handleSubmit(event) {
@@ -125,11 +125,11 @@ function handleSubmit(event) {
     var position = submitButton.parentElement.parentElement.children[1].textContent;
     var team = document.getElementById('teamLabel').textContent;
     var stat = document.getElementById('statLabel').textContent;
-    var gameboardId = document.getElementById('teamLabel').getAttribute('data-gameboard-id');
+    var id = document.getElementById('teamLabel').getAttribute('data-id');
 
     var baseUrl = window.location.protocol + '//' + window.location.hostname;
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', baseUrl + '/search?playerName=' + playerName + '&position=' + position + '&team=' + team + '&stat=' + stat + '&gameboardId=' + gameboardId, true);
+    xhr.open('GET', baseUrl + '/search?playerName=' + playerName + '&position=' + position + '&team=' + team + '&stat=' + stat + '&id=' + id, true);
     xhr.onload = function () {
       if (xhr.status === 200) {
         var statSquare = submitButton.parentElement.parentElement.children[2].children[0];
@@ -140,7 +140,7 @@ function handleSubmit(event) {
         if (submissionButtonCount === 0) {
           var totalScore = document.getElementById('totalScore').textContent;
           console.log('All buttons submitted. Total Score:', totalScore);
-          sendFinalScore(totalScore, team, stat, gameboardId);
+          sendFinalScore(totalScore, team, stat, id);
           alert('All buttons submitted!\nTotal Score: ' + totalScore);
         }
         checkAllButtonsSubmitted();
@@ -164,14 +164,14 @@ function checkAllButtonsSubmitted() {
   }
 }
 
-function sendFinalScore(totalScore, team, stat, gameboardId) {
+function sendFinalScore(totalScore, team, stat, id) {
   var baseUrl = window.location.protocol + '//' + window.location.hostname;
   fetch(baseUrl + '/saveScore', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ totalScore, team, stat, gameboardId })
+    body: JSON.stringify({ totalScore, team, stat, id })
   })
   .then(response => response.json())
   .then(result => console.log('Response from save-score:', result.message))
@@ -268,7 +268,7 @@ function autocomplete(input) {
   xhr.open("GET", baseUrl + "/autocomplete?query=" + input.value, true);
   xhr.send();
   function closeAllLists(elmnt) {
-    var autocompleteItems = document.getElementsByClassName("autocomplete-items");
+    // Remove unnecessary text
     for (var i = 0; i < autocompleteItems.length; i++) {
       if (elmnt !== autocompleteItems[i] && elmnt !== input) {
         autocompleteItems[i].parentNode.removeChild(autocompleteItems[i]);
@@ -279,7 +279,6 @@ function autocomplete(input) {
     closeAllLists(e.target);
   });
 }
-
 
 window.onload = function() {
   fetchTeamStatPair();
@@ -293,7 +292,6 @@ window.onload = function() {
 
 </body>
 </html>
-
 
 
 
