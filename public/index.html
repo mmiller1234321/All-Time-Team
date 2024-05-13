@@ -227,7 +227,7 @@ document.addEventListener("DOMContentLoaded", function() {
           if (submissionButtonCount === 0) {
             var totalScore = document.getElementById('totalScore').textContent;
             console.log('All buttons submitted. Total Score:', totalScore);
-            sendFinalScore(totalScore, team, stat, id);
+            sendFinalScore(totalScore, team, stat, id); // Update to send the correct information
             alert('All buttons submitted!\nTotal Score: ' + totalScore);
           }
         } else {
@@ -260,7 +260,7 @@ document.addEventListener("DOMContentLoaded", function() {
     fetch(baseUrl + '/saveScore', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ totalScore, team, stat, id })
+      body: JSON.stringify({ team_name: team, stat_name: stat, total_score: totalScore, id: id }) // Adjusted the keys
     })
     .then(response => response.json())
     .then(result => console.log('Response from save-score:', result.message))
@@ -277,6 +277,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 </body>
 </html>
+
 
 
 
