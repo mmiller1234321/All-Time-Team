@@ -50,8 +50,8 @@
       <tr>
         <th id="teamLabel"></th>
         <th>Position</th>
-        <th id="statLabel">Stat</th> <!-- New column for Stat -->
-        <th>Submit Player</th> <!-- New column for submit button -->
+        <th id="statLabel">Stat</th>
+        <th>Submit Player</th>
       </tr>
     </thead>
     <tbody id="playerRows">
@@ -59,13 +59,11 @@
     </tbody>
   </table>
 
-  <!-- Total Score -->
   <div>
     <p>Total Score: <span id="totalScore"></span></p>
   </div>
 </div>
 
-<!-- Instructions Modal -->
 <div class="modal fade" id="instructionsModal" tabindex="-1" role="dialog" aria-labelledby="instructionsModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -89,13 +87,10 @@
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script>
-// Array to keep track of submitted player names
 var submittedPlayers = [];
-var submissionButtonCount = 9; // Total number of submission buttons
+var submissionButtonCount = 9;
 
-// Function to fetch team and stat pair from the server
 function fetchTeamStatPair() {
-  // Dynamically determine the base URL
   var baseUrl = window.location.protocol + '//' + window.location.hostname;
   fetch(baseUrl + '/fetch-gameboard')
     .then(response => response.json())
@@ -107,75 +102,41 @@ function fetchTeamStatPair() {
     });
 }
 
-// Function to update labels with fetched team and stat pair
 function updateLabels(team, stat) {
   document.getElementById('teamLabel').innerText = team;
   document.getElementById('statLabel').innerText = stat;
 }
 
-// Function to handle form submission
 function handleSubmit(event) {
   var submitButton = event.target;
-  if (submitButton.disabled) return; // Check if the button is already disabled
-  submitButton.disabled = true; // Disable the button to prevent multiple submissions
+  if (submitButton.disabled) return;
+  submitButton.disabled = true;
 
   var playerNameInput = submitButton.parentElement.parentElement.children[0].children[0];
-  var playerName = playerNameInput.value.trim(); // Trim whitespace
+  var playerName = playerNameInput.value.trim();
 
-  // Check if the player has already been submitted
   if (submittedPlayers.includes(playerName)) {
     alert('Player has already been submitted. Please select a different player.');
-    submitButton.disabled = false; // Re-enable the button
+    submitButton.disabled = false;
     return;
   }
 
   if (playerName !== '') {
-    submittedPlayers.push(playerName); // Add the player to the submitted players list
-
+    submittedPlayers.push(playerName);
     var position = submitButton.parentElement.parentElement.children[1].textContent;
     var team = document.getElementById('teamLabel').textContent;
-    var stat = document.getElementById('statLabel').textContent; // Retrieve the value of the stats label
+    var stat = document.getElementById('statLabel').textContent;
 
-    // Dynamically determine the base URL
     var baseUrl = window.location.protocol + '//' + window.location.hostname;
-
-    // Fetch data for the submitted player
     var xhr = new XMLHttpRequest();
     xhr.open('GET', baseUrl + '/search?playerName=' + playerName + '&position=' + position + '&team=' + team + '&stat=' + stat, true);
     xhr.onload = function () {
       if (xhr.status === 200) {
         var statSquare = submitButton.parentElement.parentElement.children[2].children[0];
         var statValue = xhr.responseText;
-        statSquare.textContent = (statValue === 'null') ? 'N/A' : statValue; // Display 'N/A' if no data found. I'm trying here to handle the case where the player did not play that position or for that team (N/A instead of 0 in this case)
-        updateTotalScore(); // Update total score after each submission
-        
-        // After updating the total score, check if all submit buttons are disabled
-        var allDisabled = [...document.querySelectorAll('button.btn-primary')].every(button => button.disabled);
-        if (allDisabled) {
-          // If all submit buttons are disabled, send the total score to the server
-          var totalScore = document.getElementById('totalScore').textContent;
-
-          // Fetch the gameboardId associated with the current gameboard
-          fetch(baseUrl + '/gameboardId')
-            .then(response => response.json())
-            .then(data => {
-              var gameboardId = data.gameboardId;
-
-              // Send the total score along with the team, stat, and gameboardId to the server
-              var xhrSave = new XMLHttpRequest();
-              xhrSave.open('POST', baseUrl + '/saveScore', true); // Adjusted endpoint URL
-              xhrSave.setRequestHeader('Content-Type', 'application/json');
-              xhrSave.onreadystatechange = function() {
-                if (xhrSave.readyState === XMLHttpRequest.DONE) {
-                  console.log('Response from save-score:', xhrSave.responseText);
-                }
-              };
-              xhrSave.send(JSON.stringify({ totalScore, team, stat, gameboardId }));
-            })
-            .catch(error => {
-              console.error('Error fetching gameboardId:', error);
-            });
-        }
+        statSquare.textContent = (statValue === 'null') ? 'N/A' : statValue;
+        updateTotalScore();
+        checkAllButtonsSubmitted();
       } else {
         console.error('Error fetching data:', xhr.statusText);
       }
@@ -186,19 +147,48 @@ function handleSubmit(event) {
     xhr.send();
   }
   console.log('Submit button clicked');
-
-  // Decrement the submissionButtonCount
   submissionButtonCount--;
-
-  // Check if submissionButtonCount is zero
   if (submissionButtonCount === 0) {
-    // Trigger an alert with the desired information
     var totalScore = document.getElementById('totalScore').textContent;
     alert('All buttons submitted!\nTotal Score: ' + totalScore);
   }
 }
 
-// Function to add player rows dynamically
+function checkAllButtonsSubmitted() {
+  var allDisabled = [...document.querySelectorAll('button.btn-primary')].every(button => button.disabled);
+  if (allDisabled) {
+    sendFinalScore();
+  }
+}
+
+function sendFinalScore() {
+  var totalScore = document.getElementById('totalScore').textContent;
+  var team = document.getElementById('teamLabel').textContent;
+  var stat = document.getElementById('statLabel').textContent;
+
+  var baseUrl = window.location.protocol + '//' + window.location.hostname;
+
+  fetch(baseUrl + '/gameboardId')
+    .then(response => response.json())
+    .then(data => {
+      var gameboardId = data.gameboardId;
+
+      fetch(baseUrl + '/saveScore', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ totalScore, team, stat, gameboardId })
+      })
+      .then(response => response.json())
+      .then(result => console.log('Response from save-score:', result.message))
+      .catch(error => console.error('Failed to save score:', error));
+    })
+    .catch(error => {
+      console.error('Error fetching gameboardId:', error);
+    });
+}
+
 function addPlayerRows() {
   var positions = ["C", "1B", "2B", "3B", "SS", "OF", "OF", "OF", "P"];
   var tbody = document.getElementById("playerRows");
@@ -211,7 +201,6 @@ function addPlayerRows() {
     playerNameInput.className = "form-control player-input";
     playerNameInput.placeholder = "Enter player's name";
     playerNameInput.addEventListener('input', function() {
-      // Call the autocomplete function when input changes
       autocomplete(this);
     });
     playerNameCell.appendChild(playerNameInput);
@@ -239,12 +228,11 @@ function addPlayerRows() {
     tbody.appendChild(row);
     
     if (positions[i] === 'P') {
-      break; // Stop adding rows when reaching 'P' position
+      break;
     }
   }
 }
 
-// Function to update total score
 function updateTotalScore() {
   var statSquares = document.querySelectorAll('.stat-square');
   var totalScore = 0;
@@ -258,7 +246,6 @@ function updateTotalScore() {
   console.log('Total score updated:', totalScore);
 }
 
-// Autocomplete function
 function autocomplete(input) {
   var currentFocus;
   var xhr = new XMLHttpRequest();
@@ -288,7 +275,6 @@ function autocomplete(input) {
       }
     }
   };
-  // Dynamically determine the base URL
   var baseUrl = window.location.protocol + '//' + window.location.hostname;
   xhr.open("GET", baseUrl + "/autocomplete?query=" + input.value, true);
   xhr.send();
@@ -306,23 +292,18 @@ function autocomplete(input) {
 }
 
 window.onload = function() {
-  // Fetch initial team and stat pair
   fetchTeamStatPair();
-
   addPlayerRows();
-  
-  // Trigger the modal when the instructions button is clicked
   document.getElementById('instructionsButton').addEventListener('click', function() {
     $('#instructionsModal').modal('show');
   });
-
-  // Log when the page loads
   console.log('Page loaded');
 };
 </script>
 
 </body>
 </html>
+
 
 
 
