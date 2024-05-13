@@ -78,7 +78,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-      </div> 
+      </div>
     </div>
   </div>
 </div>
@@ -162,27 +162,36 @@ function checkAllButtonsSubmitted() {
 }
 
 function sendFinalScore() {
-  var totalScore = document.getElementById('totalScore').textContent;
+  console.log("Sending final score..."); // Confirming function trigger
+  var totalScore = parseInt(document.getElementById('totalScore').textContent, 10);
   var team = document.getElementById('teamLabel').textContent;
   var stat = document.getElementById('statLabel').textContent;
 
+  console.log(`Sending score: ${totalScore}, Team: ${team}, Stat: ${stat}`); // Debug info
+
   var baseUrl = window.location.protocol + '//' + window.location.hostname;
 
-  fetch(baseUrl + '/gameboardId')
+  fetch(baseUrl + '/gameboardId') // Make sure this endpoint correctly returns a gameboardId
     .then(response => response.json())
     .then(data => {
       var gameboardId = data.gameboardId;
 
-      fetch(baseUrl + '/saveScore', {
+      fetch(baseUrl + '/saveScore', { // Ensure correct endpoint
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ totalScore, team, stat, gameboardId })
+        body: JSON.stringify({ totalScore: totalScore, teamName: team, statName: stat, gameboardId: gameboardId })
       })
       .then(response => response.json())
-      .then(result => console.log('Response from save-score:', result.message))
-      .catch(error => console.error('Failed to save score:', error));
+      .then(result => {
+        console.log('Response from save-score:', result.message);
+        alert('Score saved successfully!');
+      })
+      .catch(error => {
+        console.error('Failed to save score:', error);
+        alert('Failed to save score.');
+      });
     })
     .catch(error => {
       console.error('Error fetching gameboardId:', error);
