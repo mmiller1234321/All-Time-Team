@@ -16,7 +16,7 @@ app.use(express.json());
 app.use('/search', require('./routes/search'));
 app.use('/autocomplete', require('./routes/autocomplete'));
 app.use('/generateTeamStatPair', require('./routes/generateTeamStatPair'));
-app.use('/save-score', require('./routes/saveScore'));
+app.use('/saveScore', require('./routes/saveScore'));  // Corrected the route here
 
 // Fetch the first team_name and stat_name pair from generated_tables and insert into gameboard
 function fetchNextRow() {
@@ -34,7 +34,7 @@ function fetchNextRow() {
           }
         });
 
-        setTimeout(fetchNextRow, 72 * 60 * 60 * 1000);
+        setTimeout(fetchNextRow, 72 * 60 * 60 * 1000); // Set to fetch the next row every 72 hours
       } else {
         console.log('No team and stat pairs found in the database');
       }
@@ -54,7 +54,7 @@ app.get('/fetch-gameboard', (req, res) => {
       if (results.length > 0) {
         const teamName = results[0].team_name;
         const statName = results[0].stat_name;
-        res.json({ team_name: teamName, stat_name: statName }); // Send response with team_name and stat_name
+        res.json({ team_name: teamName, stat_name: stat_name }); // Send response with team_name and stat_name
       } else {
         console.log('No team and stat pairs found in the gameboard table');
         res.status(404).send('No team and stat pairs found');
@@ -79,3 +79,4 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
