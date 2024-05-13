@@ -141,31 +141,48 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 
   function autocomplete(inputElement) {
-    var currentFocus;
-    var baseUrl = window.location.protocol + '//' + window.location.hostname;
-    fetch(baseUrl + "/autocomplete?query=" + inputElement.value)
-      .then(response => response.json())
-      .then(suggestions => {
-        closeAllLists(inputElement);
-        if (!inputElement.value || suggestions.length === 0) return false;
-        var autocompleteList = document.createElement("div");
-        autocompleteList.setAttribute("id", inputElement.id + "autocomplete-list");
-        autocompleteList.setAttribute("class", "autocomplete-items");
-        inputElement.parentNode.appendChild(autocompleteList);
-        suggestions.forEach(suggestion => {
-          var item = document.createElement("div");
-          item.innerHTML = "<strong>" + suggestion.substr(0, inputElement.value.length) + "</strong>";
-          item.innerHTML += suggestion.substr(inputElement.value.length);
-          item.innerHTML += "<input type='hidden' value='" + suggestion + "'>";
-          item.addEventListener("click", function(e) {
-            inputElement.value = this.getElementsByTagName("input")[0].value;
-            closeAllLists(inputElement);
-          });
-          autocompleteList.appendChild(item);
+  var currentFocus;
+  var xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = function() {
+    if (this.readyState === 4 && this.status === 200) {
+      var suggestions = JSON.parse(this.responseText);
+      closeAllLists();
+      if (!inputElement.value || suggestions.length === 0) {
+        return false;
+      }
+      currentFocus = -1;
+      var autocompleteList = document.createElement("div");
+      autocompleteList.setAttribute("id", inputElement.id + "autocomplete-list");
+      autocompleteList.setAttribute("class", "autocomplete-items");
+      inputElement.parentNode.appendChild(autocompleteList);
+      for (var i = 0; i < suggestions.length; i++) {
+        var suggestion = suggestions[i];
+        var suggestionItem = document.createElement("div");
+        suggestionItem.innerHTML = "<strong>" + suggestion.substr(0, inputElement.value.length) + "</strong>";
+        suggestionItem.innerHTML += suggestion.substr(inputElement.value.length);
+        suggestionItem.innerHTML += "<input type='hidden' value='" + suggestion + "'>";
+        suggestionItem.addEventListener("click", function(e) {
+          inputElement.value = this.getElementsByTagName("input")[0].value;
+          closeAllLists();
         });
-      })
-      .catch(error => console.error('Error fetching autocomplete suggestions:', error));
+        autocompleteList.appendChild(suggestionItem);
+      }
+    }
+  };
+  var baseUrl = window.location.protocol + '//' + window.location.hostname;
+  xhr.open("GET", baseUrl + "/autocomplete?query=" + inputElement.value, true);
+  xhr.send();
+  
+  function closeAllLists(elmnt) {
+    var autocompleteItems = document.getElementsByClassName("autocomplete-items");
+    for (var i = 0; i < autocompleteItems.length; i++) {
+      if (elmnt !== autocompleteItems[i] && elmnt !== inputElement) {
+        autocompleteItems[i].parentNode.removeChild(autocompleteItems[i]);
+      }
+    }
   }
+}
+
 
   function closeAllLists(elmnt) {
     var autocompleteItems = document.getElementsByClassName("autocomplete-items");
