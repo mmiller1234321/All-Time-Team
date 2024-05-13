@@ -194,56 +194,60 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 
   function handleSubmit(event) {
-    var submitButton = event.target;
-    if (submitButton.disabled) return;
-    submitButton.disabled = true;
+  var submitButton = event.target;
+  if (submitButton.disabled) return;
+  submitButton.disabled = true;
 
-    var row = submitButton.closest("tr");
-    var playerNameInput = row.cells[0].children[0];
-    var playerName = playerNameInput.value.trim();
+  var row = submitButton.closest("tr");
+  var playerNameInput = row.cells[0].children[0];
+  var playerName = playerNameInput.value.trim();
 
-    if (submittedPlayers.includes(playerName)) {
-      alert('Player has already been submitted. Please select a different player.');
-      submitButton.disabled = false;
-      return;
-    }
-
-    if (playerName !== '') {
-      var position = row.cells[1].textContent;
-      var team = document.getElementById('teamLabel').textContent;
-      var stat = document.getElementById('statLabel').textContent;
-      var id = document.getElementById('teamLabel').getAttribute('data-id');
-
-      var baseUrl = window.location.protocol + '//' + window.location.hostname;
-      var xhr = new XMLHttpRequest();
-      xhr.open('GET', baseUrl + '/search?playerName=' + playerName + '&position=' + position + '&team=' + team + '&stat=' + stat + '&id=' + id, true);
-      xhr.onload = function () {
-        if (xhr.status === 200) {
-          var statSquare = row.cells[2].children[0];
-          var statValue = xhr.responseText;
-          statSquare.textContent = (statValue === 'null') ? 'N/A' : statValue;
-          updateTotalScore();
-          submissionButtonCount--;
-          if (submissionButtonCount === 0) {
-            var totalScore = document.getElementById('totalScore').textContent;
-            console.log('All buttons submitted. Total Score:', totalScore);
-            sendFinalScore(totalScore, team, stat, id); // Update to send the correct information
-            alert('All buttons submitted!\nTotal Score: ' + totalScore);
-          }
-        } else {
-          console.error('Error fetching data:', xhr.statusText);
-          submitButton.disabled = false;
-        }
-      };
-      xhr.onerror = function () {
-        console.error('Error fetching data.');
-        submitButton.disabled = false;
-      };
-      xhr.send();
-    } else {
-      submitButton.disabled = false;
-    }
+  if (submittedPlayers.includes(playerName)) {
+    alert('Player has already been submitted. Please select a different player.');
+    submitButton.disabled = false;
+    return;
   }
+
+  if (playerName !== '') {
+    var position = row.cells[1].textContent;
+    var team = document.getElementById('teamLabel').textContent;
+    var stat = document.getElementById('statLabel').textContent;
+    var id = document.getElementById('teamLabel').getAttribute('data-id');
+
+    var baseUrl = window.location.protocol + '//' + window.location.hostname;
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', baseUrl + '/saveScore', true); // Changed method to POST
+    xhr.setRequestHeader('Content-Type', 'application/json'); // Set request header
+    xhr.onload = function () {
+      if (xhr.status === 200) {
+        var statSquare = row.cells[2].children[0];
+        var statValue = xhr.responseText;
+        statSquare.textContent = (statValue === 'null') ? 'N/A' : statValue;
+        updateTotalScore();
+        submissionButtonCount--;
+        if (submissionButtonCount === 0) {
+          var totalScore = document.getElementById('totalScore').textContent;
+          console.log('All buttons submitted. Total Score:', totalScore);
+          sendFinalScore(totalScore, team, stat, id);
+          alert('All buttons submitted!\nTotal Score: ' + totalScore);
+        }
+      } else {
+        console.error('Error fetching data:', xhr.statusText);
+        submitButton.disabled = false;
+      }
+    };
+    xhr.onerror = function () {
+      console.error('Error fetching data.');
+      submitButton.disabled = false;
+    };
+
+    // Send data in request body
+    xhr.send(JSON.stringify({ playerName, position, team, stat, id }));
+  } else {
+    submitButton.disabled = false;
+  }
+}
+
 
   function updateTotalScore() {
     var statSquares = document.querySelectorAll('.stat-square');
