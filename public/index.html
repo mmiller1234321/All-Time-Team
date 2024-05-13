@@ -86,178 +86,147 @@
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script>
-var submittedPlayers = [];
-var submissionButtonCount = 9;
-
-function fetchTeamStatPair() {
-  var baseUrl = window.location.protocol + '//' + window.location.hostname;
-  fetch(baseUrl + '/generateTeamStatPair/team-stat-pair')
-    .then(response => {
-      if (!response.ok) throw new Error('Failed to fetch');
-      return response.json();
-    })
-    .then(data => {
-      if (!data.team || !data.stat || !data.id) {
-        console.error('Invalid data received:', data);
-        return;
-      }
-      updateLabels(data.team, data.stat, data.id);
-    })
-    .catch(error => {
-      console.error('Error fetching team and stat pair:', error);
-    });
-}
-
-function updateLabels(team, stat, id) {
-  const teamLabel = document.getElementById('teamLabel');
-  const statLabel = document.getElementById('statLabel');
-  teamLabel.innerText = team;
-  statLabel.innerText = stat;
-  teamLabel.setAttribute('data-id', id);
-  teamLabel.setAttribute('data-team', team);
-  statLabel.setAttribute('data-stat', stat);
-}
-
-function handleSubmit(event) {
-  var submitButton = event.target;
-  var teamLabel = document.getElementById('teamLabel');
-  var statLabel = document.getElementById('statLabel');
-
-  var id = teamLabel.getAttribute('data-id');
-  var team = teamLabel.getAttribute('data-team');
-  var stat = statLabel.getAttribute('data-stat');
-
-  if (!team || !stat || !id) {
-    console.error("Submission blocked due to missing data", { team, stat, id });
-    alert("There was a problem submitting your player. Please try again.");
-    return;
-  }
-
-  var playerNameInput = submitButton.parentElement.parentElement.children[0].children[0];
-  var playerName = playerNameInput.value.trim();
-
-  if (submittedPlayers.includes(playerName)) {
-    alert('Player has already been submitted. Please select a different player.');
-    submitButton.disabled = false;
-    return;
-  }
-
-  submitButton.disabled = true;
-
-  if (playerName) {
-    var position = submitButton.parentElement.parentElement.children[1].textContent;
-    var baseUrl = window.location.protocol + '//' + window.location.hostname;
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', `${baseUrl}/search?playerName=${encodeURIComponent(playerName)}&position=${position}&team=${team}&stat=${stat}&id=${id}`, true);
-    xhr.onload = function () {
-      if (xhr.status === 200) {
-        var statValue = xhr.responseText;
-        var statSquare = submitButton.parentElement.parentElement.children[2].children[0];
-        statSquare.textContent = (statValue === 'null') ? 'N/A' : statValue;
-        updateTotalScore();
-        submissionButtonCount--;
-        checkAllButtonsSubmitted();
-      } else {
-        console.error('Error fetching data:', xhr.statusText);
-      }
-    };
-    xhr.onerror = function () {
-      console.error('Network error occurred');
-    };
-    xhr.send();
-  }
-}
-
-function checkAllButtonsSubmitted() {
-  if (submissionButtonCount === 0) {
-    var totalScore = document.getElementById('totalScore').textContent;
-    console.log('All buttons submitted. Total Score:', totalScore);
-    sendFinalScore(totalScore, document.getElementById('teamLabel').getAttribute('data-team'), document.getElementById('statLabel').getAttribute('data-stat'), document.getElementById('teamLabel').getAttribute('data-id'));
-  }
-}
-
-function sendFinalScore(totalScore, team, stat, id) {
-  var baseUrl = window.location.protocol + '//' + window.location.hostname;
-  fetch(baseUrl + '/saveScore', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ totalScore, team, stat, id })
-  })
-  .then(response => response.json())
-  .then(result => {
-      console.log('Response from save-score:', result.message);
-      alert('Score saved successfully!\nTotal Score: ' + totalScore);
-  })
-  .catch(error => {
-    console.error('Failed to save score:', error);
-    alert('Failed to save score. Please try again.');
-  });
-}
-
-function updateTotalScore() {
-  var statSquares = document.querySelectorAll('.stat-square');
-  var totalScore = 0;
-  statSquares.forEach(function(statSquare) {
-    var statValue = parseInt(statSquare.textContent);
-    if (!isNaN(statValue)) {
-      totalScore += statValue;
-    }
-  });
-  document.getElementById('totalScore').textContent = totalScore;
-  console.log('Total score updated:', totalScore);
-}
-
-function autocomplete(input) {
-  var xhr = new XMLHttpRequest();
-  xhr.onreadystatechange = function() {
-    if (this.readyState === 4 && this.status === 200) {
-      var suggestions = JSON.parse(this.responseText);
-      closeAllLists(input);
-      if (!input.value || suggestions.length === 0) {
-        return;
-      }
-      var autocompleteList = document.createElement("div");
-      autocompleteList.setAttribute("id", input.id + "autocomplete-list");
-      autocompleteList.setAttribute("class", "autocomplete-items");
-      input.parentNode.appendChild(autocompleteList);
-      suggestions.forEach(function(suggestion) {
-        var suggestionItem = document.createElement("div");
-        suggestionItem.innerHTML = "<strong>" + suggestion.substr(0, input.value.length) + "</strong>";
-        suggestionItem.innerHTML += suggestion.substr(input.value.length);
-        suggestionItem.innerHTML += "<input type='hidden' value='" + suggestion + "'>";
-        suggestionItem.addEventListener("click", function(e) {
-          input.value = this.getElementsByTagName("input")[0].value;
-          closeAllLists(input);
-        });
-        autocompleteList.appendChild(suggestionItem);
-      });
-    }
-  };
-  xhr.open("GET", `${window.location.protocol}//${window.location.hostname}/autocomplete?query=${encodeURIComponent(input.value)}`, true);
-  xhr.send();
-}
-
-function closeAllLists(elmnt) {
-  var autocompleteItems = document.getElementsByClassName("autocomplete-items");
-  Array.from(autocompleteItems).forEach(function(item) {
-    if (elmnt !== item && elmnt !== input) {
-      item.parentNode.removeChild(item);
-    }
-  });
-}
-
 document.addEventListener("DOMContentLoaded", function() {
+  var submittedPlayers = [];
+  var submissionButtonCount = 9;
+
+  function fetchTeamStatPair() {
+    var baseUrl = window.location.protocol + '//' + window.location.hostname;
+    fetch(baseUrl + '/generateTeamStatPair/team-stat-pair')
+      .then(response => response.json())
+      .then(data => {
+        updateLabels(data.team, data.stat, data.id);
+      })
+      .catch(error => {
+        console.error('Error fetching team and stat pair:', error);
+      });
+  }
+
+  function updateLabels(team, stat, id) {
+    document.getElementById('teamLabel').innerText = team;
+    document.getElementById('statLabel').innerText = stat;
+    document.getElementById('teamLabel').setAttribute('data-id', id);
+  }
+
+  function addPlayerRows() {
+    var positions = ["C", "1B", "2B", "3B", "SS", "OF", "OF", "OF", "P"];
+    var tbody = document.getElementById("playerRows");
+    positions.forEach((position, index) => {
+      var row = tbody.insertRow();
+      var cellName = row.insertCell(0);
+      var input = document.createElement("input");
+      input.type = "text";
+      input.className = "form-control";
+      input.placeholder = "Enter player's name";
+      cellName.appendChild(input);
+
+      var cellPosition = row.insertCell(1);
+      cellPosition.textContent = position;
+
+      var cellStat = row.insertCell(2);
+      var statDiv = document.createElement("div");
+      statDiv.className = "stat-square";
+      cellStat.appendChild(statDiv);
+
+      var cellSubmit = row.insertCell(3);
+      var button = document.createElement("button");
+      button.className = "btn btn-primary";
+      button.textContent = "Submit";
+      button.addEventListener('click', handleSubmit);
+      cellSubmit.appendChild(button);
+    });
+  }
+
+  function handleSubmit(event) {
+    var submitButton = event.target;
+    if (submitButton.disabled) return;
+    submitButton.disabled = true;
+
+    var row = submitButton.closest("tr");
+    var playerNameInput = row.cells[0].children[0];
+    var playerName = playerNameInput.value.trim();
+
+    if (submittedPlayers.includes(playerName)) {
+      alert('Player has already been submitted. Please select a different player.');
+      submitButton.disabled = false;
+      return;
+    }
+
+    if (playerName !== '') {
+      var position = row.cells[1].textContent;
+      var team = document.getElementById('teamLabel').textContent;
+      var stat = document.getElementById('statLabel').textContent;
+      var id = document.getElementById('teamLabel').getAttribute('data-id');
+
+      var baseUrl = window.location.protocol + '//' + window.location.hostname;
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', baseUrl + '/search?playerName=' + playerName + '&position=' + position + '&team=' + team + '&stat=' + stat + '&id=' + id, true);
+      xhr.onload = function () {
+        if (xhr.status === 200) {
+          var statSquare = row.cells[2].children[0];
+          var statValue = xhr.responseText;
+          statSquare.textContent = (statValue === 'null') ? 'N/A' : statValue;
+          updateTotalScore();
+          submissionButtonCount--;
+          if (submissionButtonCount === 0) {
+            var totalScore = document.getElementById('totalScore').textContent;
+            console.log('All buttons submitted. Total Score:', totalScore);
+            sendFinalScore(totalScore, team, stat, id);
+            alert('All buttons submitted!\nTotal Score: ' + totalScore);
+          }
+        } else {
+          console.error('Error fetching data:', xhr.statusText);
+          submitButton.disabled = false;
+        }
+      };
+      xhr.onerror = function () {
+        console.error('Error fetching data.');
+        submitButton.disabled = false;
+      };
+      xhr.send();
+    } else {
+      submitButton.disabled = false;
+    }
+  }
+
+  function updateTotalScore() {
+    var statSquares = document.querySelectorAll('.stat-square');
+    var totalScore = 0;
+    statSquares.forEach(square => {
+      var score = parseInt(square.textContent, 10);
+      if (!isNaN(score)) totalScore += score;
+    });
+    document.getElementById('totalScore').textContent = totalScore;
+  }
+
+  function sendFinalScore(totalScore, team, stat, id) {
+    var baseUrl = window.location.protocol + '//' + window.location.hostname;
+    fetch(baseUrl + '/saveScore', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ totalScore, team, stat, id })
+    })
+    .then(response => response.json())
+    .then(result => console.log('Response from save-score:', result.message))
+    .catch(error => console.error('Failed to save score:', error));
+  }
+
   fetchTeamStatPair();
   addPlayerRows();
   document.getElementById('instructionsButton').addEventListener('click', function() {
     $('#instructionsModal').modal('show');
   });
-  console.log('Page loaded');
 });
 </script>
 
 </body>
 </html>
+
+
+
+
+
+
 
 
 
