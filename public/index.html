@@ -91,6 +91,7 @@
 <script>
 // Array to keep track of submitted player names
 var submittedPlayers = [];
+var submissionButtonCount = 9; // Total number of submission buttons
 
 // Function to fetch team and stat pair from the server
 function fetchTeamStatPair() {
@@ -162,7 +163,7 @@ function handleSubmit(event) {
 
               // Send the total score along with the team, stat, and gameboardId to the server
               var xhrSave = new XMLHttpRequest();
-              xhrSave.open('POST', baseUrl + '/save-score', true);
+              xhrSave.open('POST', baseUrl + '/saveScore', true); // Adjusted endpoint URL
               xhrSave.setRequestHeader('Content-Type', 'application/json');
               xhrSave.onreadystatechange = function() {
                 if (xhrSave.readyState === XMLHttpRequest.DONE) {
@@ -185,6 +186,16 @@ function handleSubmit(event) {
     xhr.send();
   }
   console.log('Submit button clicked');
+
+  // Decrement the submissionButtonCount
+  submissionButtonCount--;
+
+  // Check if submissionButtonCount is zero
+  if (submissionButtonCount === 0) {
+    // Trigger an alert with the desired information
+    var totalScore = document.getElementById('totalScore').textContent;
+    alert('All buttons submitted!\nTotal Score: ' + totalScore);
+  }
 }
 
 // Function to add player rows dynamically
@@ -312,7 +323,6 @@ window.onload = function() {
 
 </body>
 </html>
-
 
 
 
