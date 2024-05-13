@@ -268,7 +268,6 @@ function autocomplete(input) {
     xhr.open("GET", baseUrl + "/autocomplete?query=" + input.value, true);
     xhr.send();
     function closeAllLists(elmnt) {
-      // Define autocompleteItems within the scope
       var autocompleteItems = document.getElementsByClassName("autocomplete-items");
       for (var i = 0; i < autocompleteItems.length; i++) {
         if (elmnt !== autocompleteItems[i] && elmnt !== input) {
@@ -293,6 +292,7 @@ window.onload = function() {
 
 </body>
 </html>
+
 
 
 
