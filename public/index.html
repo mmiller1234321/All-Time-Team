@@ -230,7 +230,7 @@ document.addEventListener("DOMContentLoaded", function() {
           if (enabledSubmitButtons === 0) { // If all submit buttons are disabled
             var totalScore = document.getElementById('totalScore').textContent;
             console.log('All buttons submitted. Total Score:', totalScore);
-            sendFinalScore(totalScore, team, stat, id); // Update to send the correct information
+            sendFinalScore(totalScore, id); // Update to send the correct information
             alert('All buttons submitted!\nTotal Score: ' + totalScore);
           }
         } else {
@@ -261,7 +261,9 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById('totalScore').textContent = totalScore;
   }
 
-  function sendFinalScore(totalScore, team, stat, id) {
+  function sendFinalScore(totalScore, id) {
+    var team = document.getElementById('teamLabel').textContent;
+    var stat = document.getElementById('statLabel').textContent;
     var baseUrl = window.location.protocol + '//' + window.location.hostname;
     fetch(baseUrl + '/saveScore', {
       method: 'POST',
