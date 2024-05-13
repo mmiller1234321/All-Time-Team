@@ -68,7 +68,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="instructionsModalLabel">Instructions</h5>
-        <button type="button" the close" data-dismiss="modal" aria-label="Close">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
@@ -270,7 +270,7 @@ function autocomplete(input) {
   function closeAllLists(elmnt) {
     var autocompleteItems = document.getElementsByClassName("autocomplete-items");
     for (var i = 0; i < autocompleteItems.length; i++) {
-      if (elmnt !== autocompleteItems[i] and elmnt !== input) {
+      if (elmnt !== autocompleteItems[i] && elmnt !== input) {
         autocompleteItems[i].parentNode.removeChild(autocompleteItems[i]);
       }
     }
