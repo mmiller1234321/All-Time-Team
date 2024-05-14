@@ -6,6 +6,9 @@ const pool = require('../db/db.js');
 router.post('/', async (req, res) => {
   const { total_score, team_name, stat_name, gameboard_id } = req.body;
 
+  // Log the request body to check the values
+  console.log('Request body:', req.body);
+
   // Check if all necessary fields are provided
   if (!total_score || !team_name || !stat_name || !gameboard_id) {
     console.error('Missing one or more required fields: total_score, team_name, stat_name, gameboard_id');
@@ -29,6 +32,7 @@ router.post('/', async (req, res) => {
 });
 
 module.exports = router;
+
 
 
 

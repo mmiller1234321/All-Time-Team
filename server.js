@@ -16,7 +16,7 @@ app.use(express.json());
 app.use('/search', require('./routes/search'));
 app.use('/autocomplete', require('./routes/autocomplete'));
 app.use('/generateTeamStatPair', require('./routes/generateTeamStatPair'));
-app.use('/saveScore', require('./routes/saveScore'));  // Corrected the route here
+app.use('/saveScore', require('./routes/saveScore'));
 
 // Fetch the first team_name and stat_name pair from generated_tables and insert into gameboard
 function fetchNextRow() {
@@ -29,7 +29,7 @@ function fetchNextRow() {
       const teamName = results[0].team_name;
       const statName = results[0].stat_name;
 
-      pool.query('INSERT INTO gameboard (team_name, stat_name) VALUES (?, ?)', [teamName, statName], (error, results) => {
+      pool.query('INSERT INTO gameboard (team_name, stat_name) VALUES (?, ?)', [teamName, statName], (error) => {
         if (error) {
           console.error('Error inserting data into gameboard:', error);
         }
