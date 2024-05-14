@@ -9,6 +9,7 @@ async function generateNextTeamStatPair() {
         if (results.length > 0) {
             const { team_name: teamName, stat_name: statName } = results[0];
             await pool.query('INSERT INTO gameboard (team_name, stat_name) VALUES (?, ?)', [teamName, statName]);
+            console.log(`Inserted ${teamName} - ${statName} into gameboard`);
             setTimeout(generateNextTeamStatPair, 72 * 60 * 60 * 1000); // Set to fetch the next row every 72 hours
         } else {
             console.log('No team and stat pairs found in the database');
@@ -30,15 +31,16 @@ router.get('/team-stat-pair', async (req, res) => {
             res.json({ id, team: teamName, stat: statName });
         } else {
             console.log('No team and stat pairs found in the gameboard table');
-            res.status(404).send('No team and stat pairs found');
+            res.status(404).json({ error: 'No team and stat pairs found' });
         }
     } catch (error) {
         console.error('Error fetching team and stat pair:', error);
-        res.status(500).send('Internal Server Error');
+        res.status(500).json({ error: 'Internal Server Error', message: error.message });
     }
 });
 
 module.exports = router;
+
 
 
 
