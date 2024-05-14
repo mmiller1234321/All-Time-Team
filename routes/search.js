@@ -1,8 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const mysql = require('mysql2');
-
-// Create MySQL connection pool using ClearDB connection URL
 const pool = require('../db/db.js');
 
 // Search endpoint to fetch player stats

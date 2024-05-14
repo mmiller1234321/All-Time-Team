@@ -3,52 +3,52 @@ const router = express.Router();
 const pool = require('../db/db.js');
 
 // Function to generate the next team and stat pair
-async function generateNextTeamStatPair() {
-  try {
-    // Fetch the first row from the generated_tables table
-    const [rows] = await pool.query('SELECT team_name, stat_name FROM generated_tables LIMIT 1');
-    if (rows.length > 0) {
-      const teamName = rows[0].team_name;
-      const statName = rows[0].stat_name;
+function generateNextTeamStatPair() {
+  pool.query('SELECT team_name, stat_name FROM generated_tables LIMIT 1', (error, results) => {
+    if (error) {
+      console.error('Error executing MySQL query:', error);
+    } else if (results.length > 0) {
+      const teamName = results[0].team_name;
+      const statName = results[0].stat_name;
 
-      // Insert the fetched data into the gameboard table without the date
-      await pool.query('INSERT INTO gameboard (team_name, stat_name) VALUES (?, ?)', [teamName, statName]);
+      pool.query('INSERT INTO gameboard (team_name, stat_name) VALUES (?, ?)', [teamName, statName], (error) => {
+        if (error) {
+          console.error('Error inserting data into gameboard table:', error);
+        } else {
+          console.log(`Inserted ${teamName} - ${statName} into gameboard`);
+        }
 
-      console.log(`Inserted ${teamName} - ${statName} into gameboard`);
-
-      // Start timer for 72 hours
-      setTimeout(generateNextTeamStatPair, 72 * 60 * 60 * 1000);
+        setTimeout(generateNextTeamStatPair, 72 * 60 * 60 * 1000); // Start timer for 72 hours
+      });
     } else {
       console.log('No team and stat pairs found in the database');
     }
-  } catch (error) {
-    console.error('Error executing MySQL query:', error);
-  }
+  });
 }
 
 // Generate the first team and stat pair on server start
 generateNextTeamStatPair();
 
 // Route to handle fetching the next team and stat pair
-router.get('/team-stat-pair', async (req, res, next) => {
-  try {
-    const [rows] = await pool.query('SELECT id, team_name, stat_name FROM gameboard ORDER BY date ASC LIMIT 1');
-    if (rows.length > 0) {
-      const id = rows[0].id; // Changed from gameboardID to id
-      const teamName = rows[0].team_name;
-      const statName = rows[0].stat_name;
-      res.json({ id: id, team: teamName, stat: statName }); // Adjusted response keys
+router.get('/team-stat-pair', (req, res) => {
+  pool.query('SELECT id, team_name, stat_name FROM gameboard ORDER BY date ASC LIMIT 1', (error, results) => {
+    if (error) {
+      console.error('Error fetching team and stat pair:', error);
+      res.status(500).send('Internal Server Error');
+    } else if (results.length > 0) {
+      const id = results[0].id;
+      const teamName = results[0].team_name;
+      const statName = results[0].stat_name;
+      res.json({ id: id, team: teamName, stat: statName });
     } else {
       console.log('No team and stat pairs found in the gameboard table');
       res.status(404).send('No team and stat pairs found');
     }
-  } catch (error) {
-    console.error('Error fetching team and stat pair:', error);
-    res.status(500).send('Internal Server Error');
-  }
+  });
 });
 
 module.exports = router;
+
 
 
 

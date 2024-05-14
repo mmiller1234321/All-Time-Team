@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const pool = require('../db/db.js'); // Ensure this is the promise pool from 'mysql2/promise'
+const pool = require('../db/db.js'); // Ensure this is the callback pool from 'mysql2'
 
 // Route to handle saving scores
-router.post('/', async (req, res) => {
+router.post('/', (req, res) => {
   const { total_score, team_name, stat_name, gameboard_id } = req.body;
 
   // Log the request body to check the values
@@ -17,21 +17,23 @@ router.post('/', async (req, res) => {
 
   console.log(`Attempting to insert score: ${total_score}, for team: ${team_name}, stat: ${stat_name}, with gameboard ID: ${gameboard_id}`);
 
-  try {
-    const [result] = await pool.query(
-      'INSERT INTO games (team_name, stat_name, total_score, gameboard_id) VALUES (?, ?, ?, ?)',
-      [team_name, stat_name, total_score, gameboard_id]
-    );
-
-    console.log('Total score inserted successfully:', result);
-    res.status(200).json({ message: 'Total score inserted successfully', result: result });
-  } catch (error) {
-    console.error('Error inserting total score:', error);
-    res.status(500).json({ error: 'An error occurred while inserting total score', details: error.message });
-  }
+  pool.query(
+    'INSERT INTO games (team_name, stat_name, total_score, gameboard_id) VALUES (?, ?, ?, ?)',
+    [team_name, stat_name, total_score, gameboard_id],
+    (error, results) => {
+      if (error) {
+        console.error('Error inserting total score:', error);
+        res.status(500).json({ error: 'An error occurred while inserting total score', details: error.message });
+      } else {
+        console.log('Total score inserted successfully:', results);
+        res.status(201).json({ message: 'Total score inserted successfully', result: results });
+      }
+    }
+  );
 });
 
 module.exports = router;
+
 
 
 
