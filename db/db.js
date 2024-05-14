@@ -1,16 +1,19 @@
 require('dotenv').config();
-const mysql = require('mysql2');
+const mysql = require('mysql2/promise');
 
-const pool = mysql.createPool(process.env.CLEARDB_MAUVE_URL);
+const pool = mysql.createPool({
+  uri: process.env.CLEARDB_MAUVE_URL
+});
 
-pool.getConnection((err, connection) => {
-  if (err) {
+pool.getConnection()
+  .then((connection) => {
+    console.log('Connected to MySQL database');
+    connection.release();
+  })
+  .catch((err) => {
     console.error('Error connecting to MySQL:', err);
     process.exit(1);
-  }
-  console.log('Connected to MySQL database');
-  connection.release();
-});
+  });
 
 pool.on('error', (err) => {
   console.error('MySQL connection pool error:', err);
@@ -18,5 +21,6 @@ pool.on('error', (err) => {
 });
 
 module.exports = pool;
+
 
 

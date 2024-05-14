@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const pool = require('../db/db.js');
+const pool = require('../db/db.js'); // Ensure this is the promise pool from 'mysql2/promise'
 
 // Route to handle saving scores
 router.post('/', async (req, res) => {
@@ -18,7 +18,7 @@ router.post('/', async (req, res) => {
   console.log(`Attempting to insert score: ${total_score}, for team: ${team_name}, stat: ${stat_name}, with gameboard ID: ${gameboard_id}`);
 
   try {
-    const result = await pool.query(
+    const [result] = await pool.query(
       'INSERT INTO games (team_name, stat_name, total_score, gameboard_id) VALUES (?, ?, ?, ?)',
       [team_name, stat_name, total_score, gameboard_id]
     );
@@ -32,6 +32,7 @@ router.post('/', async (req, res) => {
 });
 
 module.exports = router;
+
 
 
 
