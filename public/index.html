@@ -146,41 +146,56 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 
   function autocomplete(inputElement) {
+    var currentFocus;
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
       if (this.readyState === 4 && this.status === 200) {
         var suggestions = JSON.parse(this.responseText);
-        closeAllLists(inputElement);
+        closeAllLists();
         if (!inputElement.value || suggestions.length === 0) {
-          return;
+          return false;
         }
+        currentFocus = -1;
         var autocompleteList = document.createElement("div");
         autocompleteList.setAttribute("id", inputElement.id + "autocomplete-list");
         autocompleteList.setAttribute("class", "autocomplete-items");
         inputElement.parentNode.appendChild(autocompleteList);
-        suggestions.forEach(function(suggestion) {
-          var item = document.createElement("div");
-          item.innerHTML = "<strong>" + suggestion.substr(0, inputElement.value.length) + "</strong>" + suggestion.substr(inputElement.value.length);
-          item.innerHTML += "<input type='hidden' value='" + suggestion + "'>";
-          item.addEventListener("click", function() {
+        for (var i = 0; i < suggestions.length; i++) {
+          var suggestion = suggestions[i];
+          var suggestionItem = document.createElement("div");
+          suggestionItem.innerHTML = "<strong>" + suggestion.substr(0, inputElement.value.length) + "</strong>";
+          suggestionItem.innerHTML += suggestion.substr(inputElement.value.length);
+          suggestionItem.innerHTML += "<input type='hidden' value='" + suggestion + "'>";
+          suggestionItem.addEventListener("click", function(e) {
             inputElement.value = this.getElementsByTagName("input")[0].value;
-            closeAllLists(inputElement);
+            closeAllLists();
           });
-          autocompleteList.appendChild(item);
-        });
+          autocompleteList.appendChild(suggestionItem);
+        }
       }
     };
-    xhr.open("GET", `${window.location.protocol}//${window.location.hostname}/autocomplete?query=${encodeURIComponent(inputElement.value)}`, true);
+    var baseUrl = window.location.protocol + '//' + window.location.hostname;
+    xhr.open("GET", baseUrl + "/autocomplete?query=" + inputElement.value, true);
     xhr.send();
+    
+    function closeAllLists(elmnt) {
+      var autocompleteItems = document.getElementsByClassName("autocomplete-items");
+      for (var i = 0; i < autocompleteItems.length; i++) {
+        if (elmnt !== autocompleteItems[i] && elmnt !== inputElement) {
+          autocompleteItems[i].parentNode.removeChild(autocompleteItems[i]);
+        }
+      }
+    }
   }
 
-  function closeAllLists(inputElement) {
+
+  function closeAllLists(elmnt) {
     var autocompleteItems = document.getElementsByClassName("autocomplete-items");
-    Array.from(autocompleteItems).forEach(function(item) {
-      if (item !== inputElement) {
-        item.parentNode.removeChild(item);
+    for (var i = 0; i < autocompleteItems.length; i++) {
+      if (elmnt !== autocompleteItems[i] && elmnt !== elmnt) {
+        autocompleteItems[i].parentNode.removeChild(autocompleteItems[i]);
       }
-    });
+    }
   }
 
   function handleSubmit(event) {
@@ -250,19 +265,14 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById('totalScore').textContent = totalScore;
   }
 
-  function sendFinalScore(totalScore, gameboard_id) {
+  function sendFinalScore(totalScore, id) {
     var team = teamLabelValue; // Use global variable for team label value
     var stat = statLabelValue; // Use global variable for stat label value
     var baseUrl = window.location.protocol + '//' + window.location.hostname;
     fetch(baseUrl + '/saveScore', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        total_score: totalScore,
-        team_name: team,
-        stat_name: stat,
-        gameboard_id: gameboard_id  // Corrected to match the server expectation
-      })
+      body: JSON.stringify({ team_name: team, stat_name: stat, total_score: totalScore, id: id }) // Adjusted the keys
     })
     .then(response => response.json())
     .then(result => console.log('Response from save-score:', result.message))
@@ -280,6 +290,9 @@ document.addEventListener("DOMContentLoaded", function() {
 
 </body>
 </html>
+
+
+
 
 
 
