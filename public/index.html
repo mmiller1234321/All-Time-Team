@@ -146,46 +146,41 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 
   function autocomplete(inputElement) {
-    var currentFocus;
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
       if (this.readyState === 4 && this.status === 200) {
         var suggestions = JSON.parse(this.responseText);
-        closeAllLists();
+        closeAllLists(inputElement);
         if (!inputElement.value || suggestions.length === 0) {
-          return false;
+          return;
         }
-        currentFocus = -1;
         var autocompleteList = document.createElement("div");
         autocompleteList.setAttribute("id", inputElement.id + "autocomplete-list");
         autocompleteList.setAttribute("class", "autocomplete-items");
         inputElement.parentNode.appendChild(autocompleteList);
-        for (var i = 0; i < suggestions.length; i++) {
-          var suggestion = suggestions[i];
-          var suggestionItem = document.createElement("div");
-          suggestionItem.innerHTML = "<strong>" + suggestion.substr(0, inputElement.value.length) + "</strong>";
-          suggestionItem.innerHTML += suggestion.substr(inputElement.value.length);
-          suggestionItem.innerHTML += "<input type='hidden' value='" + suggestion + "'>";
-          suggestionItem.addEventListener("click", function(e) {
+        suggestions.forEach(function(suggestion) {
+          var item = document.createElement("div");
+          item.innerHTML = "<strong>" + suggestion.substr(0, inputElement.value.length) + "</strong>" + suggestion.substr(inputElement.value.length);
+          item.innerHTML += "<input type='hidden' value='" + suggestion + "'>";
+          item.addEventListener("click", function() {
             inputElement.value = this.getElementsByTagName("input")[0].value;
-            closeAllLists();
+            closeAllLists(inputElement);
           });
-          autocompleteList.appendChild(suggestionItem);
-        }
+          autocompleteList.appendChild(item);
+        });
       }
     };
-    var baseUrl = window.location.protocol + '//' + window.location.hostname;
-    xhr.open("GET", baseUrl + "/autocomplete?query=" + inputElement.value, true);
+    xhr.open("GET", `${window.location.protocol}//${window.location.hostname}/autocomplete?query=${encodeURIComponent(inputElement.value)}`, true);
     xhr.send();
   }
 
-  function closeAllLists(elmnt) {
+  function closeAllLists(inputElement) {
     var autocompleteItems = document.getElementsByClassName("autocomplete-items");
-    for (var i = 0; i < autocompleteItems.length; i++) {
-      if (elmnt !== autocompleteItems[i] && elmnt !== inputElement) {
-        autocompleteItems[i].parentNode.removeChild(autocompleteItems[i]);
+    Array.from(autocompleteItems).forEach(function(item) {
+      if (item !== inputElement) {
+        item.parentNode.removeChild(item);
       }
-    }
+    });
   }
 
   function handleSubmit(event) {
@@ -255,7 +250,7 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById('totalScore').textContent = totalScore;
   }
 
-  function sendFinalScore(totalScore, gameboard_id) {  // Updated to match the backend
+  function sendFinalScore(totalScore, gameboard_id) {
     var team = teamLabelValue; // Use global variable for team label value
     var stat = statLabelValue; // Use global variable for stat label value
     var baseUrl = window.location.protocol + '//' + window.location.hostname;
@@ -285,9 +280,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
 </body>
 </html>
-
-
-
 
 
 
