@@ -173,7 +173,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
   function fetchHighScore(gameboardId) {
     var baseUrl = window.location.protocol + '//' + window.location.hostname;
-    fetch(baseUrl + '/fetch-high-score?gameboard_id=' + gameboardId)
+    fetch(baseUrl + '/fetch-high-score/' + gameboardId)
       .then(response => response.json())
       .then(data => {
         document.getElementById('highScore').innerText = data.high_score || 'N/A';
