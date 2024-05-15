@@ -22,7 +22,8 @@
     "jquery": "^3.5.1",
     "mysql": "^2.18.1",
     "mysql2": "^3.9.6",
-    "node-cache": "^5.1.2"
+    "node-cache": "^5.1.2",
+    "node-fetch": "^3.0.0"
   }
 }
 
