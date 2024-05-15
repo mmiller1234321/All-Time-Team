@@ -1,3 +1,7 @@
+const express = require('express');
+const router = express.Router();
+const pool = require('../db/db.js'); // Import the pool from your db.js file
+
 // Function to generate the next team and stat pair
 function generateNextTeamStatPair() {
   pool.query('SELECT team_name, stat_name, perfect_score FROM generated_tables LIMIT 1', (error, results) => {
@@ -47,6 +51,7 @@ router.get('/team-stat-pair', (req, res) => {
 });
 
 module.exports = router;
+
 
 
 
