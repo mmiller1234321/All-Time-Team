@@ -1,7 +1,3 @@
-const express = require('express');
-const router = express.Router();
-const pool = require('../db/db.js');
-
 // Function to generate the next team and stat pair
 function generateNextTeamStatPair() {
   pool.query('SELECT team_name, stat_name, perfect_score FROM generated_tables LIMIT 1', (error, results) => {
@@ -19,7 +15,8 @@ function generateNextTeamStatPair() {
           console.log(`Inserted ${teamName} - ${statName} - ${perfectScore} into gameboard`);
         }
 
-        setTimeout(generateNextTeamStatPair, 72 * 60 * 60 * 1000); // Start timer for 72 hours
+        // Set timer for 8 minutes instead of 72 hours
+        setTimeout(generateNextTeamStatPair, 8 * 60 * 1000); // 8 minutes * 60 seconds * 1000 milliseconds
       });
     } else {
       console.log('No team and stat pairs found in the database');
