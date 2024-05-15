@@ -1,12 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../db/db.js');
-const fetch = require('node-fetch').default; // Import node-fetch and use its default export
+const fetch = require('node-fetch');
 
-let lastFetchedId = 0; // This assumes the IDs are sequential and start from 1.
+let lastFetchedId = 0;
 
 function generateNextTeamStatPair() {
-  // Query to get the next team and stat pair, cycling back to the start after the last one
   const query = 'SELECT team_name, stat_name, perfect_score, id FROM generated_tables WHERE id > ? ORDER BY id ASC LIMIT 1';
   
   pool.query(query, [lastFetchedId], (error, results) => {
@@ -18,7 +17,7 @@ function generateNextTeamStatPair() {
 
     if (results.length > 0) {
       const { team_name: teamName, stat_name: statName, perfect_score: perfectScore, id } = results[0];
-      lastFetchedId = id; // Update last fetched id
+      lastFetchedId = id;
 
       pool.query(
         'INSERT INTO gameboard (team_name, stat_name, perfect_score) VALUES (?, ?, ?)',
@@ -29,22 +28,19 @@ function generateNextTeamStatPair() {
           } else {
             console.log(`Inserted ${teamName} - ${statName} - ${perfectScore} into gameboard`);
           }
-          setTimeout(generateNextTeamStatPair, 8 * 60 * 1000); // Schedule next generation
+          setTimeout(generateNextTeamStatPair, 8 * 60 * 1000);
         }
       );
     } else {
-      // If no results found (possibly end of table), reset the counter to zero and restart the cycle
       console.log('Reached end of table, restarting cycle.');
       lastFetchedId = 0;
-      setTimeout(generateNextTeamStatPair, 8 * 60 * 1000); // Schedule next generation
+      setTimeout(generateNextTeamStatPair, 8 * 60 * 1000);
     }
   });
 }
 
-// Initialize the process on server start
 generateNextTeamStatPair();
 
-// Route to handle fetching the current team and stat pair from gameboard
 router.get('/team-stat-pair', (req, res) => {
   pool.query('SELECT id, team_name, stat_name, perfect_score FROM gameboard ORDER BY ID DESC LIMIT 1', (error, results) => {
     if (error) {
@@ -59,7 +55,6 @@ router.get('/team-stat-pair', (req, res) => {
   });
 });
 
-// Route to fetch high score based on gameboard_id
 router.get('/fetch-high-score/:gameboardId', (req, res) => {
   const { gameboardId } = req.params;
   pool.query(
@@ -70,14 +65,14 @@ router.get('/fetch-high-score/:gameboardId', (req, res) => {
         console.error('Error fetching high score:', error);
         return res.status(500).json({ error: 'Internal Server Error', message: error.message });
       }
-      const highScore = results[0].high_score || 'N/A'; // Handle case where there might be no scores
+      const highScore = results[0].high_score || 'N/A';
       res.json({ high_score: highScore });
     }
   );
 });
 
-// Export the router
 module.exports = router;
+
 
 
 
