@@ -62,8 +62,8 @@
   </table>
 
   <div>
-    <p>Total Score: <span id="totalScore"></span></p>
-    <p>High Score: <span id="highScore"></span></p>
+    <p>Total Score: <span id="totalScore">0</span></p>
+    <p>High Score: <span id="highScore">N/A</span></p>
     <p>Optimal Score: <span id="optimalScore"></span></p>
   </div>
 </div>
@@ -276,45 +276,45 @@ document.addEventListener("DOMContentLoaded", function() {
         } else {
           console.error('Error fetching data:', xhr.statusText);
           submitButton.disabled = false;
-          enabledSubmitButtons++; // Increment the count of enabled submit buttons
-        }
-      };
-      xhr.onerror = function () {
-        console.error('Error fetching data.');
-        submitButton.disabled = false;
-        enabledSubmitButtons++; // Increment the count of enabled submit buttons
-      };
-      xhr.send();
-    } else {
-      submitButton.disabled = false;
-      enabledSubmitButtons++; // Increment the count of enabled submit buttons
-    }
-  }
+                  enabledSubmitButtons++; // Increment the count of enabled submit buttons
+                }
+              };
+              xhr.onerror = function() {
+                console.error('Error fetching data.');
+                submitButton.disabled = false;
+                enabledSubmitButtons++; // Increment the count of enabled submit buttons
+              };
+              xhr.send();
+            } else {
+              submitButton.disabled = false;
+              enabledSubmitButtons++; // Increment the count of enabled submit buttons
+            }
+          }
 
-  function updateTotalScore() {
-    var statSquares = document.querySelectorAll('.stat-square');
-    var totalScore = 0;
-    statSquares.forEach(square => {
-      var score = parseInt(square.textContent, 10);
-      if (!isNaN(score)) totalScore += score;
-    });
-    document.getElementById('totalScore').textContent = totalScore;
-  }
+          function updateTotalScore() {
+            var statSquares = document.querySelectorAll('.stat-square');
+            var totalScore = 0;
+            statSquares.forEach(square => {
+              var score = parseInt(square.textContent, 10);
+              if (!isNaN(score)) totalScore += score;
+            });
+            document.getElementById('totalScore').textContent = totalScore;
+          }
 
-  function sendFinalScore(totalScore, gameboardId) {
+          function sendFinalScore(totalScore, gameboardId) {
     var team = teamLabelValue; // Use global variable for team label value
     var stat = statLabelValue; // Use global variable for stat label value
     var baseUrl = window.location.protocol + '//' + window.location.hostname;
     fetch(baseUrl + '/saveScore', {
       method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          total_score: totalScore,
-          team_name: team,
-          stat_name: stat,
-          gameboard_id: gameboardId // Ensure the correct key name is used here
-        })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        total_score: totalScore,
+        team_name: team,
+        stat_name: stat,
+        gameboard_id: gameboardId // Ensure the correct key name is used here
       })
+    })
     .then(response => response.json())
     .then(result => {
       console.log('Response from save-score:', result.message);
