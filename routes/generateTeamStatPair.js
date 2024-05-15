@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../db/db.js');
-const fetch = require('node-fetch');
+const fetch = require('node-fetch').default;
+
 
 let lastFetchedId = 0; // This assumes the IDs are sequential and start from 1.
 
