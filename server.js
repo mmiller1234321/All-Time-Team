@@ -56,6 +56,23 @@ app.get('/fetch-gameboard', (req, res) => {
   });
 });
 
+// New route to fetch the high score for a given gameboard
+app.get('/fetch-high-score', (req, res) => {
+  const gameboardId = req.query.gameboard_id;
+  pool.query(
+    'SELECT MAX(total_score) AS high_score FROM games WHERE gameboard_id = ?',
+    [gameboardId],
+    (error, results) => {
+      if (error) {
+        console.error('Error fetching high score:', error);
+        res.status(500).json({ error: 'Internal Server Error', message: error.message });
+      } else {
+        res.json({ high_score: results[0].high_score });
+      }
+    }
+  );
+});
+
 // 404 route
 app.get('*', (req, res) => {
   res.status(404).send('Page not found');

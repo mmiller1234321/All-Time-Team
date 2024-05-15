@@ -60,6 +60,7 @@
 
   <div>
     <p>Total Score: <span id="totalScore"></span></p>
+    <p>High Score: <span id="highScore"></span></p>
     <p>Optimal Score: <span id="optimalScore"></span></p>
   </div>
 </div>
@@ -102,6 +103,7 @@ document.addEventListener("DOMContentLoaded", function() {
       .then(data => {
         updateLabels(data.team, data.stat, data.id);
         displayOptimalScore(data.perfect_score); // Display the optimal score
+        fetchHighScore(data.id); // Fetch and display high score
       })
       .catch(error => {
         console.error('Error fetching team and stat pair:', error);
@@ -124,6 +126,18 @@ document.addEventListener("DOMContentLoaded", function() {
     } else {
       optimalScoreElement.innerText = ''; // Leave blank if no value
     }
+  }
+
+  function fetchHighScore(gameboardId) {
+    var baseUrl = window.location.protocol + '//' + window.location.hostname;
+    fetch(baseUrl + '/fetch-high-score?gameboard_id=' + gameboardId)
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById('highScore').innerText = data.high_score || 'N/A';
+      })
+      .catch(error => {
+        console.error('Error fetching high score:', error);
+      });
   }
 
   function addPlayerRows() {
@@ -190,22 +204,13 @@ document.addEventListener("DOMContentLoaded", function() {
     var baseUrl = window.location.protocol + '//' + window.location.hostname;
     xhr.open("GET", baseUrl + "/autocomplete?query=" + inputElement.value, true);
     xhr.send();
-    
+
     function closeAllLists(elmnt) {
       var autocompleteItems = document.getElementsByClassName("autocomplete-items");
       for (var i = 0; i < autocompleteItems.length; i++) {
         if (elmnt !== autocompleteItems[i] && elmnt !== inputElement) {
           autocompleteItems[i].parentNode.removeChild(autocompleteItems[i]);
         }
-      }
-    }
-  }
-
-  function closeAllLists(elmnt) {
-    var autocompleteItems = document.getElementsByClassName("autocomplete-items");
-    for (var i = 0; i < autocompleteItems.length; i++) {
-      if (elmnt !== autocompleteItems[i] && elmnt !== elmnt) {
-        autocompleteItems[i].parentNode.removeChild(autocompleteItems[i]);
       }
     }
   }
@@ -309,7 +314,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
 </body>
 </html>
-
 
 
 
