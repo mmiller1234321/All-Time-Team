@@ -19,7 +19,7 @@ app.use('/saveScore', require('./routes/saveScore'));
 
 // Fetch all previous gameboards
 app.get('/fetch-previous-gameboards', (req, res) => {
-  pool.query('SELECT id, team_name, stat_name FROM gameboards ORDER BY id DESC', (error, results) => {
+  pool.query('SELECT id, team_name, stat_name FROM gameboard ORDER BY id DESC', (error, results) => {
     if (error) {
       console.error('Error fetching previous gameboards:', error);
       res.status(500).json({ error: 'Internal Server Error', message: error.message });
@@ -32,7 +32,7 @@ app.get('/fetch-previous-gameboards', (req, res) => {
 // Route to fetch a specific gameboard
 app.get('/gameboard/:id', (req, res) => {
   const gameboardId = req.params.id;
-  pool.query('SELECT * FROM gameboards WHERE id = ?', [gameboardId], (error, results) => {
+  pool.query('SELECT * FROM gameboard WHERE id = ?', [gameboardId], (error, results) => {
     if (error) {
       console.error('Error fetching gameboard:', error);
       res.status(500).json({ error: 'Internal Server Error', message: error.message });
