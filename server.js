@@ -1,4 +1,3 @@
-// Import the necessary modules
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -17,6 +16,7 @@ app.use('/search', require('./routes/search'));
 app.use('/autocomplete', require('./routes/autocomplete'));
 app.use('/generateTeamStatPair', require('./routes/generateTeamStatPair'));
 app.use('/saveScore', require('./routes/saveScore'));
+app.use('/getOptimalScore', require('./routes/getOptimalScore')); // New route
 
 // Fetch the first team_name and stat_name pair from generated_tables and insert into gameboard
 function fetchNextRow() {

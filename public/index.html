@@ -1,42 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>All Time Teams</title>
-<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-<style>
-  body {
-    background-color: #71A95A; /* Green like Wrigley Field grass */
-    font-family: Arial, sans-serif;
-  }
-  .container {
-    margin-top: 20px;
-    background-color: #FAFAD2; /* Sand color */
-    padding: 20px;
-    border-radius: 10px;
-  }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-    background-color: #FAFAD2; /* Sand color */
-  }
-  th, td {
-    border: 1px solid #dddddd;
-    text-align: left;
-    padding: 8px;
-  }
-  th {
-    background-color: #f2f2f2; /* Light gray header */
-  }
-  .stat-square {
-    width: 30px;
-    height: 30px;
-    background-color: #ffffff; /* White square */
-    border: 1px solid #dddddd;
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>All Time Teams</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #71A95A; /* Green like Wrigley Field grass */
+      font-family: Arial, sans-serif;
+    }
+    .container {
+      margin-top: 20px;
+      background-color: #FAFAD2; /* Sand color */
+      padding: 20px;
+      border-radius: 10px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background-color: #FAFAD2; /* Sand color */
+    }
+    th, td {
+      border: 1px solid #dddddd;
+      text-align: left;
+      padding: 8px;
+    }
+    th {
+      background-color: #f2f2f2; /* Light gray header */
+    }
+    .stat-square {
+      width: 30px;
+      height: 30px;
+      background-color: #ffffff; /* White square */
+      border: 1px solid #dddddd;
+    }
+  </style>
 </head>
 <body>
 <div class="container">
@@ -60,6 +60,7 @@
 
   <div>
     <p>Total Score: <span id="totalScore"></span></p>
+    <p>Optimal Score: <span id="optimalScore"></span></p>
   </div>
 </div>
 
@@ -95,16 +96,18 @@ document.addEventListener("DOMContentLoaded", function() {
   var gameboardId = ''; // Variable to store gameboard ID
 
   function fetchTeamStatPair() {
-    var baseUrl = window.location.protocol + '//' + window.location.hostname;
-    fetch(baseUrl + '/generateTeamStatPair/team-stat-pair')
-      .then(response => response.json())
-      .then(data => {
-        updateLabels(data.team, data.stat, data.id);
-      })
-      .catch(error => {
-        console.error('Error fetching team and stat pair:', error);
-      });
-  }
+  var baseUrl = window.location.protocol + '//' + window.location.hostname;
+  fetch(baseUrl + '/generateTeamStatPair/team-stat-pair')
+    .then(response => response.json())
+    .then(data => {
+      updateLabels(data.team, data.stat, data.id);
+      fetchOptimalScore(data.id); // Fetch optimal score
+    })
+    .catch(error => {
+      console.error('Error fetching team and stat pair:', error);
+    });
+}
+
 
   function updateLabels(team, stat, id) {
     teamLabelValue = team; // Save team label value globally
@@ -114,6 +117,24 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById('statLabel').innerText = stat;
     document.getElementById('teamLabel').setAttribute('data-id', id);
   }
+
+  function fetchOptimalScore(id) {
+  var baseUrl = window.location.protocol + '//' + window.location.hostname;
+  fetch(baseUrl + '/getOptimalScore?id=' + id)
+    .then(response => response.json())
+    .then(data => {
+      var optimalScoreElement = document.getElementById('optimalScore');
+      if (data.optimal_score !== null) {
+        optimalScoreElement.innerText = data.optimal_score;
+      } else {
+        optimalScoreElement.innerText = ''; // Leave blank if no value
+      }
+    })
+    .catch(error => {
+      console.error('Error fetching optimal score:', error);
+    });
+}
+
 
   function addPlayerRows() {
     var positions = ["C", "1B", "2B", "3B", "SS", "OF", "OF", "OF", "P"];
@@ -298,6 +319,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 </body>
 </html>
+
 
 
 
