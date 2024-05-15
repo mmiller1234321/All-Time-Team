@@ -1,8 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../db/db.js');
-const fetch = require('node-fetch').default;
-
+const fetch = require('node-fetch').default; // Import node-fetch and use its default export
 
 let lastFetchedId = 0; // This assumes the IDs are sequential and start from 1.
 
@@ -77,24 +76,7 @@ router.get('/fetch-high-score/:gameboardId', (req, res) => {
   );
 });
 
-// Function to fetch high score from front-end
-function fetchHighScore(gameboardId) {
-  fetch('/fetch-high-score/' + gameboardId)
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return response.json();
-    })
-    .then(data => {
-      document.getElementById('highScore').innerText = data.high_score || 'N/A'; // Use 'N/A' if high score is not available
-    })
-    .catch(error => {
-      console.error('Error fetching high score:', error);
-      document.getElementById('highScore').innerText = 'N/A'; // Set to 'N/A' in case of error
-    });
-}
-
+// Export the router
 module.exports = router;
 
 
