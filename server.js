@@ -14,9 +14,8 @@ app.use(express.json());
 // Routes setup
 app.use('/search', require('./routes/search'));
 app.use('/autocomplete', require('./routes/autocomplete'));
-app.use('/generateTeamStatPair', require('./routes/generateTeamStatPair'));
+app.use('/generateTeamStatPair', require('./routes/generateTeamStatPair')); // Route for generating team and stat pairs and fetching perfect score
 app.use('/saveScore', require('./routes/saveScore'));
-app.use('/getOptimalScore', require('./routes/getOptimalScore')); // New route
 
 // Fetch the first team_name and stat_name pair from generated_tables and insert into gameboard
 function fetchNextRow() {

@@ -96,18 +96,17 @@ document.addEventListener("DOMContentLoaded", function() {
   var gameboardId = ''; // Variable to store gameboard ID
 
   function fetchTeamStatPair() {
-  var baseUrl = window.location.protocol + '//' + window.location.hostname;
-  fetch(baseUrl + '/generateTeamStatPair/team-stat-pair')
-    .then(response => response.json())
-    .then(data => {
-      updateLabels(data.team, data.stat, data.id);
-      fetchOptimalScore(data.id); // Fetch optimal score
-    })
-    .catch(error => {
-      console.error('Error fetching team and stat pair:', error);
-    });
-}
-
+    var baseUrl = window.location.protocol + '//' + window.location.hostname;
+    fetch(baseUrl + '/generateTeamStatPair/team-stat-pair')
+      .then(response => response.json())
+      .then(data => {
+        updateLabels(data.team, data.stat, data.id);
+        displayOptimalScore(data.perfect_score); // Display the optimal score
+      })
+      .catch(error => {
+        console.error('Error fetching team and stat pair:', error);
+      });
+  }
 
   function updateLabels(team, stat, id) {
     teamLabelValue = team; // Save team label value globally
@@ -118,23 +117,14 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById('teamLabel').setAttribute('data-id', id);
   }
 
-  function fetchOptimalScore(id) {
-  var baseUrl = window.location.protocol + '//' + window.location.hostname;
-  fetch(baseUrl + '/getOptimalScore?id=' + id)
-    .then(response => response.json())
-    .then(data => {
-      var optimalScoreElement = document.getElementById('optimalScore');
-      if (data.optimal_score !== null) {
-        optimalScoreElement.innerText = data.optimal_score;
-      } else {
-        optimalScoreElement.innerText = ''; // Leave blank if no value
-      }
-    })
-    .catch(error => {
-      console.error('Error fetching optimal score:', error);
-    });
-}
-
+  function displayOptimalScore(optimalScore) {
+    var optimalScoreElement = document.getElementById('optimalScore');
+    if (optimalScore !== null) {
+      optimalScoreElement.innerText = optimalScore;
+    } else {
+      optimalScoreElement.innerText = ''; // Leave blank if no value
+    }
+  }
 
   function addPlayerRows() {
     var positions = ["C", "1B", "2B", "3B", "SS", "OF", "OF", "OF", "P"];
@@ -319,10 +309,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
 </body>
 </html>
-
-
-
-
 
 
 
