@@ -130,6 +130,8 @@ document.addEventListener("DOMContentLoaded", function() {
       .then(response => response.json())
       .then(data => {
         updatePageWithGameboard(data);
+        fetchHighScore(data.id); // Fetch high score when a gameboard is loaded
+        periodicHighScoreUpdate(); // Start periodic update
       })
       .catch(error => console.error('Error loading gameboard:', error));
   };
@@ -148,6 +150,7 @@ document.addEventListener("DOMContentLoaded", function() {
         updateLabels(data.team, data.stat, data.id);
         displayOptimalScore(data.perfect_score);
         fetchHighScore(data.id);
+        periodicHighScoreUpdate(); // Start periodic update
       })
       .catch(error => {
         console.error('Error fetching team and stat pair:', error);
@@ -178,6 +181,13 @@ document.addEventListener("DOMContentLoaded", function() {
       .catch(error => {
         console.error('Error fetching high score:', error);
       });
+  }
+
+  function periodicHighScoreUpdate() {
+    if (gameboardId) {
+      fetchHighScore(gameboardId);
+      setTimeout(periodicHighScoreUpdate, 300000); // Update every 5 minutes
+    }
   }
 
   function addPlayerRows() {
@@ -216,144 +226,145 @@ document.addEventListener("DOMContentLoaded", function() {
     var currentFocus;
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
-      if (this.readyState === 4 && this.status === 200) {
-        var suggestions = JSON.parse(this.responseText);
-        closeAllLists();
-        if (!inputElement.value || suggestions.length === 0) {
-          return false;
-        }
-        currentFocus = -1;
-        var autocompleteList = document.createElement("div");
-        autocompleteList.setAttribute("id", inputElement.id + "autocomplete-list");
-        autocompleteList.setAttribute("class", "autocomplete-items");
-        inputElement.parentNode.appendChild(autocompleteList);
-        suggestions.forEach(suggestion => {
-          var suggestionItem = document.createElement("div");
-          suggestionItem.innerHTML = "<strong>" + suggestion.fullName.substr(0, inputElement.value.length) + "</strong>";
-          suggestionItem.innerHTML += suggestion.fullName.substr(inputElement.value.length);
-          suggestionItem.innerHTML += "<br><small>Born in " + suggestion.birthYear + "</small>"; // Display birth year in smaller text
-          suggestionItem.innerHTML += "<input type='hidden' value='" + suggestion.fullName + "'>";
-          suggestionItem.addEventListener("click", function(e) {
-            inputElement.value = this.getElementsByTagName("input")[0].value;
-            closeAllLists();
-          });
-          autocompleteList.appendChild(suggestionItem);
-        });
-      }
-    };
-    var baseUrl = window.location.protocol + '//' + window.location.hostname;
-    xhr.open("GET", baseUrl + "/autocomplete?query=" + inputElement.value, true);
-    xhr.send();
+            if (this.readyState === 4 && this.status === 200) {
+              var suggestions = JSON.parse(this.responseText);
+              closeAllLists();
+              if (!inputElement.value || suggestions.length === 0) {
+                return false;
+              }
+              currentFocus = -1;
+              var autocompleteList = document.createElement("div");
+              autocompleteList.setAttribute("id", inputElement.id + "autocomplete-list");
+              autocompleteList.setAttribute("class", "autocomplete-items");
+              inputElement.parentNode.appendChild(autocompleteList);
+              suggestions.forEach(suggestion => {
+                var suggestionItem = document.createElement("div");
+                suggestionItem.innerHTML = "<strong>" + suggestion.fullName.substr(0, inputElement.value.length) + "</strong>";
+                suggestionItem.innerHTML += suggestion.fullName.substr(inputElement.value.length);
+                suggestionItem.innerHTML += "<br><small>Born in " + suggestion.birthYear + "</small>"; // Display birth year in smaller text
+                suggestionItem.innerHTML += "<input type='hidden' value='" + suggestion.fullName + "'>";
+                suggestionItem.addEventListener("click", function(e) {
+                  inputElement.value = this.getElementsByTagName("input")[0].value;
+                  closeAllLists();
+                });
+                autocompleteList.appendChild(suggestionItem);
+              });
+            }
+          };
+          var baseUrl = window.location.protocol + '//' + window.location.hostname;
+          xhr.open("GET", baseUrl + "/autocomplete?query=" + inputElement.value, true);
+          xhr.send();
 
-    function closeAllLists(elmnt) {
-      var autocompleteItems = document.getElementsByClassName("autocomplete-items");
-      for (var i = 0; i < autocompleteItems.length; i++) {
-        if (elmnt !== autocompleteItems[i] && elmnt !== inputElement) {
-          autocompleteItems[i].parentNode.removeChild(autocompleteItems[i]);
-        }
-      }
-    }
-  }
-
-  function handleSubmit(event) {
-    var submitButton = event.target;
-    if (submitButton.disabled) return;
-    submitButton.disabled = true;
-    enabledSubmitButtons--; // Decrement the count of enabled submit buttons
-
-    var row = submitButton.closest("tr");
-    var playerNameInput = row.cells[0].children[0];
-    var playerName = playerNameInput.value.trim();
-
-    if (submittedPlayers.includes(playerName)) {
-      alert('Player has already been submitted. Please select a different player.');
-      submitButton.disabled = false;
-      enabledSubmitButtons++; // Increment the count of enabled submit buttons
-      return;
-    }
-
-    if (playerName !== '') {
-      var position = row.cells[1].textContent;
-      var team = teamLabelValue; // Use global variable for team label value
-      var stat = statLabelValue; // Use global variable for stat label value
-      var id = document.getElementById('teamLabel').getAttribute('data-id');
-
-      var baseUrl = window.location.protocol + '//' + window.location.hostname;
-      var xhr = new XMLHttpRequest();
-      xhr.open('GET', baseUrl + '/search?playerName=' + playerName + '&position=' + position + '&team=' + team + '&stat=' + stat + '&id=' + id, true);
-      xhr.onload = function () {
-        if (xhr.status === 200) {
-          var statSquare = row.cells[2].children[0];
-          var statValue = xhr.responseText;
-          statSquare.textContent = (statValue === 'null') ? 'N/A' : statValue;
-          updateTotalScore();
-          submissionButtonCount--;
-          if (enabledSubmitButtons === 0) { // If all submit buttons are disabled
-            var totalScore = document.getElementById('totalScore').textContent;
-            console.log('All buttons submitted. Total Score:', totalScore);
-            sendFinalScore(totalScore, id); // Update to send the correct information
+          function closeAllLists(elmnt) {
+            var autocompleteItems = document.getElementsByClassName("autocomplete-items");
+            for (var i = 0; i < autocompleteItems.length; i++) {
+              if (elmnt !== autocompleteItems[i] && elmnt !== inputElement) {
+                autocompleteItems[i].parentNode.removeChild(autocompleteItems[i]);
+              }
+            }
           }
-        } else {
-          console.error('Error fetching data:', xhr.statusText);
-          submitButton.disabled = false;
-          enabledSubmitButtons++; // Increment the count of enabled submit buttons
         }
-      };
-      xhr.onerror = function () {
-        console.error('Error fetching data.');
-        submitButton.disabled = false;
-        enabledSubmitButtons++; // Increment the count of enabled submit buttons
-      };
-      xhr.send();
-    } else {
-      submitButton.disabled = false;
-      enabledSubmitButtons++; // Increment the count of enabled submit buttons
-    }
-  }
 
-  function updateTotalScore() {
-    var statSquares = document.querySelectorAll('.stat-square');
-    var totalScore = 0;
-    statSquares.forEach(square => {
-      var score = parseInt(square.textContent, 10);
-      if (!isNaN(score)) totalScore += score;
-    });
-    document.getElementById('totalScore').textContent = totalScore;
-  }
+        function handleSubmit(event) {
+          var submitButton = event.target;
+          if (submitButton.disabled) return;
+          submitButton.disabled = true;
+          enabledSubmitButtons--; // Decrement the count of enabled submit buttons
 
-  function sendFinalScore(totalScore, gameboardId) {
-    var team = teamLabelValue; // Use global variable for team label value
-    var stat = statLabelValue; // Use global variable for stat label value
-    var baseUrl = window.location.protocol + '//' + window.location.hostname;
-    fetch(baseUrl + '/saveScore', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        total_score: totalScore,
-        team_name: team,
-        stat_name: stat,
-        gameboard_id: gameboardId // Ensure the correct key name is used here
-      })
-    })
-    .then(response => response.json())
-    .then(result => {
-      console.log('Response from save-score:', result.message);
-      alert('All buttons submitted!\nTotal Score: ' + totalScore);
-    })
-    .catch(error => console.error('Failed to save score:', error));
-  }
+          var row = submitButton.closest("tr");
+          var playerNameInput = row.cells[0].children[0];
+          var playerName = playerNameInput.value.trim();
 
-  // Initial setup
-  fetchTeamStatPair();
-  addPlayerRows();
-  document.getElementById('instructionsButton').addEventListener('click', function() {
-    $('#instructionsModal').modal('show');
-  });
-});
+          if (submittedPlayers.includes(playerName)) {
+            alert('Player has already been submitted. Please select a different player.');
+            submitButton.disabled = false;
+            enabledSubmitButtons++; // Increment the count of enabled submit buttons
+            return;
+          }
+
+          if (playerName !== '') {
+            var position = row.cells[1].textContent;
+            var team = teamLabelValue; // Use global variable for team label value
+            var stat = statLabelValue; // Use global variable for stat label value
+            var id = document.getElementById('teamLabel').getAttribute('data-id');
+
+            var baseUrl = window.location.protocol + '//' + window.location.hostname;
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', baseUrl + '/search?playerName=' + playerName + '&position=' + position + '&team=' + team + '&stat=' + stat + '&id=' + id, true);
+            xhr.onload = function () {
+              if (xhr.status === 200) {
+                var statSquare = row.cells[2].children[0];
+                var statValue = xhr.responseText;
+                statSquare.textContent = (statValue === 'null') ? 'N/A' : statValue;
+                updateTotalScore();
+                submissionButtonCount--;
+                if (enabledSubmitButtons === 0) { // If all submit buttons are disabled
+                  var totalScore = document.getElementById('totalScore').textContent;
+                  console.log('All buttons submitted. Total Score:', totalScore);
+                  sendFinalScore(totalScore, id); // Update to send the correct information
+                }
+              } else {
+                console.error('Error fetching data:', xhr.statusText);
+                submitButton.disabled = false;
+                enabledSubmitButtons++; // Increment the count of enabled submit buttons
+              }
+            };
+            xhr.onerror = function () {
+              console.error('Error fetching data.');
+              submitButton.disabled = false;
+              enabledSubmitButtons++; // Increment the count of enabled submit buttons
+            };
+            xhr.send();
+          } else {
+            submitButton.disabled = false;
+            enabledSubmitButtons++; // Increment the count of enabled submit buttons
+          }
+        }
+
+        function updateTotalScore() {
+          var statSquares = document.querySelectorAll('.stat-square');
+          var totalScore = 0;
+          statSquares.forEach(square => {
+            var score = parseInt(square.textContent, 10);
+            if (!isNaN(score)) totalScore += score;
+          });
+          document.getElementById('totalScore').textContent = totalScore;
+        }
+
+        function sendFinalScore(totalScore, gameboardId) {
+          var team = teamLabelValue; // Use global variable for team label value
+          var stat = statLabelValue; // Use global variable for stat label value
+          var baseUrl = window.location.protocol + '//' + window.location.hostname;
+          fetch(baseUrl + '/saveScore', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              total_score: totalScore,
+              team_name: team,
+              stat_name: stat,
+              gameboard_id: gameboardId // Ensure the correct key name is used here
+            })
+          })
+          .then(response => response.json())
+          .then(result => {
+            console.log('Response from save-score:', result.message);
+            alert('All buttons submitted!\nTotal Score: ' + totalScore);
+          })
+          .catch(error => console.error('Failed to save score:', error));
+        }
+
+        // Initial setup
+        fetchTeamStatPair();
+        addPlayerRows();
+        document.getElementById('instructionsButton').addEventListener('click', function() {
+          $('#instructionsModal').modal('show');
+        });
+      });
 </script>
 
 </body>
 </html>
+
 
 
 
