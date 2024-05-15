@@ -307,14 +307,14 @@ document.addEventListener("DOMContentLoaded", function() {
     var baseUrl = window.location.protocol + '//' + window.location.hostname;
     fetch(baseUrl + '/saveScore', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        total_score: totalScore,
-        team_name: team,
-        stat_name: stat,
-        gameboard_id: gameboardId // Ensure the correct key name is used here
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          total_score: totalScore,
+          team_name: team,
+          stat_name: stat,
+          gameboard_id: gameboardId // Ensure the correct key name is used here
+        })
       })
-    })
     .then(response => response.json())
     .then(result => {
       console.log('Response from save-score:', result.message);
@@ -327,8 +327,5 @@ document.addEventListener("DOMContentLoaded", function() {
 
 </body>
 </html>
-
-
-
 
 
