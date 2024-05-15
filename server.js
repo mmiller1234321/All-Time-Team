@@ -28,8 +28,7 @@ app.get('/fetch-previous-gameboards', (req, res) => {
     }
   });
 });
-
-// Fetch the high score for a specific gameboard
+// fetch high score for a specific gameboard
 app.get('/fetch-high-score/:gameboardId', (req, res) => {
   const { gameboardId } = req.params;
   pool.query(
@@ -40,11 +39,12 @@ app.get('/fetch-high-score/:gameboardId', (req, res) => {
         console.error('Error fetching high score:', error);
         return res.status(500).json({ error: 'Internal Server Error', message: error.message });
       }
-      const highScore = results[0].high_score || 'N/A'; // Handle case where there might be no scores
+      const highScore = results[0] ? results[0].high_score : 'N/A';
       res.json({ high_score: highScore });
     }
   );
 });
+
 
 // Route to fetch a specific gameboard
 app.get('/gameboard/:id', (req, res) => {
