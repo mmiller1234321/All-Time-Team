@@ -119,7 +119,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
   function displayOptimalScore(optimalScore) {
     var optimalScoreElement = document.getElementById('optimalScore');
-    if (optimalScore !== null) {
+    if (optimalScore !== null && optimalScore !== undefined) {
       optimalScoreElement.innerText = optimalScore;
     } else {
       optimalScoreElement.innerText = ''; // Leave blank if no value
