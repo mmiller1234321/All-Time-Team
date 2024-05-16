@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const pool = require('./db/db.js'); // Ensure this is the callback pool from 'mysql2'
+const pool = require('./db/db.js');
 const app = express();
 
 require('dotenv').config();
@@ -11,15 +11,16 @@ app.use(cors());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 
-// Prevent caching for autocomplete route
-app.use('/autocomplete', (req, res, next) => {
+// Apply no-cache headers globally to all responses
+app.use((req, res, next) => {
   res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
   res.setHeader('Pragma', 'no-cache');
   res.setHeader('Expires', '0');
   next();
-}, require('./routes/autocomplete'));
+});
 
 // Routes setup
+app.use('/autocomplete', require('./routes/autocomplete'));
 app.use('/search', require('./routes/search'));
 app.use('/generateTeamStatPair', require('./routes/generateTeamStatPair'));
 app.use('/saveScore', require('./routes/saveScore'));
@@ -47,8 +48,7 @@ app.get('/fetch-high-score/:gameboardId', (req, res) => {
         console.error('Error fetching high score:', error);
         return res.status(500).json({ error: 'Internal Server Error', message: error.message });
       }
-      const highScore = results[0].high_score || 'N/A'; // Handle case where there might be no scores
-      res.json({ high_score: highScore });
+      res.json({ high_score: results[0].high_score || 'N/A' });
     }
   );
 });
@@ -61,7 +61,6 @@ app.get('/gameboard/:id', (req, res) => {
       console.error('Error fetching gameboard:', error);
       res.status(500).json({ error: 'Internal Server Error', message: error.message });
     } else if (results.length > 0) {
-      // Fetch the high score for the loaded gameboard
       pool.query(
         'SELECT MAX(total_score) AS high_score FROM games WHERE gameboard_id = ?',
         [gameboardId],
@@ -70,9 +69,7 @@ app.get('/gameboard/:id', (req, res) => {
             console.error('Error fetching high score:', error);
             res.status(500).json({ error: 'Internal Server Error', message: error.message });
           } else {
-            const highScore = scoreResults[0].high_score || 'N/A';
-            // Combine the gameboard data with the high score and send to client
-            res.json({ gameboard: results[0], high_score: highScore });
+            res.json({ gameboard: results[0], high_score: scoreResults[0].high_score || 'N/A' });
           }
         }
       );

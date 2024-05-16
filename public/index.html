@@ -201,52 +201,52 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 
   function autocomplete(inputElement) {
-  var currentFocus;
-  var xhr = new XMLHttpRequest();
-  xhr.onreadystatechange = function() {
-    if (this.readyState === 4 && this.status === 200) {
-      var suggestions = JSON.parse(this.responseText);
-      closeAllLists();
-      if (!inputElement.value || suggestions.length === 0) {
-        return false;
-      }
-      currentFocus = -1;
-      var autocompleteList = document.createElement("div");
-      autocompleteList.setAttribute("id", inputElement.id + "autocomplete-list");
-      autocompleteList.setAttribute("class", "autocomplete-items");
-      inputElement.parentNode.appendChild(autocompleteList);
-      suggestions.forEach(suggestion => {
-        var suggestionItem = document.createElement("div");
-        suggestionItem.innerHTML = "<strong>" + suggestion.fullName.substr(0, inputElement.value.length) + "</strong>" + suggestion.fullName.substr(inputElement.value.length);
-        suggestionItem.innerHTML += "<input type='hidden' value='" + suggestion.fullName + "'>";
-        suggestionItem.addEventListener("click", function(e) {
-          inputElement.value = this.getElementsByTagName("input")[0].value;
-          closeAllLists();
+    var currentFocus;
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+      if (this.readyState === 4 && this.status === 200) {
+        var suggestions = JSON.parse(this.responseText);
+        closeAllLists();
+        if (!inputElement.value || suggestions.length === 0) {
+          return false;
+        }
+        currentFocus = -1;
+        var autocompleteList = document.createElement("div");
+        autocompleteList.setAttribute("id", inputElement.id + "autocomplete-list");
+        autocompleteList.setAttribute("class", "autocomplete-items");
+        inputElement.parentNode.appendChild(autocompleteList);
+        suggestions.forEach(suggestion => {
+          var suggestionItem = document.createElement("div");
+          suggestionItem.innerHTML = "<strong>" + suggestion.fullName.substr(0, inputElement.value.length) + "</strong>" + suggestion.fullName.substr(inputElement.value.length);
+          suggestionItem.innerHTML += " <small>(" + suggestion.birthYear + ")</small>";
+          suggestionItem.innerHTML += "<input type='hidden' value='" + suggestion.fullName + "'>";
+          suggestionItem.addEventListener("click", function(e) {
+            inputElement.value = this.getElementsByTagName("input")[0].value;
+            closeAllLists();
+          });
+          autocompleteList.appendChild(suggestionItem);
         });
-        autocompleteList.appendChild(suggestionItem);
-      });
-    }
-  };
-  var baseUrl = window.location.protocol + '//' + window.location.hostname;
-  xhr.open("GET", baseUrl + "/autocomplete?query=" + encodeURIComponent(inputElement.value), true);
-  xhr.send();
+      }
+    };
+    var baseUrl = window.location.protocol + '//' + window.location.hostname;
+    xhr.open("GET", baseUrl + "/autocomplete?query=" + encodeURIComponent(inputElement.value), true);
+    xhr.send();
 
-  function closeAllLists(elmnt) {
-    var autocompleteItems = document.getElementsByClassName("autocomplete-items");
-    for (var i = 0; i < autocompleteItems.length; i++) {
-      if (elmnt !== autocompleteItems[i] && elmnt !== inputElement) {
-        autocompleteItems[i].parentNode.removeChild(autocompleteItems[i]);
+    function closeAllLists(elmnt) {
+      var autocompleteItems = document.getElementsByClassName("autocomplete-items");
+      for (var i = 0; i < autocompleteItems.length; i++) {
+        if (elmnt !== autocompleteItems[i] && elmnt !== inputElement) {
+          autocompleteItems[i].parentNode.removeChild(autocompleteItems[i]);
+        }
       }
     }
   }
-}
 
-document.addEventListener("input", function(e) {
-  if (e.target.matches(".player-input")) {
-    autocomplete(e.target);
-  }
-});
-
+  document.addEventListener("input", function(e) {
+    if (e.target.matches(".player-input")) {
+      autocomplete(e.target);
+    }
+  });
 
   function handleSubmit(event) {
     var submitButton = event.target;
@@ -294,30 +294,30 @@ document.addEventListener("input", function(e) {
       };
       xhr.onerror = function () {
         console.error('Error fetching data.');
-              submitButton.disabled = false;
-              enabledSubmitButtons++; // Increment the count of enabled submit buttons
-            };
-            xhr.send();
-          } else {
-            submitButton.disabled = false;
-            enabledSubmitButtons++; // Increment the count of enabled submit buttons
-          }
-        }
+        submitButton.disabled = false;
+        enabledSubmitButtons++; // Increment the count of enabled submit buttons
+      };
+      xhr.send();
+    } else {
+      submitButton.disabled = false;
+      enabledSubmitButtons++; // Increment the count of enabled submit buttons
+    }
+  }
 
-        function updateTotalScore() {
-          var statSquares = document.querySelectorAll('.stat-square');
-          var totalScore = 0;
-          statSquares.forEach(square => {
-            var score = parseInt(square.textContent, 10);
-            if (!isNaN(score)) totalScore += score;
-          });
-          document.getElementById('totalScore').textContent = totalScore;
-        }
+  function updateTotalScore() {
+    var statSquares = document.querySelectorAll('.stat-square');
+    var totalScore = 0;
+    statSquares.forEach(square => {
+      var score = parseInt(square.textContent, 10);
+      if (!isNaN(score)) totalScore += score;
+    });
+    document.getElementById('totalScore').textContent = totalScore;
+  }
 
-        function sendFinalScore(totalScore, gameboardId) {
-          var team = teamLabelValue; // Use global variable for team label value
-          var stat = statLabelValue; // Use global variable for stat label value
-          var baseUrl = window.location.protocol + '//' + window.location.hostname;
+  function sendFinalScore(totalScore, gameboardId) {
+    var team = teamLabelValue; // Use global variable for team label value
+    var stat = statLabelValue; // Use global variable for stat label value
+    var baseUrl = window.location.protocol + '//' + window.location.hostname;
     fetch(baseUrl + '/saveScore', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -347,5 +347,3 @@ document.addEventListener("input", function(e) {
 
 </body>
 </html>
-
-

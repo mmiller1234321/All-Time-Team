@@ -54,23 +54,8 @@ router.get('/team-stat-pair', (req, res) => {
   });
 });
 
-router.get('/fetch-high-score/:gameboardId', (req, res) => {
-  const { gameboardId } = req.params;
-  pool.query(
-    'SELECT MAX(total_score) AS high_score FROM games WHERE gameboard_id = ?',
-    [gameboardId],
-    (error, results) => {
-      if (error) {
-        console.error('Error fetching high score:', error);
-        return res.status(500).json({ error: 'Internal Server Error', message: error.message });
-      }
-      const highScore = results[0].high_score || 'N/A';
-      res.json({ high_score: highScore });
-    }
-  );
-});
-
 module.exports = router;
+
 
 
 
