@@ -15,7 +15,7 @@ The project is deployed and can be accessed [here](https://alltimeteam-205f3b996
 
 ## Version 2.0
 
-High score functionality. New boards generated every 24 hours. Access to play previously released boards. 
+High score functionality. New boards generated every 24 hours. Access to play previously released boards. Optimal Score is not accurate. Working on it!
 
 ## Version 1.2
 
