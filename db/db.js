@@ -2,7 +2,10 @@ require('dotenv').config();
 const mysql = require('mysql2');
 
 const pool = mysql.createPool({
-  uri: process.env.CLEARDB_MAUVE_URL
+  uri: process.env.CLEARDB_MAUVE_URL,
+  waitForConnections: true,
+  connectionLimit: 10, // Limit the number of connections to prevent exceeding the max_user_connections
+  queueLimit: 0
 });
 
 pool.getConnection((err, connection) => {

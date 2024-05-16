@@ -11,14 +11,6 @@ app.use(cors());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 
-// Apply no-cache headers globally to all responses
-app.use((req, res, next) => {
-  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-  res.setHeader('Pragma', 'no-cache');
-  res.setHeader('Expires', '0');
-  next();
-});
-
 // Routes setup
 app.use('/autocomplete', require('./routes/autocomplete'));
 app.use('/search', require('./routes/search'));
