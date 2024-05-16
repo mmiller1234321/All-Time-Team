@@ -10,7 +10,7 @@ function generateNextTeamStatPair() {
   pool.getConnection((err, connection) => {
     if (err) {
       console.error('Error getting MySQL connection:', err);
-      setTimeout(generateNextTeamStatPair, 24 * 60 * 60 * 1000); // Set timeout to 24 hours
+      setTimeout(generateNextTeamStatPair, 8 * 60 * 1000);
       return;
     }
 
@@ -18,7 +18,7 @@ function generateNextTeamStatPair() {
       if (error) {
         console.error('Error executing MySQL query:', error);
         connection.release();
-        setTimeout(generateNextTeamStatPair, 24 * 60 * 60 * 1000); // Set timeout to 24 hours
+        setTimeout(generateNextTeamStatPair, 8 * 60 * 1000);
         return;
       }
 
@@ -36,14 +36,14 @@ function generateNextTeamStatPair() {
             } else {
               console.log(`Inserted ${teamName} - ${statName} - ${perfectScore} into gameboard`);
             }
-            setTimeout(generateNextTeamStatPair, 24 * 60 * 60 * 1000); // Set timeout to 24 hours
+            setTimeout(generateNextTeamStatPair, 8 * 60 * 1000);
           }
         );
       } else {
         connection.release();
         console.log('Reached end of table, restarting cycle.');
         lastFetchedId = 0;
-        setTimeout(generateNextTeamStatPair, 24 * 60 * 60 * 1000); // Set timeout to 24 hours
+        setTimeout(generateNextTeamStatPair, 8 * 60 * 1000);
       }
     });
   });
@@ -75,6 +75,132 @@ router.get('/team-stat-pair', (req, res) => {
 });
 
 module.exports = router;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
