@@ -13,6 +13,10 @@ This project is licensed under the [CC BY-NC-ND 4.0](https://creativecommons.org
 
 The project is deployed and can be accessed [here](https://alltimeteam-205f3b996ac7.herokuapp.com/).
 
+## Version 2.0
+
+High score functionality. New boards generated every 24 hours. Access to play previously released boards. 
+
 ## Version 1.2
 
 High Score (global) is functional and displays on UI. Optimal Score is functional (but still have to actually get correct data). Next, allowing play of earlier boards and testing fetching new boards via timer. 
