@@ -36,6 +36,15 @@
       background-color: #ffffff; /* White square */
       border: 1px solid #dddddd;
     }
+    .alert-card {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80%;
+      z-index: 1050;
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -87,6 +96,25 @@
   </div>
 </div>
 
+<!-- Alert card for Previous Games -->
+<div id="previousGamesAlert" class="alert alert-info alert-card">
+  <button type="button" class="close" onclick="closeAlertCard()">&times;</button>
+  <h4 class="alert-heading">Previous Games</h4>
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>Gameboard ID</th>
+        <th>Team Name</th>
+        <th>Stat Name</th>
+        <th>Play Now</th>
+      </tr>
+    </thead>
+    <tbody id="previousGamesTableBody">
+      <!-- Previous games will be dynamically inserted here -->
+    </tbody>
+  </table>
+</div>
+
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
@@ -104,26 +132,28 @@ document.addEventListener("DOMContentLoaded", function() {
     fetch(baseUrl + '/fetch-previous-gameboards')
       .then(response => response.json())
       .then(gameboards => {
-        var gameboardsList = document.createElement('div');
+        var tableBody = document.getElementById('previousGamesTableBody');
+        tableBody.innerHTML = ''; // Clear existing rows
         gameboards.forEach(gameboard => {
-          var gameboardCard = document.createElement('div');
-          gameboardCard.className = 'card';
-          gameboardCard.style = 'margin: 10px;';
-          gameboardCard.innerHTML = `
-            <div class="card-body">
-              <h5 class="card-title">Game Number: <a href="#" onclick="loadGameboard(${gameboard.id})">${gameboard.id}</a></h5>
-              <p class="card-text">${gameboard.team_name} - ${gameboard.stat_name}</p>
-            </div>
+          var row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${gameboard.id}</td>
+            <td>${gameboard.team_name}</td>
+            <td>${gameboard.stat_name}</td>
+            <td><button class="btn btn-link" onclick="loadGameboard(${gameboard.id})">Play Now!</button></td>
           `;
-          gameboardsList.appendChild(gameboardCard);
+          tableBody.appendChild(row);
         });
-        var container = document.getElementsByClassName('container')[0];
-        container.appendChild(gameboardsList);
+        document.getElementById('previousGamesAlert').style.display = 'block'; // Show the alert card
       })
       .catch(error => {
         console.error('Error fetching previous gameboards:', error);
       });
   });
+
+  window.closeAlertCard = function() {
+    document.getElementById('previousGamesAlert').style.display = 'none';
+  };
 
   window.loadGameboard = function(gameboardId) {
     fetch(`${window.location.protocol + '//' + window.location.hostname}/gameboard/${gameboardId}`)
@@ -131,6 +161,7 @@ document.addEventListener("DOMContentLoaded", function() {
       .then(data => {
         updatePageWithGameboard(data.gameboard);
         document.getElementById('highScore').innerText = data.high_score || 'N/A'; // Fetch high score when a gameboard is loaded
+        closeAlertCard(); // Close the alert card
       })
       .catch(error => console.error('Error loading gameboard:', error));
   };
@@ -228,7 +259,7 @@ document.addEventListener("DOMContentLoaded", function() {
         suggestions.forEach(suggestion => {
           var suggestionItem = document.createElement("div");
           suggestionItem.innerHTML = "<strong>" + suggestion.fullName.substr(0, inputElement.value.length) + "</strong>" + suggestion.fullName.substr(inputElement.value.length);
-          suggestionItem.innerHTML += " <small>(" + suggestion.birthYear + ")</small>";
+          suggestionItem.innerHTML += " <br><small>born in " + suggestion.birthYear + "</small>";
           suggestionItem.innerHTML += "<input type='hidden' value='" + suggestion.fullName + "'>";
           suggestionItem.addEventListener("click", function(e) {
             inputElement.value = this.getElementsByTagName("input")[0].value;
@@ -357,5 +388,4 @@ document.addEventListener("DOMContentLoaded", function() {
 
 </body>
 </html>
-
 
