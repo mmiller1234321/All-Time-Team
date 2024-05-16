@@ -13,9 +13,17 @@ This project is licensed under the [CC BY-NC-ND 4.0](https://creativecommons.org
 
 The project is deployed and can be accessed [here](https://alltimeteam-205f3b996ac7.herokuapp.com/).
 
+## Version 2.01
+
+Updating styling. Mobile first media query. Still in development. 
 ## Version 2.0
 
-High score functionality. New boards generated every 24 hours. Access to play previously released boards. Optimal Score is not accurate. Working on it!
+High score functionality. New boards generated every 24 hours. Access to play previously released boards. 
+
+Coming Soon:
+Optimal Score is not accurate. Working on it!
+Disable of name fields after submission.
+Get rid of white box around the number. It looks like a field you're supposed to type in. Thank you for the feedback users!
 
 ## Version 1.2
 

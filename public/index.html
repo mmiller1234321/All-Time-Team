@@ -9,18 +9,19 @@
     body {
       background-color: #71A95A; /* Green like Wrigley Field grass */
       font-family: Arial, sans-serif;
+      color: #333; /* Ensuring good contrast */
+      padding: 0 5%; /* Padding for small screens */
     }
     .container {
-      margin-top: 20px;
+      margin-top: 10px;
       background-color: #FAFAD2; /* Sand color */
-      padding: 20px;
-      border-radius: 10px;
+      padding: 10px;
+      border-radius: 5px;
     }
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 20px;
-      background-color: #FAFAD2; /* Sand color */
+      margin-top: 10px;
     }
     th, td {
       border: 1px solid #dddddd;
@@ -30,20 +31,41 @@
     th {
       background-color: #f2f2f2; /* Light gray header */
     }
-    .stat-square {
-      width: 30px;
-      height: 30px;
-      background-color: #ffffff; /* White square */
-      border: 1px solid #dddddd;
+    input[type="text"], button {
+      width: 100%; /* Full width for better accessibility */
+      margin: 4px 0; /* Spacing for touch targets */
+      font-size: 16px; /* Adequate font size for readability on mobile */
     }
     .alert-card {
       position: fixed;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 80%;
+      width: 95%; /* Make it nearly full width on small screens */
       z-index: 1050;
       display: none;
+    }
+
+    /* Media Query for Larger Screens */
+    @media (min-width: 768px) {
+      body {
+        padding: 0 10%; /* Slightly larger padding on larger screens */
+      }
+      .container {
+        margin-top: 20px;
+        padding: 20px;
+        border-radius: 10px;
+      }
+      table {
+        margin-top: 20px;
+      }
+      input[type="text"], button {
+        width: auto; /* Allow natural width */
+        margin: 8px;
+      }
+      .alert-card {
+        width: 50%; /* Adjust width for better visibility on larger screens */
+      }
     }
   </style>
 </head>
@@ -227,10 +249,7 @@ document.addEventListener("DOMContentLoaded", function() {
       var cellPosition = row.insertCell(1);
       cellPosition.textContent = position;
 
-      var cellStat = row.insertCell(2);
-      var statDiv = document.createElement("div");
-      statDiv.className = "stat-square";
-      cellStat.appendChild(statDiv);
+      var cellStat = row.insertCell(2);  // Directly use this cell to display stats
 
       var cellSubmit = row.insertCell(3);
       var button = document.createElement("button");
@@ -298,10 +317,12 @@ document.addEventListener("DOMContentLoaded", function() {
     var row = submitButton.closest("tr");
     var playerNameInput = row.cells[0].children[0];
     var playerName = playerNameInput.value.trim();
+    playerNameInput.disabled = true; // Disable the player name input field after submission
 
     if (submittedPlayers.includes(playerName)) {
       alert('Player has already been submitted. Please select a different player.');
       submitButton.disabled = false;
+      playerNameInput.disabled = false; // Re-enable the input field if the player has already been submitted
       enabledSubmitButtons++; // Increment the count of enabled submit buttons
       return;
     }
@@ -314,12 +335,12 @@ document.addEventListener("DOMContentLoaded", function() {
 
       var baseUrl = window.location.protocol + '//' + window.location.hostname;
       var xhr = new XMLHttpRequest();
-      xhr.open('GET', baseUrl + '/search?playerName=' + playerName + '&position=' + position + '&team=' + team + '&stat=' + stat + '&id=' + id, true);
+      xhr.open('GET', baseUrl + '/search?playerName=' + encodeURIComponent(playerName) + '&position=' + encodeURIComponent(position) + '&team=' + encodeURIComponent(team) + '&stat=' + encodeURIComponent(stat) + '&id=' + encodeURIComponent(id), true);
       xhr.onload = function () {
         if (xhr.status === 200) {
-          var statSquare = row.cells[2].children[0];
+          var statCell = row.cells[2];
           var statValue = xhr.responseText;
-          statSquare.textContent = (statValue === 'null') ? 'N/A' : statValue;
+          statCell.textContent = (statValue === 'null') ? 'N/A' : statValue;
           updateTotalScore();
           submissionButtonCount--;
           if (enabledSubmitButtons === 0) { // If all submit buttons are disabled
@@ -329,57 +350,60 @@ document.addEventListener("DOMContentLoaded", function() {
           }
         } else {
           console.error('Error fetching data:', xhr.statusText);
-          submitButton.disabled = false;
-          enabledSubmitButtons++; // Increment the count of enabled submit buttons
-        }
-      };
-      xhr.onerror = function () {
-        console.error('Error fetching data.');
-        submitButton.disabled = false;
-        enabledSubmitButtons++; // Increment the count of enabled submit buttons
-      };
-      xhr.send();
-    } else {
-      submitButton.disabled = false;
-      enabledSubmitButtons++; // Increment the count of enabled submit buttons
-    }
-  }
+                  submitButton.disabled = false;
+                  playerNameInput.disabled = false; // Re-enable the input field if there was an error fetching data
+                  enabledSubmitButtons++; // Increment the count of enabled submit buttons
+                }
+              };
+              xhr.onerror = function () {
+                console.error('Error fetching data.');
+                submitButton.disabled = false;
+                playerNameInput.disabled = false; // Re-enable the input field in case of an error
+                enabledSubmitButtons++; // Increment the count of enabled submit buttons
+              };
+              xhr.send();
+            } else {
+              submitButton.disabled = false;
+              playerNameInput.disabled = false; // Re-enable the input field if it was empty
+              enabledSubmitButtons++; // Increment the count of enabled submit buttons
+            }
+          }
 
-  function updateTotalScore() {
-    var statSquares = document.querySelectorAll('.stat-square');
-    var totalScore = 0;
-    statSquares.forEach(square => {
-      var score = parseInt(square.textContent, 10);
-      if (!isNaN(score)) totalScore += score;
-    });
-    document.getElementById('totalScore').textContent = totalScore;
-  }
+          function updateTotalScore() {
+            var statSquares = document.querySelectorAll('.stat-square');
+            var totalScore = 0;
+            statSquares.forEach(square => {
+              var score = parseInt(square.textContent, 10);
+              if (!isNaN(score)) totalScore += score;
+            });
+            document.getElementById('totalScore').textContent = totalScore;
+          }
 
-  function sendFinalScore(totalScore, gameboardId) {
-    var team = teamLabelValue; // Use global variable for team label value
-    var stat = statLabelValue; // Use global variable for stat label value
-    var baseUrl = window.location.protocol + '//' + window.location.hostname;
-    fetch(baseUrl + '/saveScore', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        total_score: totalScore,
-        team_name: team,
-        stat_name: stat,
-        gameboard_id: gameboardId // Ensure the correct key name is used here
-      })
-    })
-    .then(response => response.json())
-    .then(result => {
-      console.log('Response from save-score:', result.message);
-      alert('All buttons submitted!\nTotal Score: ' + totalScore);
-    })
-    .catch(error => console.error('Failed to save score:', error));
-  }
+          function sendFinalScore(totalScore, gameboardId) {
+            var team = teamLabelValue; // Use global variable for team label value
+            var stat = statLabelValue; // Use global variable for stat label value
+            var baseUrl = window.location.protocol + '//' + window.location.hostname;
+            fetch(baseUrl + '/saveScore', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                total_score: totalScore,
+                team_name: team,
+                stat_name: stat,
+                gameboard_id: gameboardId // Ensure the correct key name is used here
+              })
+            })
+            .then(response => response.json())
+            .then(result => {
+              console.log('Response from save-score:', result.message);
+              alert('All buttons submitted!\nTotal Score: ' + totalScore);
+            })
+            .catch(error => console.error('Failed to save score:', error));
+          }
 
-  // Initial setup
-  fetchTeamStatPair();
-  addPlayerRows();
+          // Initial setup
+          fetchTeamStatPair();
+          addPlayerRows();
   document.getElementById('instructionsButton').addEventListener('click', function() {
     $('#instructionsModal').modal('show');
   });
