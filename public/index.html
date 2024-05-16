@@ -36,14 +36,6 @@
       background-color: #ffffff; /* White square */
       border: 1px solid #dddddd;
     }
-    .alert-card {
-      background-color: #fff3cd;
-      border: 1px solid #ffeeba;
-      padding: 20px;
-      border-radius: 10px;
-      margin-top: 20px;
-      display: none; /* Initially hidden */
-    }
   </style>
 </head>
 <body>
@@ -74,23 +66,6 @@
     <p>High Score: <span id="highScore"></span></p>
     <p>Optimal Score: <span id="optimalScore"></span></p>
   </div>
-  
-  <div id="previousGamesAlert" class="alert-card">
-    <h4>Previous Games</h4>
-    <table class="table table-bordered">
-      <thead>
-        <tr>
-          <th>Grid</th>
-          <th>Date</th>
-          <th>Score</th>
-          <th>Play Now</th>
-        </tr>
-      </thead>
-      <tbody id="previousGamesTable">
-        <!-- Previous games will be appended here -->
-      </tbody>
-    </table>
-  </div>
 </div>
 
 <div class="modal fade" id="instructionsModal" tabindex="-1" role="dialog" aria-labelledby="instructionsModalLabel" aria-hidden="true">
@@ -104,6 +79,38 @@
       </div>
       <div class="modal-body">
         <p>Build an All Time Team! Choose a player who played for the given team and position. The score will be that player's highest season stat total for that category. Your total score is the sum of all the players' scores. Have fun!</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal for Previous Games -->
+<div class="modal fade" id="previousGamesModal" tabindex="-1" role="dialog" aria-labelledby="previousGamesModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="previousGamesModalLabel">Previous Games</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Gameboard ID</th>
+              <th>Team Name</th>
+              <th>Stat Name</th>
+              <th>Play Now</th>
+            </tr>
+          </thead>
+          <tbody id="previousGamesTableBody">
+            <!-- Previous games will be dynamically inserted here -->
+          </tbody>
+        </table>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -129,20 +136,19 @@ document.addEventListener("DOMContentLoaded", function() {
     fetch(baseUrl + '/fetch-previous-gameboards')
       .then(response => response.json())
       .then(gameboards => {
-        var previousGamesTable = document.getElementById('previousGamesTable');
-        previousGamesTable.innerHTML = ''; // Clear previous entries
+        var tableBody = document.getElementById('previousGamesTableBody');
+        tableBody.innerHTML = ''; // Clear existing rows
         gameboards.forEach(gameboard => {
           var row = document.createElement('tr');
           row.innerHTML = `
             <td>${gameboard.id}</td>
-            <td>${new Date().toLocaleDateString()}</td>
-            <td>${gameboard.team_name} - ${gameboard.stat_name}</td>
-            <td><a href="#" onclick="loadGameboard(${gameboard.id})">Play Now!</a></td>
+            <td>${gameboard.team_name}</td>
+            <td>${gameboard.stat_name}</td>
+            <td><button class="btn btn-link" onclick="loadGameboard(${gameboard.id})">Play Now!</button></td>
           `;
-          previousGamesTable.appendChild(row);
+          tableBody.appendChild(row);
         });
-        var alertCard = document.getElementById('previousGamesAlert');
-        alertCard.style.display = 'block'; // Show the alert card
+        $('#previousGamesModal').modal('show'); // Show the modal
       })
       .catch(error => {
         console.error('Error fetching previous gameboards:', error);
@@ -371,3 +377,4 @@ document.addEventListener("DOMContentLoaded", function() {
 
 </body>
 </html>
+
