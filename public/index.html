@@ -201,38 +201,35 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 
   function autocomplete(inputElement) {
-    var currentFocus;
-    var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function() {
-      if (this.readyState === 4 && this.status === 200) {
-        var suggestions = JSON.parse(this.responseText);
-        closeAllLists();
-        if (!inputElement.value || suggestions.length === 0) {
-          return false;
-        }
-        currentFocus = -1;
-        var autocompleteList = document.createElement("div");
-        autocompleteList.setAttribute("id", inputElement.id + "autocomplete-list");
-        autocompleteList.setAttribute("class", "autocomplete-items");
-        inputElement.parentNode.appendChild(autocompleteList);
-        suggestions.forEach(suggestion => {
-          var suggestionItem = document.createElement("div");
-          suggestionItem.innerHTML = "<strong>" + suggestion.fullName.substr(0, inputElement.value.length) + "</strong>";
-          suggestionItem.innerHTML += suggestion.fullName.substr(inputElement.value.length);
-          suggestionItem.innerHTML += "<br><small>Born in " + suggestion.birthYear + "</small>"; // Display birth year in smaller text
-          suggestionItem.innerHTML += "<input type='hidden' value='" + suggestion.fullName + "'>";
-          suggestionItem.addEventListener("click", function(e) {
-            inputElement.value = this.getElementsByTagName("input")[0].value;
-            closeAllLists();
-          });
-          autocompleteList.appendChild(suggestionItem);
-        });
+  var currentFocus;
+  var xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = function() {
+    if (this.readyState === 4 && this.status === 200) {
+      var suggestions = JSON.parse(this.responseText);
+      closeAllLists();
+      if (!inputElement.value || suggestions.length === 0) {
+        return false;
       }
-    };
-    var baseUrl = window.location.protocol + '//' + window.location.hostname;
-    xhr.open("GET", baseUrl + "/autocomplete?query=" + inputElement.value, true);
-    xhr.send();
-  }
+      currentFocus = -1;
+      var autocompleteList = document.createElement("div");
+      autocompleteList.setAttribute("id", inputElement.id + "autocomplete-list");
+      autocompleteList.setAttribute("class", "autocomplete-items");
+      inputElement.parentNode.appendChild(autocompleteList);
+      suggestions.forEach(suggestion => {
+        var suggestionItem = document.createElement("div");
+        suggestionItem.innerHTML = "<strong>" + suggestion.fullName.substr(0, inputElement.value.length) + "</strong>" + suggestion.fullName.substr(inputElement.value.length);
+        suggestionItem.innerHTML += "<input type='hidden' value='" + suggestion.fullName + "'>";
+        suggestionItem.addEventListener("click", function(e) {
+          inputElement.value = this.getElementsByTagName("input")[0].value;
+          closeAllLists();
+        });
+        autocompleteList.appendChild(suggestionItem);
+      });
+    }
+  };
+  var baseUrl = window.location.protocol + '//' + window.location.hostname;
+  xhr.open("GET", baseUrl + "/autocomplete?query=" + encodeURIComponent(inputElement.value), true);
+  xhr.send();
 
   function closeAllLists(elmnt) {
     var autocompleteItems = document.getElementsByClassName("autocomplete-items");
@@ -242,6 +239,14 @@ document.addEventListener("DOMContentLoaded", function() {
       }
     }
   }
+}
+
+document.addEventListener("input", function(e) {
+  if (e.target.matches(".player-input")) {
+    autocomplete(e.target);
+  }
+});
+
 
   function handleSubmit(event) {
     var submitButton = event.target;
