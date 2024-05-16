@@ -11,9 +11,16 @@ app.use(cors());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 
+// Prevent caching for autocomplete route
+app.use('/autocomplete', (req, res, next) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  next();
+}, require('./routes/autocomplete'));
+
 // Routes setup
 app.use('/search', require('./routes/search'));
-app.use('/autocomplete', require('./routes/autocomplete'));
 app.use('/generateTeamStatPair', require('./routes/generateTeamStatPair'));
 app.use('/saveScore', require('./routes/saveScore'));
 
@@ -80,4 +87,3 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-
