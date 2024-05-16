@@ -93,7 +93,7 @@
   </table>
 
   <div>
-    <p>Total Score: <span id="totalScore"></span></p>
+    <p>Total Score: <span id="totalScore">0</span></p>
     <p>High Score: <span id="highScore"></span></p>
     <p>Optimal Score: <span id="optimalScore"></span></p>
   </div>
@@ -117,6 +117,7 @@
     </div>
   </div>
 </div>
+
 
 <!-- Alert card for Previous Games -->
 <div id="previousGamesAlert" class="alert alert-info alert-card">
@@ -341,6 +342,7 @@ document.addEventListener("DOMContentLoaded", function() {
           var statCell = row.cells[2];
           var statValue = xhr.responseText;
           statCell.textContent = (statValue === 'null') ? 'N/A' : statValue;
+          statCell.classList.add('stat-square');
           updateTotalScore();
           submissionButtonCount--;
           if (enabledSubmitButtons === 0) { // If all submit buttons are disabled
@@ -350,60 +352,60 @@ document.addEventListener("DOMContentLoaded", function() {
           }
         } else {
           console.error('Error fetching data:', xhr.statusText);
-                  submitButton.disabled = false;
-                  playerNameInput.disabled = false; // Re-enable the input field if there was an error fetching data
-                  enabledSubmitButtons++; // Increment the count of enabled submit buttons
-                }
-              };
-              xhr.onerror = function () {
-                console.error('Error fetching data.');
-                submitButton.disabled = false;
-                playerNameInput.disabled = false; // Re-enable the input field in case of an error
-                enabledSubmitButtons++; // Increment the count of enabled submit buttons
-              };
-              xhr.send();
-            } else {
-              submitButton.disabled = false;
-              playerNameInput.disabled = false; // Re-enable the input field if it was empty
-              enabledSubmitButtons++; // Increment the count of enabled submit buttons
-            }
-          }
+          submitButton.disabled = false;
+          playerNameInput.disabled = false; // Re-enable the input field if there was an error fetching data
+          enabledSubmitButtons++; // Increment the count of enabled submit buttons
+        }
+      };
+      xhr.onerror = function () {
+          console.error('Error fetching data.');
+          submitButton.disabled = false;
+          playerNameInput.disabled = false; // Re-enable the input field in case of an error
+          enabledSubmitButtons++; // Increment the count of enabled submit buttons
+      };
+      xhr.send();
+    } else {
+      submitButton.disabled = false;
+      playerNameInput.disabled = false; // Re-enable the input field if it was empty
+      enabledSubmitButtons++; // Increment the count of enabled submit buttons
+    }
+  }
 
-          function updateTotalScore() {
-            var statSquares = document.querySelectorAll('.stat-square');
-            var totalScore = 0;
-            statSquares.forEach(square => {
-              var score = parseInt(square.textContent, 10);
-              if (!isNaN(score)) totalScore += score;
-            });
-            document.getElementById('totalScore').textContent = totalScore;
-          }
+  function updateTotalScore() {
+    var statSquares = document.querySelectorAll('.stat-square');
+    var totalScore = 0;
+    statSquares.forEach(square => {
+      var score = parseInt(square.textContent, 10);
+      if (!isNaN(score)) totalScore += score;
+    });
+    document.getElementById('totalScore').textContent = totalScore;
+  }
 
-          function sendFinalScore(totalScore, gameboardId) {
-            var team = teamLabelValue; // Use global variable for team label value
-            var stat = statLabelValue; // Use global variable for stat label value
-            var baseUrl = window.location.protocol + '//' + window.location.hostname;
-            fetch(baseUrl + '/saveScore', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                total_score: totalScore,
-                team_name: team,
-                stat_name: stat,
-                gameboard_id: gameboardId // Ensure the correct key name is used here
-              })
-            })
-            .then(response => response.json())
-            .then(result => {
-              console.log('Response from save-score:', result.message);
-              alert('All buttons submitted!\nTotal Score: ' + totalScore);
-            })
-            .catch(error => console.error('Failed to save score:', error));
-          }
+  function sendFinalScore(totalScore, gameboardId) {
+    var team = teamLabelValue; // Use global variable for team label value
+    var stat = statLabelValue; // Use global variable for stat label value
+    var baseUrl = window.location.protocol + '//' + window.location.hostname;
+    fetch(baseUrl + '/saveScore', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        total_score: totalScore,
+        team_name: team,
+        stat_name: stat,
+        gameboard_id: gameboardId // Ensure the correct key name is used here
+      })
+    })
+    .then(response => response.json())
+    .then(result => {
+      console.log('Response from save-score:', result.message);
+      alert('All buttons submitted!\nTotal Score: ' + totalScore);
+    })
+    .catch(error => console.error('Failed to save score:', error));
+  }
 
-          // Initial setup
-          fetchTeamStatPair();
-          addPlayerRows();
+  // Initial setup
+  fetchTeamStatPair();
+  addPlayerRows();
   document.getElementById('instructionsButton').addEventListener('click', function() {
     $('#instructionsModal').modal('show');
   });
@@ -412,4 +414,3 @@ document.addEventListener("DOMContentLoaded", function() {
 
 </body>
 </html>
-
