@@ -161,6 +161,16 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById('teamLabel').innerText = team;
     document.getElementById('statLabel').innerText = stat;
     document.getElementById('teamLabel').setAttribute('data-id', id);
+
+    // Fetch and display the high score for the current gameboard
+    fetch(`${window.location.protocol + '//' + window.location.hostname}/fetch-high-score/${id}`)
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById('highScore').innerText = data.high_score || 'N/A';
+      })
+      .catch(error => {
+        console.error('Error fetching high score:', error);
+      });
   }
 
   function displayOptimalScore(optimalScore) {
