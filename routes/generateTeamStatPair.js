@@ -10,7 +10,7 @@ function generateNextTeamStatPair() {
   pool.getConnection((err, connection) => {
     if (err) {
       console.error('Error getting MySQL connection:', err);
-      setTimeout(generateNextTeamStatPair, 8 * 60 * 1000);
+      setTimeout(generateNextTeamStatPair, 24 );
       return;
     }
 
@@ -18,7 +18,7 @@ function generateNextTeamStatPair() {
       if (error) {
         console.error('Error executing MySQL query:', error);
         connection.release();
-        setTimeout(generateNextTeamStatPair, 8 * 60 * 1000);
+        setTimeout(generateNextTeamStatPair, 24 * 60 * 60 * 1000);
         return;
       }
 
