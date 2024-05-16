@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../db/db.js');
-const axios = require('axios');
 
 let lastFetchedId = 0;
 
@@ -72,6 +71,8 @@ router.get('/fetch-high-score/:gameboardId', (req, res) => {
 });
 
 module.exports = router;
+
+
 
 
 

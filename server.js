@@ -46,7 +46,7 @@ app.get('/fetch-high-score/:gameboardId', (req, res) => {
   );
 });
 
-// Route to fetch a specific gameboard
+// Route to fetch a specific gameboard along with its high score
 app.get('/gameboard/:id', (req, res) => {
   const gameboardId = req.params.id;
   pool.query('SELECT * FROM gameboard WHERE id = ?', [gameboardId], (error, results) => {
@@ -54,7 +54,21 @@ app.get('/gameboard/:id', (req, res) => {
       console.error('Error fetching gameboard:', error);
       res.status(500).json({ error: 'Internal Server Error', message: error.message });
     } else if (results.length > 0) {
-      res.json(results[0]);
+      // Fetch the high score for the loaded gameboard
+      pool.query(
+        'SELECT MAX(total_score) AS high_score FROM games WHERE gameboard_id = ?',
+        [gameboardId],
+        (error, scoreResults) => {
+          if (error) {
+            console.error('Error fetching high score:', error);
+            res.status(500).json({ error: 'Internal Server Error', message: error.message });
+          } else {
+            const highScore = scoreResults[0].high_score || 'N/A';
+            // Combine the gameboard data with the high score and send to client
+            res.json({ gameboard: results[0], high_score: highScore });
+          }
+        }
+      );
     } else {
       res.status(404).send('Gameboard not found');
     }
@@ -66,3 +80,4 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
