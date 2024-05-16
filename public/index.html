@@ -87,38 +87,6 @@
   </div>
 </div>
 
-<!-- Modal for Previous Games -->
-<div class="modal fade" id="previousGamesModal" tabindex="-1" role="dialog" aria-labelledby="previousGamesModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="previousGamesModalLabel">Previous Games</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <table class="table table-bordered">
-          <thead>
-            <tr>
-              <th>Gameboard ID</th>
-              <th>Team Name</th>
-              <th>Stat Name</th>
-              <th>Play Now</th>
-            </tr>
-          </thead>
-          <tbody id="previousGamesTableBody">
-            <!-- Previous games will be dynamically inserted here -->
-          </tbody>
-        </table>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
@@ -136,19 +104,21 @@ document.addEventListener("DOMContentLoaded", function() {
     fetch(baseUrl + '/fetch-previous-gameboards')
       .then(response => response.json())
       .then(gameboards => {
-        var tableBody = document.getElementById('previousGamesTableBody');
-        tableBody.innerHTML = ''; // Clear existing rows
+        var gameboardsList = document.createElement('div');
         gameboards.forEach(gameboard => {
-          var row = document.createElement('tr');
-          row.innerHTML = `
-            <td>${gameboard.id}</td>
-            <td>${gameboard.team_name}</td>
-            <td>${gameboard.stat_name}</td>
-            <td><button class="btn btn-link" onclick="loadGameboard(${gameboard.id})">Play Now!</button></td>
+          var gameboardCard = document.createElement('div');
+          gameboardCard.className = 'card';
+          gameboardCard.style = 'margin: 10px;';
+          gameboardCard.innerHTML = `
+            <div class="card-body">
+              <h5 class="card-title">Game Number: <a href="#" onclick="loadGameboard(${gameboard.id})">${gameboard.id}</a></h5>
+              <p class="card-text">${gameboard.team_name} - ${gameboard.stat_name}</p>
+            </div>
           `;
-          tableBody.appendChild(row);
+          gameboardsList.appendChild(gameboardCard);
         });
-        $('#previousGamesModal').modal('show'); // Show the modal
+        var container = document.getElementsByClassName('container')[0];
+        container.appendChild(gameboardsList);
       })
       .catch(error => {
         console.error('Error fetching previous gameboards:', error);
@@ -191,6 +161,16 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById('teamLabel').innerText = team;
     document.getElementById('statLabel').innerText = stat;
     document.getElementById('teamLabel').setAttribute('data-id', id);
+
+    // Fetch and display the high score for the current gameboard
+    fetch(`${window.location.protocol + '//' + window.location.hostname}/fetch-high-score/${id}`)
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById('highScore').innerText = data.high_score || 'N/A';
+      })
+      .catch(error => {
+        console.error('Error fetching high score:', error);
+      });
   }
 
   function displayOptimalScore(optimalScore) {
