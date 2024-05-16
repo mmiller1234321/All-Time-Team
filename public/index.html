@@ -36,6 +36,14 @@
       background-color: #ffffff; /* White square */
       border: 1px solid #dddddd;
     }
+    .alert-card {
+      background-color: #fff3cd;
+      border: 1px solid #ffeeba;
+      padding: 20px;
+      border-radius: 10px;
+      margin-top: 20px;
+      display: none; /* Initially hidden */
+    }
   </style>
 </head>
 <body>
@@ -65,6 +73,23 @@
     <p>Total Score: <span id="totalScore"></span></p>
     <p>High Score: <span id="highScore"></span></p>
     <p>Optimal Score: <span id="optimalScore"></span></p>
+  </div>
+  
+  <div id="previousGamesAlert" class="alert-card">
+    <h4>Previous Games</h4>
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Grid</th>
+          <th>Date</th>
+          <th>Score</th>
+          <th>Play Now</th>
+        </tr>
+      </thead>
+      <tbody id="previousGamesTable">
+        <!-- Previous games will be appended here -->
+      </tbody>
+    </table>
   </div>
 </div>
 
@@ -104,21 +129,20 @@ document.addEventListener("DOMContentLoaded", function() {
     fetch(baseUrl + '/fetch-previous-gameboards')
       .then(response => response.json())
       .then(gameboards => {
-        var gameboardsList = document.createElement('div');
+        var previousGamesTable = document.getElementById('previousGamesTable');
+        previousGamesTable.innerHTML = ''; // Clear previous entries
         gameboards.forEach(gameboard => {
-          var gameboardCard = document.createElement('div');
-          gameboardCard.className = 'card';
-          gameboardCard.style = 'margin: 10px;';
-          gameboardCard.innerHTML = `
-            <div class="card-body">
-              <h5 class="card-title">Game Number: <a href="#" onclick="loadGameboard(${gameboard.id})">${gameboard.id}</a></h5>
-              <p class="card-text">${gameboard.team_name} - ${gameboard.stat_name}</p>
-            </div>
+          var row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${gameboard.id}</td>
+            <td>${new Date().toLocaleDateString()}</td>
+            <td>${gameboard.team_name} - ${gameboard.stat_name}</td>
+            <td><a href="#" onclick="loadGameboard(${gameboard.id})">Play Now!</a></td>
           `;
-          gameboardsList.appendChild(gameboardCard);
+          previousGamesTable.appendChild(row);
         });
-        var container = document.getElementsByClassName('container')[0];
-        container.appendChild(gameboardsList);
+        var alertCard = document.getElementById('previousGamesAlert');
+        alertCard.style.display = 'block'; // Show the alert card
       })
       .catch(error => {
         console.error('Error fetching previous gameboards:', error);
@@ -161,16 +185,6 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById('teamLabel').innerText = team;
     document.getElementById('statLabel').innerText = stat;
     document.getElementById('teamLabel').setAttribute('data-id', id);
-
-    // Fetch and display the high score for the current gameboard
-    fetch(`${window.location.protocol + '//' + window.location.hostname}/fetch-high-score/${id}`)
-      .then(response => response.json())
-      .then(data => {
-        document.getElementById('highScore').innerText = data.high_score || 'N/A';
-      })
-      .catch(error => {
-        console.error('Error fetching high score:', error);
-      });
   }
 
   function displayOptimalScore(optimalScore) {
