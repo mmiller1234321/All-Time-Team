@@ -126,15 +126,16 @@ document.addEventListener("DOMContentLoaded", function() {
   });
 
   window.loadGameboard = function(gameboardId) {
-    fetch(`${window.location.protocol + '//' + window.location.hostname}/gameboard/${gameboardId}`)
-      .then(response => response.json())
-      .then(data => {
-        updatePageWithGameboard(data);
-        fetchHighScore(data.id); // Fetch high score when a gameboard is loaded
-        periodicHighScoreUpdate(); // Start periodic update
-      })
-      .catch(error => console.error('Error loading gameboard:', error));
-  };
+  fetch(`${window.location.protocol + '//' + window.location.hostname}/gameboard/${gameboardId}`)
+    .then(response => response.json())
+    .then(data => {
+      updatePageWithGameboard(data);
+      fetchHighScore(data.id); // This ensures the high score for the loaded gameboard is fetched
+      periodicHighScoreUpdate(); // Start periodic update
+    })
+    .catch(error => console.error('Error loading gameboard:', error));
+};
+
 
   function updatePageWithGameboard(gameboard) {
     document.getElementById('teamLabel').innerText = gameboard.team_name;
