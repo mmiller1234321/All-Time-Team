@@ -74,7 +74,7 @@
   <div class="d-flex justify-content-between align-items-center">
     <h2>All Time Teams</h2>
     <div>
-      <button type="button" class="btn btn-primary" id="previousGamesButton">Previous Games</button>
+      <button type="button" class="btn btn-primary" id="previousGamesButton">Click Here To Play</button>
       <button type="button" class="btn btn-primary" id="instructionsButton">Instructions</button>
     </div>
   </div>
@@ -219,7 +219,6 @@ document.addEventListener("DOMContentLoaded", function() {
     fetch(baseUrl + '/generateTeamStatPair/team-stat-pair')
       .then(response => response.json())
       .then(data => {
-        throw new Error('Testing error handling'); // Testing error handling
         updateLabels(data.team, data.stat, data.id);
         displayOptimalScore(data.perfect_score);
       })
