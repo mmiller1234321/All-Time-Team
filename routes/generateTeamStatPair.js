@@ -2,15 +2,18 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db/db.js');
 
+// This variable holds the ID of the last row fetched and inserted into the gameboard table.
 let lastFetchedId = 0;
 
 function generateNextTeamStatPair() {
+  // This query selects the next row in the generated_tables based on the last fetched ID.
   const query = 'SELECT team_name, stat_name, perfect_score, id FROM generated_tables WHERE id > ? ORDER BY id ASC LIMIT 1';
 
   pool.getConnection((err, connection) => {
     if (err) {
       console.error('Error getting MySQL connection:', err);
-      setTimeout(generateNextTeamStatPair, 24 );
+      // Retry immediately but this should ideally be a longer delay, possibly with exponential backoff.
+      setTimeout(generateNextTeamStatPair, 1000 * 10); // Retry after 10 seconds
       return;
     }
 
@@ -18,14 +21,16 @@ function generateNextTeamStatPair() {
       if (error) {
         console.error('Error executing MySQL query:', error);
         connection.release();
-        setTimeout(generateNextTeamStatPair, 24 * 60 * 60 * 1000);
+        // Set a retry with a proper delay if there's a query execution error.
+        setTimeout(generateNextTeamStatPair, 1000 * 60 * 5); // Retry after 5 minutes
         return;
       }
 
       if (results.length > 0) {
         const { team_name: teamName, stat_name: statName, perfect_score: perfectScore, id } = results[0];
-        lastFetchedId = id;
+        lastFetchedId = id; // Update lastFetchedId to the id of the fetched row.
 
+        // Insert the fetched data into the gameboard table.
         connection.query(
           'INSERT INTO gameboard (team_name, stat_name, perfect_score) VALUES (?, ?, ?)',
           [teamName, statName, perfectScore],
@@ -36,14 +41,15 @@ function generateNextTeamStatPair() {
             } else {
               console.log(`Inserted ${teamName} - ${statName} - ${perfectScore} into gameboard`);
             }
-            setTimeout(generateNextTeamStatPair, 24 * 60 * 60 * 1000);
+            // Schedule the next execution of this function to occur after 24 hours.
+            setTimeout(generateNextTeamStatPair, 1000 * 60 * 60 * 24);
           }
         );
       } else {
         connection.release();
         console.log('Reached end of table, restarting cycle.');
-        lastFetchedId = 0;
-        setTimeout(generateNextTeamStatPair, 8 * 60 * 1000);
+        lastFetchedId = 0; // Reset the ID to start from the beginning of the table.
+        setTimeout(generateNextTeamStatPair, 1000 * 60 * 5); // Retry after 5 minutes
       }
     });
   });
@@ -59,6 +65,7 @@ router.get('/team-stat-pair', (req, res) => {
       return;
     }
 
+    // Fetch the most recently inserted team and stat pair from the gameboard.
     connection.query('SELECT id, team_name, stat_name, perfect_score FROM gameboard ORDER BY ID DESC LIMIT 1', (error, results) => {
       connection.release();
       if (error) {
@@ -75,6 +82,7 @@ router.get('/team-stat-pair', (req, res) => {
 });
 
 module.exports = router;
+
 
 
 
