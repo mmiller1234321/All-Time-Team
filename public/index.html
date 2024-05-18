@@ -94,8 +94,8 @@
 
   <div>
     <p>Total Score: <span id="totalScore">0</span></p>
-    <p>High Score: <span id="highScore"></span></p>
-    <p>Optimal Score: <span id="optimalScore"></span></p>
+    <p>High Score: <span id="highScore">N/A</span></p>
+    <p>Optimal Score: <span id="optimalScore">N/A</span></p>
   </div>
 </div>
 
@@ -104,9 +104,9 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="instructionsModalLabel">Instructions</h5>
-        <button type="button" the class="close" data-dismiss="modal" aria-label="Close">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
-        </button>
+        </button
       </div>
       <div class="modal-body">
         <p>Build an All Time Team! Choose a player who played for the given team and position. The score will be that player's highest season stat total for that category. Your total score is the sum of all the players' scores. Have fun!</p>
@@ -121,7 +121,7 @@
           <tbody>
             <tr><td>2B</td><td>Doubles</td></tr>
             <tr><td>3B</td><td>Triiples</td></tr>
-            <tr><td>BB</td><td>Walks</td></tr>
+            <tr><td>BB</td><td>Walks</td></tr
             <tr><td>H</td><td>Hits</td></tr>
             <tr><td>HR</td><td>Home Runs</td></tr>
             <tr><td>IBB</td><td>Intentional Walks</td></tr>
@@ -154,13 +154,16 @@
     <tbody id="previousGamesTableBody">
       <!-- Previous games will be dynamically inserted here -->
     </tbody>
-  </table
+  </table>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script>
+// Declare the variable in global scope
+var enabledSubmitButtons = 9; // Initial count of submit buttons, assuming 9 player positions
+
 document.addEventListener("DOMContentLoaded", async function() {
   try {
     await fetchTeamStatPair();  // Ensure team and stat labels are set before setting up the rest of the UI
@@ -216,25 +219,26 @@ function showPreviousGames() {
     });
 }
 
-function updateLabels(team, stat, id) {
-  document.getElementById('teamLabel').innerText = team;
-  document.getElementById('statLabel').innerText = stat;
-  document.getElementById('teamLabel').setAttribute('data-id', id);
-
-  // Fetch and display the high score for the current gameboard
-  fetch(`${window.location.protocol + '//' + window.location.hostname}/fetch-high-score/${id}`)
+function loadGameboard(gameboardId) {
+  var baseUrl = window.location.protocol + '//' + window.location.hostname;
+  fetch(baseUrl + '/gameboard/' + gameboardId)
     .then(response => response.json())
     .then(data => {
-      document.getElementById('highScore').innerText = data.high_score || 'N/A';
+      updatePageWithGameboard(data.gameboard);
+      document.getElementById('highScore').innerText = data.high_score || 'N/A'; // Fetch high score when a gameboard is loaded
+      closeAlertCard(); // Close the alert card
     })
-    .catch(error => {
-      console.error('Error fetching high score:', error);
-    });
+    .catch(error => console.error('Error loading gameboard:', error));
 }
 
-function displayOptimalScore(optimalScore) {
-  var optimalScoreElement = document.getElementById('optimalScore');
-  optimalScoreElement.innerText = optimalScore || 'N/A';
+function updatePageWithGameboard(gameboard) {
+  document.getElementById('teamLabel').innerText = gameboard.team_name;
+  document.getElementById('statLabel').innerText = gameboard.stat_name;
+  // Additional updates as needed...
+}
+
+function closeAlertCard() {
+  document.getElementById('previousGamesAlert').style.display = 'none';
 }
 
 function addPlayerRows() {
@@ -247,9 +251,7 @@ function addPlayerRows() {
     input.type = "text";
     input.className = "form-control player-input";
     input.placeholder = "Enter player's name";
-    input.addEventListener('input', function() {
-      autocomplete(this);
-    });
+    input.addEventListener('input', autocomplete);
     cellName.appendChild(input);
 
     var cellPosition = row.insertCell(1);
@@ -284,7 +286,6 @@ function autocomplete(inputElement) {
       suggestions.forEach(suggestion => {
         var suggestionItem = document.createElement("div");
         suggestionItem.innerHTML = "<strong>" + suggestion.fullName.substr(0, inputElement.value.length) + "</strong>" + suggestion.fullName.substr(inputElement.value.length);
-        suggestionItem.innerHTML += " <br><small>born in " + suggestion.birthYear + "</small>";
         suggestionItem.innerHTML += "<input type='hidden' value='" + suggestion.fullName + "'>";
         suggestionItem.addEventListener("click", function(e) {
           inputElement.value = this.getElementsByTagName("input")[0].value;
