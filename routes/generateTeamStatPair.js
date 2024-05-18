@@ -36,14 +36,14 @@ function generateNextTeamStatPair() {
             } else {
               console.log(`Inserted ${teamName} - ${statName} - ${perfectScore} into gameboard`);
             }
-            setTimeout(generateNextTeamStatPair, 720000); // Now it waits 12 minutes instead of 24 hours
+            setTimeout(generateNextTeamStatPair, 86400000); // Now it waits 24 hours instead of 12 minutes
           }
         );
       } else {
         connection.release();
         console.log('Reached end of table, restarting cycle.');
         lastFetchedId = 0;
-        setTimeout(generateNextTeamStatPair, 720000); // Also wait 12 minutes to start over if at the end of the table
+        setTimeout(generateNextTeamStatPair, 86400000); // Also wait 24 hours to start over if at the end of the table
       }
     });
   });
@@ -75,6 +75,7 @@ router.get('/team-stat-pair', (req, res) => {
 });
 
 module.exports = router;
+
 
 
 
