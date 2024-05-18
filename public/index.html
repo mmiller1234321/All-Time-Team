@@ -219,11 +219,12 @@ document.addEventListener("DOMContentLoaded", function() {
     fetch(baseUrl + '/generateTeamStatPair/team-stat-pair')
       .then(response => response.json())
       .then(data => {
+        throw new Error('Testing error handling'); // Testing error handling
         updateLabels(data.team, data.stat, data.id);
         displayOptimalScore(data.perfect_score);
       })
       .catch(error => {
-        console.error('Error fetching team and stat pair:', {error});
+        console.error('Error fetching team and stat pair:', {error}); // updated her to try to fix error message 5.18
       });
   }
 
