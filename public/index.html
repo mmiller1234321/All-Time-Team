@@ -223,7 +223,7 @@ document.addEventListener("DOMContentLoaded", function() {
         displayOptimalScore(data.perfect_score);
       })
       .catch(error => {
-        console.error('Error fetching team and stat pair:', error);
+        console.error('Error fetching team and stat pair:', {error});
       });
   }
 
