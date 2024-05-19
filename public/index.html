@@ -74,7 +74,7 @@
   <div class="d-flex justify-content-between align-items-center">
     <h2>All Time Teams</h2>
     <div>
-      <button type="button" class="btn btn-primary" id="previousGamesButton">Play previous games</button>
+      <button type="button" class="btn btn-primary" id="previousGamesButton">Play Previous Games</button>
       <button type="button" class="btn btn-primary" id="instructionsButton">Instructions</button>
     </div>
   </div>
@@ -94,8 +94,8 @@
 
   <div>
     <p>Total Score: <span id="totalScore">0</span></p>
-    <p>High Score: <span id="highScore">N/A</span></p>
-    <p>Optimal Score: <span id="optimalScore">N/A</span></p>
+    <p>High Score: <span id="highScore"></span></p>
+    <p>Optimal Score: <span id="optimalScore"></span></p>
   </div>
 </div>
 
@@ -209,21 +209,9 @@ document.addEventListener("DOMContentLoaded", function() {
   };
 
   function updatePageWithGameboard(gameboard) {
-    document.getElementById('teamLabel').innerText = gameboard.team_name;
-    document.getElementById('statLabel').innerText = gameboard.stat_name;
-    teamLabelValue = gameboard.team_name;
-    statLabelValue = gameboard.stat_name;
-    gameboardId = gameboard.id;
-
-    // Fetch and display the high score for the current gameboard
-    fetch(`${window.location.protocol + '//' + window.location.hostname}/fetch-high-score/${gameboard.id}`)
-      .then(response => response.json())
-      .then(data => {
-        document.getElementById('highScore').innerText = data.high_score || 'N/A';
-      })
-      .catch(error => {
-        console.error('Error fetching high score:', error);
-      });
+    updateLabels(gameboard.team_name, gameboard.stat_name, gameboard.id);
+    displayOptimalScore(gameboard.perfect_score);
+    fetchHighScore(gameboard.id);
   }
 
   function fetchTeamStatPair() {
@@ -235,7 +223,7 @@ document.addEventListener("DOMContentLoaded", function() {
         displayOptimalScore(data.perfect_score);
       })
       .catch(error => {
-        console.error('Error fetching team and stat pair:', {error}); // updated her to try to fix error message 5.18
+        console.error('Error fetching team and stat pair:', error);
       });
   }
 
@@ -246,9 +234,11 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById('teamLabel').innerText = team;
     document.getElementById('statLabel').innerText = stat;
     document.getElementById('teamLabel').setAttribute('data-id', id);
+    fetchHighScore(id);
+  }
 
-    // Fetch and display the high score for the current gameboard
-    fetch(`${window.location.protocol + '//' + window.location.hostname}/fetch-high-score/${id}`)
+  function fetchHighScore(gameboardId) {
+    fetch(`${window.location.protocol + '//' + window.location.hostname}/fetch-high-score/${gameboardId}`)
       .then(response => response.json())
       .then(data => {
         document.getElementById('highScore').innerText = data.high_score || 'N/A';
@@ -429,6 +419,7 @@ document.addEventListener("DOMContentLoaded", function() {
     .then(result => {
       console.log('Response from save-score:', result.message);
       alert('All buttons submitted!\nTotal Score: ' + totalScore);
+      fetchHighScore(gameboardId); // Refresh high score after saving
     })
     .catch(error => console.error('Failed to save score:', error));
   }
@@ -441,9 +432,10 @@ document.addEventListener("DOMContentLoaded", function() {
   });
 });
 </script>
-
 </body>
 </html>
+
+
 
 
 
