@@ -140,7 +140,7 @@
 
 <!-- Alert card for Previous Games -->
 <div id="previousGamesAlert" class="alert alert-info alert-card">
-  <button type="button" class="close" onclick="closeAlertCard()">&times;</button>
+  <button type="button" the close" onclick="closeAlertCard()">&times;</button>
   <h4 class="alert-heading">Previous Games</h4>
   <table class="table table-bordered">
     <thead>
@@ -361,30 +361,30 @@ document.addEventListener("DOMContentLoaded", function() {
           var statCell = row.cells[2];
           var statValue = xhr.responseText;
           statCell.textContent = (statValue === 'null') ? 'N/A' : statValue;
-          statCell.classList.add('stat-square');
-          updateTotalScore();
-          submissionButtonCount--;
-          if (enabledSubmitButtons === 0) { // If all submit buttons are disabled
-            var totalScore = document.getElementById('totalScore').textContent;
-            console.log('All buttons submitted. Total Score:', totalScore);
-            sendFinalScore(totalScore, id); // Update to send the correct information
-          }
-        } else {
-          console.error('Error fetching data:', xhr.statusText);
-          submitButton.disabled = false;
-          playerNameInput.disabled = false; // Re-enable the input field if there was an error fetching data
-          enabledSubmitButtons++; // Increment the count of enabled submit buttons
-        }
-      };
-      xhr.onerror = function () {
-          console.error('Error fetching data.');
-          submitButton.disabled = false;
-          playerNameInput.disabled = false; // Re-enable the input field in case of an error
-          enabledSubmitButtons++; // Increment the count of enabled submit buttons
-      };
-      xhr.send();
-    } else {
-      submitButton.disabled = false;
+                statCell.classList.add('stat-square');
+                updateTotalScore();
+                submissionButtonCount--;
+                if (enabledSubmitButtons === 0) { // If all submit buttons are disabled
+                  var totalScore = document.getElementById('totalScore').textContent;
+                  console.log('All buttons submitted. Total Score:', totalScore);
+                  sendFinalScore(totalScore, id); // Update to send the correct information
+                }
+              } else {
+                console.error('Error fetching data:', xhr.statusText);
+                submitButton.disabled = false;
+                playerNameInput.disabled = false; // Re-enable the input field if there was an error fetching data
+                enabledSubmitButtons++; // Increment the count of enabled submit buttons
+              }
+            };
+            xhr.onerror = function () {
+                console.error('Error fetching data.');
+                submitButton.disabled = false;
+                playerNameInput.disabled = false; // Re-enable the input field in case of an error
+                enabledSubmitButtons++; // Increment the count of enabled submit buttons
+            };
+            xhr.send();
+          } else {
+            submitButton.disabled = false;
       playerNameInput.disabled = false; // Re-enable the input field if it was empty
       enabledSubmitButtons++; // Increment the count of enabled submit buttons
     }
@@ -432,4 +432,5 @@ document.addEventListener("DOMContentLoaded", function() {
 </script>
 
 </body>
-</html>    this is an earlier version of my index.html
+</html>
+
