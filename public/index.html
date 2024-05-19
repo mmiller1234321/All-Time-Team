@@ -43,6 +43,7 @@
       transform: translate(-50%, -50%);
       width: 95%; /* Make it nearly full width on small screens */
       z-index: 1050;
+      display: none;
     }
 
     /* Media Query for Larger Screens */
@@ -119,7 +120,7 @@
           </thead>
           <tbody>
             <tr><td>2B</td><td>Doubles</td></tr>
-            <tr><td>3B</td><td>Triples</td></tr>
+            <tr><td>3B</td><td>Triiples</td></tr>
             <tr><td>BB</td><td>Walks</td></tr>
             <tr><td>H</td><td>Hits</td></tr>
             <tr><td>HR</td><td>Home Runs</td></tr>
@@ -140,8 +141,7 @@
 <!-- Alert card for Previous Games -->
 <div id="previousGamesAlert" class="alert alert-info alert-card">
   <button type="button" class="close" onclick="closeAlertCard()">&times;</button>
-  <h4 class="alert-heading">Thanks for playing All Time Team!</h4>
-  <p>Please choose which game you would like to play. More games are added daily (at least)!</p>
+  <h4 class="alert-heading">Previous Games</h4>
   <table class="table table-bordered">
     <thead>
       <tr>
@@ -169,8 +169,7 @@ document.addEventListener("DOMContentLoaded", function() {
   var statLabelValue = ''; // Variable to store stat label value
   var gameboardId = ''; // Variable to store gameboard ID
 
-  // Function to fetch and display the "Previous Games" table
-  function showPreviousGames() {
+  document.getElementById('previousGamesButton').addEventListener('click', function() {
     var baseUrl = window.location.protocol + '//' + window.location.hostname;
     fetch(baseUrl + '/fetch-previous-gameboards')
       .then(response => response.json())
@@ -192,11 +191,10 @@ document.addEventListener("DOMContentLoaded", function() {
       .catch(error => {
         console.error('Error fetching previous gameboards:', error);
       });
-  }
+  });
 
   window.closeAlertCard = function() {
     document.getElementById('previousGamesAlert').style.display = 'none';
-    localStorage.setItem('previousGamesClosed', 'true'); // Store the fact that the alert card was closed
   };
 
   window.loadGameboard = function(gameboardId) {
@@ -225,7 +223,7 @@ document.addEventListener("DOMContentLoaded", function() {
         displayOptimalScore(data.perfect_score);
       })
       .catch(error => {
-        console.error('Error fetching team and stat pair:', error);
+        console.error('Error fetching team and stat pair:', {error}); // updated her to try to fix error message 5.18
       });
   }
 
@@ -430,17 +428,11 @@ document.addEventListener("DOMContentLoaded", function() {
   document.getElementById('instructionsButton').addEventListener('click', function() {
     $('#instructionsModal').modal('show');
   });
-
-  // Show previous games if it has not been closed before
-  if (!localStorage.getItem('previousGamesClosed')) {
-    showPreviousGames();
-  }
 });
 </script>
 
 </body>
 </html>
-
 
 
 
