@@ -43,8 +43,9 @@
       transform: translate(-50%, -50%);
       width: 95%; /* Make it nearly full width on small screens */
       z-index: 1050;
-      display: block; /* Changed from none to block to show on load */
+      display: none;
     }
+
     /* Media Query for Larger Screens */
     @media (min-width: 768px) {
       body {
@@ -73,7 +74,7 @@
   <div class="d-flex justify-content-between align-items-center">
     <h2>All Time Teams</h2>
     <div>
-      <button type="button" class="btn btn-primary" id="previousGamesButton" onclick="location.reload();">Click Here To Play</button>
+      <button type="button" class="btn btn-primary" id="previousGamesButton">Click Here To Play</button>
       <button type="button" class="btn btn-primary" id="instructionsButton">Instructions</button>
     </div>
   </div>
@@ -119,7 +120,7 @@
           </thead>
           <tbody>
             <tr><td>2B</td><td>Doubles</td></tr>
-            <tr><td>3B</td><td>Triiples</td></tr>
+            <tr><td>3B</td><td>Triples</td></tr>
             <tr><td>BB</td><td>Walks</td></tr>
             <tr><td>H</td><td>Hits</td></tr>
             <tr><td>HR</td><td>Home Runs</td></tr>
@@ -139,8 +140,9 @@
 
 <!-- Alert card for Previous Games -->
 <div id="previousGamesAlert" class="alert alert-info alert-card">
-  <button type="button" class="close" onclick="closeAlertCard()">&times;</button>
-  <h4 class="alert-heading">Welcome to All Time Teams. <button onclick="location.reload();" class="btn btn-primary">Play Today's Game</button> to play. Or see all of our games in the list below (more added all the time)!</h4>
+  <button type="button" the close" onclick="closeAlertCard()">&times;</button>
+  <h4 class="alert-heading">Welcome to All Time Teams</h4>
+  <p>Click <button type="button" class="btn btn-link p-0" onclick="playTodaysGame()">Play Today's Game</button> to play. Or see all of our games in the list below (more added all the time)!</p>
   <table class="table table-bordered">
     <thead>
       <tr>
@@ -168,40 +170,49 @@ document.addEventListener("DOMContentLoaded", function() {
   var statLabelValue = ''; // Variable to store stat label value
   var gameboardId = ''; // Variable to store gameboard ID
 
-  // Immediately display the previous games alert on load
-  var baseUrl = window.location.protocol + '//' + window.location.hostname;
-  fetch(baseUrl + '/fetch-previous-gameboards')
-    .then(response => response.json())
-    .then(gameboards => {
-      var tableBody = document.getElementById('previousGamesTableBody');
-      tableBody.innerHTML = ''; // Clear existing rows
-      gameboards.forEach(gameboard => {
-        var row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${gameboard.id}</td>
-          <td>${gameboard.team_name}</td>
-          <td>${gameboard.stat_name}</td>
-          <td><button class="btn btn-link" onclick="loadGameboard(${gameboard.id})">Play Now!</button></td>
-        `;
-        tableBody.appendChild(row);
+  document.getElementById('previousGamesButton').addEventListener('click', function() {
+    var baseUrl = window.location.protocol + '//' + window.location.hostname;
+    fetch(baseUrl + '/fetch-previous-gameboards')
+      .then(response => response.json())
+      .then(gameboards => {
+        var tableBody = document.getElementById('previousGamesTableBody');
+        tableBody.innerHTML = ''; // Clear existing rows
+        gameboards.forEach(gameboard => {
+          var row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${gameboard.id}</td>
+            <td>${gameboard.team_name}</td>
+            <td>${gameboard.stat_name}</td>
+            <td><button class="btn btn-link" onclick="loadGameboard(${gameboard.id})">Play Now!</button></td>
+          `;
+          tableBody.appendChild(row);
+        });
+        document.getElementById('previousGamesAlert').style.display = 'block'; // Show the alert card
+      })
+      .catch(error => {
+        console.error('Error fetching previous gameboards:', error);
       });
-      document.getElementById('previousGamesAlert').style.display = 'block'; // Show the alert card
-    })
-    .catch(error => {
-      console.error('Error fetching previous gameboards:', error);
-    });
+  });
 
   window.closeAlertCard = function() {
     document.getElementById('previousGamesAlert').style.display = 'none';
+  };
+
+  window.playTodaysGame = function() {
+    location.reload();
   };
 
   window.loadGameboard = function(gameboardId) {
     fetch(`${window.location.protocol + '//' + window.location.hostname}/gameboard/${gameboardId}`)
       .then(response => response.json())
       .then(data => {
-        updatePageWithGameboard(data.gameboard);
-        document.getElementById('highScore').innerText = data.high_score || 'N/A'; // Fetch high score when a gameboard is loaded
-        closeAlertCard(); // Close the alert card
+        if (data.gameboard) {
+          updatePageWithGameboard(data.gameboard);
+          document.getElementById('highScore').innerText = data.high_score || 'N/A'; // Fetch high score when a gameboard is loaded
+          closeAlertCard(); // Close the alert card
+        } else {
+          console.error('No gameboard data found for ID:', gameboardId);
+        }
       })
       .catch(error => console.error('Error loading gameboard:', error));
   };
@@ -209,10 +220,13 @@ document.addEventListener("DOMContentLoaded", function() {
   function updatePageWithGameboard(gameboard) {
     document.getElementById('teamLabel').innerText = gameboard.team_name;
     document.getElementById('statLabel').innerText = gameboard.stat_name;
-    // Additional updates as needed...
+    teamLabelValue = gameboard.team_name; // Update the global variables
+    statLabelValue = gameboard.stat_name;
+    gameboardId = gameboard.id;
   }
 
   function fetchTeamStatPair() {
+    var baseUrl = window.location.protocol + '//' + window.location.hostname;
     fetch(baseUrl + '/generateTeamStatPair/team-stat-pair')
       .then(response => response.json())
       .then(data => {
@@ -374,10 +388,10 @@ document.addEventListener("DOMContentLoaded", function() {
               }
             };
             xhr.onerror = function () {
-                console.error('Error fetching data.');
-                submitButton.disabled = false;
-                playerNameInput.disabled = false; // Re-enable the input field in case of an error
-                enabledSubmitButtons++; // Increment the count of enabled submit buttons
+              console.error('Error fetching data.');
+              submitButton.disabled = false;
+              playerNameInput.disabled = false; // Re-enable the input field in case of an error
+              enabledSubmitButtons++; // Increment the count of enabled submit buttons
             };
             xhr.send();
           } else {
@@ -425,11 +439,12 @@ document.addEventListener("DOMContentLoaded", function() {
         document.getElementById('instructionsButton').addEventListener('click', function() {
           $('#instructionsModal').modal('show');
         });
+
+        // Show the welcome alert on initial load
+        document.getElementById('previousGamesButton').click();
       });
 </script>
 
 </body>
 </html>
-
-
 
