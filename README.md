@@ -13,6 +13,11 @@ This project is licensed under the [CC BY-NC-ND 4.0](https://creativecommons.org
 
 The project is deployed and can be accessed [here](https://alltimeteam-205f3b996ac7.herokuapp.com/).
 
+
+## Version 2.1
+
+Updated "Click Here to Play" button. Debugged high score functionality.
+
 ## Version 2.01
 
 Updating styling. Mobile first media query. Still in development. 
