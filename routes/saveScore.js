@@ -1,8 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const pool = require('../db/db.js'); // Ensure this is the callback pool from 'mysql2'
+const pool = require('../db/db.js');
 
-// Route to handle saving scores
 router.post('/', (req, res) => {
   const { total_score, team_name, stat_name, gameboard_id } = req.body;
 
@@ -18,8 +17,8 @@ router.post('/', (req, res) => {
   console.log(`Attempting to insert score: ${total_score}, for team: ${team_name}, stat: ${stat_name}, with gameboard ID: ${gameboard_id}`);
 
   pool.query(
-    'INSERT INTO games (team_name, stat_name, total_score, gameboard_id) VALUES (?, ?, ?, ?)',
-    [team_name, stat_name, total_score, gameboard_id],
+    'INSERT INTO games (total_score, team_name, stat_name, gameboard_id) VALUES (?, ?, ?, ?)',
+    [total_score, team_name, stat_name, gameboard_id],
     (error, results) => {
       if (error) {
         console.error('Error inserting total score:', error);
@@ -33,6 +32,7 @@ router.post('/', (req, res) => {
 });
 
 module.exports = router;
+
 
 
 

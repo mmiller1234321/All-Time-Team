@@ -40,7 +40,11 @@ app.get('/fetch-high-score/:gameboardId', (req, res) => {
         console.error('Error fetching high score:', error);
         return res.status(500).json({ error: 'Internal Server Error', message: error.message });
       }
-      res.json({ high_score: results[0].high_score || 'N/A' });
+      if (results.length === 0 || results[0].high_score === null) {
+        res.json({ high_score: 'N/A' });
+      } else {
+        res.json({ high_score: results[0].high_score });
+      }
     }
   );
 });
