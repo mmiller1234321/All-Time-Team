@@ -36,7 +36,7 @@ function generateNextTeamStatPair() {
             } else {
               console.log(`Inserted ${teamName} - ${statName} - ${perfectScore} into gameboard`);
             }
-            setTimeout(generateNextTeamStatPair, 4000000); // Now it waits 25 minutes instead of 24 hours 
+            setTimeout(generateNextTeamStatPair, 1500000); // Now it waits 25 minutes instead of 24 hours 
           }
         );
       } else {
