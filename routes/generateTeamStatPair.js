@@ -30,20 +30,19 @@ function generateNextTeamStatPair() {
           'INSERT INTO gameboard (team_name, stat_name, perfect_score) VALUES (?, ?, ?)',
           [teamName, statName, perfectScore],
           (insertError) => {
-            connection.release();
             if (insertError) {
               console.error('Error inserting data into gameboard table:', insertError);
             } else {
               console.log(`Inserted ${teamName} - ${statName} - ${perfectScore} into gameboard`);
             }
+            connection.release();
             setTimeout(generateNextTeamStatPair, 1400000); // Now it waits 25 minutes instead of 24 hours 
           }
         );
       } else {
+        console.log('No new team-stat pair found, waiting to retry...');
         connection.release();
-        console.log('Reached end of table, restarting cycle.');
-        lastFetchedId = 0;
-        setTimeout(generateNextTeamStatPair, 86400000); // Also wait 24 hours to start over if at the end of the table
+        setTimeout(generateNextTeamStatPair, 1400000); // Wait 25 minutes before trying again
       }
     });
   });
@@ -60,7 +59,6 @@ router.get('/team-stat-pair', (req, res) => {
     }
 
     connection.query('SELECT id, team_name, stat_name, perfect_score FROM gameboard ORDER BY ID DESC LIMIT 1', (error, results) => {
-      connection.release();
       if (error) {
         console.error('Error fetching team and stat pair:', error);
         res.status(500).send('Internal Server Error');
@@ -70,11 +68,13 @@ router.get('/team-stat-pair', (req, res) => {
       } else {
         res.status(404).send('No team and stat pairs found in the gameboard');
       }
+      connection.release();
     });
   });
 });
 
 module.exports = router;
+
 
 
 
