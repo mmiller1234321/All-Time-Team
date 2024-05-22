@@ -10,7 +10,7 @@ function generateNextTeamStatPair() {
   pool.getConnection((err, connection) => {
     if (err) {
       console.error('Error getting MySQL connection:', err);
-      setTimeout(generateNextTeamStatPair, 1000 * 10);
+      setTimeout(generateNextTeamStatPair, 1000 * 10); // Retry in 10 seconds on error
       return;
     }
 
@@ -18,13 +18,13 @@ function generateNextTeamStatPair() {
       if (error) {
         console.error('Error executing MySQL query:', error);
         connection.release();
-        setTimeout(generateNextTeamStatPair, 1000 * 60 * 5);
+        setTimeout(generateNextTeamStatPair, 1000 * 60 * 5); // Retry in 5 minutes on error
         return;
       }
 
       if (results.length > 0) {
         const { team_name: teamName, stat_name: statName, perfect_score: perfectScore, id } = results[0];
-        lastFetchedId = id;
+        lastFetchedId = id; // Update lastFetchedId to the current record's id
 
         connection.query(
           'INSERT INTO gameboard (team_name, stat_name, perfect_score) VALUES (?, ?, ?)',
@@ -36,13 +36,13 @@ function generateNextTeamStatPair() {
               console.log(`Inserted ${teamName} - ${statName} - ${perfectScore} into gameboard`);
             }
             connection.release();
-            setTimeout(generateNextTeamStatPair, 1400000);
+            setTimeout(generateNextTeamStatPair, 1400000); // Retry in 23 minutes
           }
         );
       } else {
         console.log('No new team-stat pair found, waiting to retry...');
         connection.release();
-        setTimeout(generateNextTeamStatPair, 1400000);
+        setTimeout(generateNextTeamStatPair, 1400000); // Retry in 23 minutes
       }
     });
   });
@@ -74,7 +74,6 @@ router.get('/team-stat-pair', (req, res) => {
 });
 
 module.exports = router;
-
 
 
 
