@@ -171,13 +171,17 @@
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script>
+let currentGame = {
+  gameboard_id: null,
+  team_name: '',
+  stat_name: '',
+  total_score: 0
+};
+
 document.addEventListener("DOMContentLoaded", function() {
   var submittedPlayers = [];
   var submissionButtonCount = 9;
   var enabledSubmitButtons = submissionButtonCount; // Track the number of enabled submit buttons
-  var teamLabelValue = ''; // Variable to store team label value
-  var statLabelValue = ''; // Variable to store stat label value
-  var gameboardId = ''; // Variable to store gameboard ID
 
   document.getElementById('previousGamesButton').addEventListener('click', function() {
     var baseUrl = window.location.protocol + '//' + window.location.hostname;
@@ -227,11 +231,12 @@ document.addEventListener("DOMContentLoaded", function() {
   };
 
   function updatePageWithGameboard(gameboard) {
+    currentGame.gameboard_id = gameboard.id;
+    currentGame.team_name = gameboard.team_name;
+    currentGame.stat_name = gameboard.stat_name;
+
     document.getElementById('teamLabel').innerText = gameboard.team_name;
     document.getElementById('statLabel').innerText = gameboard.stat_name;
-    teamLabelValue = gameboard.team_name; // Update the global variables
-    statLabelValue = gameboard.stat_name;
-    gameboardId = gameboard.id;
   }
 
   function fetchTeamStatPair() {
@@ -248,12 +253,11 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 
   function updateLabels(team, stat, id) {
-    teamLabelValue = team;
-    statLabelValue = stat;
-    gameboardId = id;
+    currentGame.team_name = team;
+    currentGame.stat_name = stat;
+    currentGame.gameboard_id = id;
     document.getElementById('teamLabel').innerText = team;
     document.getElementById('statLabel').innerText = stat;
-    document.getElementById('teamLabel').setAttribute('data-id', id);
 
     // Fetch and display the high score for the current gameboard
     fetch(`${window.location.protocol + '//' + window.location.hostname}/fetch-high-score/${id}`)
@@ -369,9 +373,9 @@ document.addEventListener("DOMContentLoaded", function() {
 
     if (playerName !== '') {
       var position = row.cells[1].textContent;
-      var team = teamLabelValue; // Use global variable for team label value
-      var stat = statLabelValue; // Use global variable for stat label value
-      var id = gameboardId; // Use the correct gameboard ID
+      var team = currentGame.team_name;
+      var stat = currentGame.stat_name;
+      var id = currentGame.gameboard_id;
 
       var baseUrl = window.location.protocol + '//' + window.location.hostname;
       var xhr = new XMLHttpRequest();
@@ -386,8 +390,9 @@ document.addEventListener("DOMContentLoaded", function() {
           submissionButtonCount--;
           if (enabledSubmitButtons === 0) { // If all submit buttons are disabled
             var totalScore = document.getElementById('totalScore').textContent;
+            currentGame.total_score = totalScore;
             console.log('All buttons submitted. Total Score:', totalScore);
-            sendFinalScore(totalScore, id); // Update to send the correct information
+            sendFinalScore();
           }
         } else {
           console.error('Error fetching data:', xhr.statusText);
@@ -420,24 +425,17 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById('totalScore').textContent = totalScore;
   }
 
-  function sendFinalScore(totalScore, gameboardId) {
-    var team = teamLabelValue; // Use global variable for team label value
-    var stat = statLabelValue; // Use global variable for stat label value
+  function sendFinalScore() {
     var baseUrl = window.location.protocol + '//' + window.location.hostname;
     fetch(baseUrl + '/saveScore', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        total_score: totalScore,
-        team_name: team,
-        stat_name: stat,
-        gameboard_id: gameboardId // Ensure the correct key name is used here
-      })
+      body: JSON.stringify(currentGame)
     })
     .then(response => response.json())
     .then(result => {
       console.log('Response from save-score:', result.message);
-      alert('All buttons submitted!\nTotal Score: ' + totalScore);
+      alert('All buttons submitted!\nTotal Score: ' + currentGame.total_score);
     })
     .catch(error => console.error('Failed to save score:', error));
   }
@@ -456,4 +454,5 @@ document.addEventListener("DOMContentLoaded", function() {
 
 </body>
 </html>
+
 
