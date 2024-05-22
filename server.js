@@ -16,7 +16,7 @@ app.use('/autocomplete', require('./routes/autocomplete'));
 app.use('/search', require('./routes/search'));
 app.use('/generateTeamStatPair', require('./routes/generateTeamStatPair'));
 app.use('/saveScore', require('./routes/saveScore'));
-app.use('/gameboard', require('./routes/gameboards')); // Corrected route name
+app.use('/gameboard', require('./routes/gameboards')); // Ensure this file name and path is correct
 
 // Fetch all previous gameboards
 app.get('/fetch-previous-gameboards', (req, res) => {
