@@ -2,8 +2,7 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db/db.js');
 
-// Search endpoint to fetch player stats
-router.get('/', (req, res, next) => {
+router.get('/', (req, res) => {
   const playerName = req.query.playerName;
   const position = req.query.position;
   const team = req.query.team;
@@ -12,7 +11,6 @@ router.get('/', (req, res, next) => {
   let query;
   let params;
 
-  // Logic for team associations
   if (team === 'Los Angeles Angels of Anaheim') {
     query = `
       SELECT MAX(b.${stat}) AS max_stat_value
@@ -110,7 +108,6 @@ router.get('/', (req, res, next) => {
     `;
     params = [playerName, position, team, 'Kansas City Athletics', 'Philadelphia Athletics'];
   } else {
-    // Default logic for other teams
     query = `
       SELECT MAX(b.${stat}) AS max_stat_value
       FROM batting AS b
@@ -124,21 +121,30 @@ router.get('/', (req, res, next) => {
     params = [playerName, position, team];
   }
 
-  pool.query(query, params, (error, results) => {
-    if (error) {
-      console.error('Error executing MySQL query:', error);
-      res.status(500).send('Internal server error');
-    } else {
-      if (results.length > 0 && results[0].max_stat_value !== null) {
-        const maxStatValue = results[0].max_stat_value;
-        res.send(maxStatValue.toString());
-      } else {
-        console.log('No results found for the query');
-        res.send('0');
-      }
+  pool.getConnection((err, connection) => {
+    if (err) {
+      console.error('Error getting MySQL connection:', err);
+      res.status(500).json({ error: 'Internal server error' });
+      return;
     }
+
+    connection.query(query, params, (error, results) => {
+      connection.release();
+      if (error) {
+        console.error('Error executing MySQL query:', error);
+        res.status(500).json({ error: 'Internal server error' });
+      } else {
+        if (results.length > 0 && results[0].max_stat_value !== null) {
+          const maxStatValue = results[0].max_stat_value;
+          res.send(maxStatValue.toString());
+        } else {
+          res.send('0');
+        }
+      }
+    });
   });
 });
 
 module.exports = router;
+
 

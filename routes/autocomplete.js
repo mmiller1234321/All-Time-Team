@@ -1,11 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const pool = require('../db/db.js'); // Assuming you have a database connection pool initialized
+const pool = require('../db/db.js');
 
 router.get('/', (req, res) => {
-  const partialQuery = req.query.query; // Get partial input value
+  const partialQuery = req.query.query;
 
-  // Adjust the autocomplete query to handle partial input value and include birthYear
   const autocompleteQuery = `
     SELECT CONCAT(nameFirst, ' ', nameLast) AS fullName, birthYear
     FROM people
@@ -13,20 +12,30 @@ router.get('/', (req, res) => {
     LIMIT 10
   `;
 
-  pool.query(autocompleteQuery, [`%${partialQuery}%`], (error, results) => {
-    if (error) {
-      console.error('Error executing autocomplete MySQL query:', error);
-      res.status(500).json({ error: 'Internal server error' }); // Send error response as JSON
-    } else {
-      const suggestions = results.map((row) => {
-        return { fullName: row.fullName, birthYear: row.birthYear };
-      });
-      res.json(suggestions); // Send suggestions as JSON response
+  pool.getConnection((err, connection) => {
+    if (err) {
+      console.error('Error getting MySQL connection:', err);
+      res.status(500).json({ error: 'Internal server error' });
+      return;
     }
+
+    connection.query(autocompleteQuery, [`%${partialQuery}%`], (error, results) => {
+      connection.release();
+      if (error) {
+        console.error('Error executing autocomplete MySQL query:', error);
+        res.status(500).json({ error: 'Internal server error' });
+      } else {
+        const suggestions = results.map((row) => {
+          return { fullName: row.fullName, birthYear: row.birthYear };
+        });
+        res.json(suggestions);
+      }
+    });
   });
 });
 
 module.exports = router;
+
 
 
 
