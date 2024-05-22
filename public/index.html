@@ -171,17 +171,16 @@
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script>
-let currentGame = {
-  gameboard_id: null,
-  team_name: '',
-  stat_name: '',
-  total_score: 0
-};
-
 document.addEventListener("DOMContentLoaded", function() {
   var submittedPlayers = [];
   var submissionButtonCount = 9;
   var enabledSubmitButtons = submissionButtonCount; // Track the number of enabled submit buttons
+  var currentGame = {
+    gameboard_id: '',
+    team_name: '',
+    stat_name: '',
+    total_score: 0
+  };
 
   document.getElementById('previousGamesButton').addEventListener('click', function() {
     var baseUrl = window.location.protocol + '//' + window.location.hostname;
@@ -231,12 +230,11 @@ document.addEventListener("DOMContentLoaded", function() {
   };
 
   function updatePageWithGameboard(gameboard) {
-    currentGame.gameboard_id = gameboard.id;
-    currentGame.team_name = gameboard.team_name;
-    currentGame.stat_name = gameboard.stat_name;
-
     document.getElementById('teamLabel').innerText = gameboard.team_name;
     document.getElementById('statLabel').innerText = gameboard.stat_name;
+    currentGame.team_name = gameboard.team_name;
+    currentGame.stat_name = gameboard.stat_name;
+    currentGame.gameboard_id = gameboard.id;
   }
 
   function fetchTeamStatPair() {
@@ -258,6 +256,7 @@ document.addEventListener("DOMContentLoaded", function() {
     currentGame.gameboard_id = id;
     document.getElementById('teamLabel').innerText = team;
     document.getElementById('statLabel').innerText = stat;
+    document.getElementById('teamLabel').setAttribute('data-id', id);
 
     // Fetch and display the high score for the current gameboard
     fetch(`${window.location.protocol + '//' + window.location.hostname}/fetch-high-score/${id}`)
@@ -390,9 +389,8 @@ document.addEventListener("DOMContentLoaded", function() {
           submissionButtonCount--;
           if (enabledSubmitButtons === 0) { // If all submit buttons are disabled
             var totalScore = document.getElementById('totalScore').textContent;
-            currentGame.total_score = totalScore;
             console.log('All buttons submitted. Total Score:', totalScore);
-            sendFinalScore();
+            sendFinalScore(); // Update to send the correct information
           }
         } else {
           console.error('Error fetching data:', xhr.statusText);
@@ -422,6 +420,7 @@ document.addEventListener("DOMContentLoaded", function() {
       var score = parseInt(square.textContent, 10);
       if (!isNaN(score)) totalScore += score;
     });
+    currentGame.total_score = totalScore;
     document.getElementById('totalScore').textContent = totalScore;
   }
 

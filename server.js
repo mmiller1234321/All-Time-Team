@@ -16,6 +16,7 @@ app.use('/autocomplete', require('./routes/autocomplete'));
 app.use('/search', require('./routes/search'));
 app.use('/generateTeamStatPair', require('./routes/generateTeamStatPair'));
 app.use('/saveScore', require('./routes/saveScore'));
+app.use('/gameboard', require('./routes/gameboards')); // Corrected route name
 
 // Fetch all previous gameboards
 app.get('/fetch-previous-gameboards', (req, res) => {
@@ -49,35 +50,8 @@ app.get('/fetch-high-score/:gameboardId', (req, res) => {
   );
 });
 
-// Route to fetch a specific gameboard along with its high score
-app.get('/gameboard/:id', (req, res) => {
-  const gameboardId = req.params.id;
-  pool.query('SELECT * FROM gameboard WHERE id = ?', [gameboardId], (error, results) => {
-    if (error) {
-      console.error('Error fetching gameboard:', error);
-      res.status(500).json({ error: 'Internal Server Error', message: error.message });
-    } else if (results.length > 0) {
-      pool.query(
-        'SELECT MAX(total_score) AS high_score FROM games WHERE gameboard_id = ?',
-        [gameboardId],
-        (error, scoreResults) => {
-          if (error) {
-            console.error('Error fetching high score:', error);
-            res.status(500).json({ error: 'Internal Server Error', message: error.message });
-          } else {
-            res.json({ gameboard: results[0], high_score: scoreResults[0].high_score || 'N/A' });
-          }
-        }
-      );
-    } else {
-      res.status(404).send('Gameboard not found');
-    }
-  });
-});
-
 // Start the server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-
