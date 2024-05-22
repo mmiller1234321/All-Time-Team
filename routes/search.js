@@ -7,6 +7,7 @@ router.get('/', (req, res) => {
   const position = req.query.position;
   const team = req.query.team;
   const stat = req.query.stat;
+  const gameboardId = req.query.id;
 
   let query;
   let params;
@@ -146,6 +147,7 @@ router.get('/', (req, res) => {
 });
 
 module.exports = router;
+
 
 
 
