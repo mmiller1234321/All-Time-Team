@@ -256,7 +256,7 @@ document.addEventListener("DOMContentLoaded", function() {
     currentGame.gameboard_id = id;
     document.getElementById('teamLabel').innerText = team;
     document.getElementById('statLabel').innerText = stat;
-    document.getElementById('teamLabel').setAttribute('data-id', id);
+    document.getElementById('teamLabel').setAttribute('data-id', id); //is this match up with what is in saveScore.js
 
     // Fetch and display the high score for the current gameboard
     fetch(`${window.location.protocol + '//' + window.location.hostname}/fetch-high-score/${id}`)
