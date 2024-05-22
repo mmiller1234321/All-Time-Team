@@ -174,10 +174,10 @@
 document.addEventListener("DOMContentLoaded", function() {
   var submittedPlayers = [];
   var submissionButtonCount = 9;
-  var enabledSubmitButtons = submissionButtonCount; // Track the number of enabled submit buttons
-  var teamLabelValue = ''; // Variable to store team label value
-  var statLabelValue = ''; // Variable to store stat label value
-  var gameboardId = ''; // Variable to store gameboard ID
+  var enabledSubmitButtons = submissionButtonCount;
+  var teamLabelValue = '';
+  var statLabelValue = '';
+  var gameboardId = '';
 
   document.getElementById('previousGamesButton').addEventListener('click', function() {
     var baseUrl = window.location.protocol + '//' + window.location.hostname;
@@ -185,7 +185,7 @@ document.addEventListener("DOMContentLoaded", function() {
       .then(response => response.json())
       .then(gameboards => {
         var tableBody = document.getElementById('previousGamesTableBody');
-        tableBody.innerHTML = ''; // Clear existing rows
+        tableBody.innerHTML = '';
         gameboards.forEach(gameboard => {
           var row = document.createElement('tr');
           row.innerHTML = `
@@ -196,7 +196,7 @@ document.addEventListener("DOMContentLoaded", function() {
           `;
           tableBody.appendChild(row);
         });
-        document.getElementById('previousGamesAlert').style.display = 'block'; // Show the alert card
+        document.getElementById('previousGamesAlert').style.display = 'block';
       })
       .catch(error => {
         console.error('Error fetching previous gameboards:', error);
@@ -217,8 +217,8 @@ document.addEventListener("DOMContentLoaded", function() {
       .then(data => {
         if (data.gameboard) {
           updatePageWithGameboard(data.gameboard);
-          document.getElementById('highScore').innerText = data.high_score || 'N/A'; // Fetch high score when a gameboard is loaded
-          closeAlertCard(); // Close the alert card
+          document.getElementById('highScore').innerText = data.high_score || 'N/A';
+          closeAlertCard();
         } else {
           console.error('No gameboard data found for ID:', gameboardId);
         }
@@ -229,7 +229,7 @@ document.addEventListener("DOMContentLoaded", function() {
   function updatePageWithGameboard(gameboard) {
     document.getElementById('teamLabel').innerText = gameboard.team_name;
     document.getElementById('statLabel').innerText = gameboard.stat_name;
-    teamLabelValue = gameboard.team_name; // Update the global variables
+    teamLabelValue = gameboard.team_name;
     statLabelValue = gameboard.stat_name;
     gameboardId = gameboard.id;
   }
@@ -255,7 +255,6 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById('statLabel').innerText = stat;
     document.getElementById('teamLabel').setAttribute('data-id', id);
 
-    // Fetch and display the high score for the current gameboard
     fetch(`${window.location.protocol + '//' + window.location.hostname}/fetch-high-score/${id}`)
       .then(response => response.json())
       .then(data => {
@@ -289,7 +288,7 @@ document.addEventListener("DOMContentLoaded", function() {
       var cellPosition = row.insertCell(1);
       cellPosition.textContent = position;
 
-      var cellStat = row.insertCell(2);  // Directly use this cell to display stats
+      var cellStat = row.insertCell(2);
 
       var cellSubmit = row.insertCell(3);
       var button = document.createElement("button");
@@ -335,123 +334,121 @@ document.addEventListener("DOMContentLoaded", function() {
     function closeAllLists(elmnt) {
       var autocompleteItems = document.getElementsByClassName("autocomplete-items");
       for (var i = 0; i < autocompleteItems.length; i++) {
-                if (elmnt !== autocompleteItems[i] && elmnt !== inputElement) {
-                  autocompleteItems[i].parentNode.removeChild(autocompleteItems[i]);
-                }
-              }
-            }
+        if (elmnt !== autocompleteItems[i] && elmnt !== inputElement) {
+          autocompleteItems[i].parentNode.removeChild(autocompleteItems[i]);
+        }
+      }
+    }
+  }
+
+  document.addEventListener("input", function(e) {
+    if (e.target.matches(".player-input")) {
+      autocomplete(e.target);
+    }
+  });
+
+  function handleSubmit(event) {
+    var submitButton = event.target;
+    if (submitButton.disabled) return;
+    submitButton.disabled = true;
+    enabledSubmitButtons--;
+
+    var row = submitButton.closest("tr");
+    var playerNameInput = row.cells[0].children[0];
+    var playerName = playerNameInput.value.trim();
+    playerNameInput.disabled = true;
+
+    if (submittedPlayers.includes(playerName)) {
+      alert('Player has already been submitted. Please select a different player.');
+      submitButton.disabled = false;
+      playerNameInput.disabled = false;
+      enabledSubmitButtons++;
+      return;
+    }
+
+    if (playerName !== '') {
+      var position = row.cells[1].textContent;
+      var team = teamLabelValue;
+      var stat = statLabelValue;
+      var id = gameboardId;
+
+      var baseUrl = window.location.protocol + '//' + window.location.hostname;
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', baseUrl + '/search?playerName=' + encodeURIComponent(playerName) + '&position=' + encodeURIComponent(position) + '&team=' + encodeURIComponent(team) + '&stat=' + encodeURIComponent(stat) + '&id=' + encodeURIComponent(id), true);
+      xhr.onload = function () {
+        if (xhr.status === 200) {
+          var statCell = row.cells[2];
+          var statValue = xhr.responseText;
+          statCell.textContent = (statValue === 'null') ? 'N/A' : statValue;
+          statCell.classList.add('stat-square');
+          updateTotalScore();
+          submissionButtonCount--;
+          if (enabledSubmitButtons === 0) {
+            var totalScore = document.getElementById('totalScore').textContent;
+            console.log('All buttons submitted. Total Score:', totalScore);
+            sendFinalScore(totalScore, id);
           }
+        } else {
+          console.error('Error fetching data:', xhr.statusText);
+          submitButton.disabled = false;
+          playerNameInput.disabled = false;
+          enabledSubmitButtons++;
+        }
+      };
+      xhr.onerror = function () {
+        console.error('Error fetching data.');
+        submitButton.disabled = false;
+        playerNameInput.disabled = false;
+        enabledSubmitButtons++;
+      };
+      xhr.send();
+    } else {
+      submitButton.disabled = false;
+      playerNameInput.disabled = false;
+      enabledSubmitButtons++;
+    }
+  }
 
-          document.addEventListener("input", function(e) {
-            if (e.target.matches(".player-input")) {
-              autocomplete(e.target);
-            }
-          });
+  function updateTotalScore() {
+    var statSquares = document.querySelectorAll('.stat-square');
+    var totalScore = 0;
+    statSquares.forEach(square => {
+      var score = parseInt(square.textContent, 10);
+      if (!isNaN(score)) totalScore += score;
+    });
+    document.getElementById('totalScore').textContent = totalScore;
+  }
 
-          function handleSubmit(event) {
-            var submitButton = event.target;
-            if (submitButton.disabled) return;
-            submitButton.disabled = true;
-            enabledSubmitButtons--; // Decrement the count of enabled submit buttons
+  function sendFinalScore(totalScore, gameboardId) {
+    var team = teamLabelValue;
+    var stat = statLabelValue;
+    var baseUrl = window.location.protocol + '//' + window.location.hostname;
+    fetch(baseUrl + '/saveScore', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        total_score: totalScore,
+        team_name: team,
+        stat_name: stat,
+        gameboard_id: gameboardId
+      })
+    })
+    .then(response => response.json())
+    .then(result => {
+      console.log('Response from save-score:', result.message);
+      alert('All buttons submitted!\nTotal Score: ' + totalScore);
+    })
+    .catch(error => console.error('Failed to save score:', error));
+  }
 
-            var row = submitButton.closest("tr");
-            var playerNameInput = row.cells[0].children[0];
-            var playerName = playerNameInput.value.trim();
-            playerNameInput.disabled = true; // Disable the player name input field after submission
+  fetchTeamStatPair();
+  addPlayerRows();
+  document.getElementById('instructionsButton').addEventListener('click', function() {
+    $('#instructionsModal').modal('show');
+  });
 
-            if (submittedPlayers.includes(playerName)) {
-              alert('Player has already been submitted. Please select a different player.');
-              submitButton.disabled = false;
-              playerNameInput.disabled = false; // Re-enable the input field if the player has already been submitted
-              enabledSubmitButtons++; // Increment the count of enabled submit buttons
-              return;
-            }
-
-            if (playerName !== '') {
-              var position = row.cells[1].textContent;
-              var team = teamLabelValue; // Use global variable for team label value
-              var stat = statLabelValue; // Use global variable for stat label value
-              var id = gameboardId; // Use the correct gameboard ID
-
-              var baseUrl = window.location.protocol + '//' + window.location.hostname;
-              var xhr = new XMLHttpRequest();
-              xhr.open('GET', baseUrl + '/search?playerName=' + encodeURIComponent(playerName) + '&position=' + encodeURIComponent(position) + '&team=' + encodeURIComponent(team) + '&stat=' + encodeURIComponent(stat) + '&id=' + encodeURIComponent(id), true);
-              xhr.onload = function () {
-                if (xhr.status === 200) {
-                  var statCell = row.cells[2];
-                  var statValue = xhr.responseText;
-                  statCell.textContent = (statValue === 'null') ? 'N/A' : statValue;
-                  statCell.classList.add('stat-square');
-                  updateTotalScore();
-                  submissionButtonCount--;
-                  if (enabledSubmitButtons === 0) { // If all submit buttons are disabled
-                    var totalScore = document.getElementById('totalScore').textContent;
-                    console.log('All buttons submitted. Total Score:', totalScore);
-                    sendFinalScore(totalScore, id); // Update to send the correct information
-                  }
-                } else {
-                  console.error('Error fetching data:', xhr.statusText);
-                  submitButton.disabled = false;
-                  playerNameInput.disabled = false; // Re-enable the input field if there was an error fetching data
-                  enabledSubmitButtons++; // Increment the count of enabled submit buttons
-                }
-              };
-              xhr.onerror = function () {
-                  console.error('Error fetching data.');
-                  submitButton.disabled = false;
-                  playerNameInput.disabled = false; // Re-enable the input field in case of an error
-                  enabledSubmitButtons++; // Increment the count of enabled submit buttons
-              };
-              xhr.send();
-            } else {
-              submitButton.disabled = false;
-              playerNameInput.disabled = false; // Re-enable the input field if it was empty
-              enabledSubmitButtons++; // Increment the count of enabled submit buttons
-            }
-          }
-
-          function updateTotalScore() {
-            var statSquares = document.querySelectorAll('.stat-square');
-            var totalScore = 0;
-            statSquares.forEach(square => {
-              var score = parseInt(square.textContent, 10);
-              if (!isNaN(score)) totalScore += score;
-            });
-            document.getElementById('totalScore').textContent = totalScore;
-          }
-
-          function sendFinalScore(totalScore, gameboardId) {
-            var team = teamLabelValue; // Use global variable for team label value
-            var stat = statLabelValue; // Use global variable for stat label value
-            var baseUrl = window.location.protocol + '//' + window.location.hostname;
-            fetch(baseUrl + '/saveScore', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                total_score: totalScore,
-                team_name: team,
-                stat_name: stat,
-                gameboard_id: gameboardId // Ensure the correct key name is used here
-              })
-            })
-            .then(response => response.json())
-            .then(result => {
-              console.log('Response from save-score:', result.message);
-              alert('All buttons submitted!\nTotal Score: ' + totalScore);
-            })
-            .catch(error => console.error('Failed to save score:', error));
-          }
-
-          // Initial setup
-          fetchTeamStatPair();
-          addPlayerRows();
-          document.getElementById('instructionsButton').addEventListener('click', function() {
-            $('#instructionsModal').modal('show');
-          });
-
-          // Show the welcome alert on initial load
-          document.getElementById('previousGamesButton').click();
-        });
+  document.getElementById('previousGamesButton').click();
+});
 </script>
 
 </body>

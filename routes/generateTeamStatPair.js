@@ -10,7 +10,7 @@ function generateNextTeamStatPair() {
   pool.getConnection((err, connection) => {
     if (err) {
       console.error('Error getting MySQL connection:', err);
-      setTimeout(generateNextTeamStatPair, 1000 * 10); // Retry after 10 seconds
+      setTimeout(generateNextTeamStatPair, 1000 * 10);
       return;
     }
 
@@ -18,7 +18,7 @@ function generateNextTeamStatPair() {
       if (error) {
         console.error('Error executing MySQL query:', error);
         connection.release();
-        setTimeout(generateNextTeamStatPair, 1000 * 60 * 5); // Retry after 5 minutes
+        setTimeout(generateNextTeamStatPair, 1000 * 60 * 5);
         return;
       }
 
@@ -36,13 +36,13 @@ function generateNextTeamStatPair() {
               console.log(`Inserted ${teamName} - ${statName} - ${perfectScore} into gameboard`);
             }
             connection.release();
-            setTimeout(generateNextTeamStatPair, 1400000); // Now it waits 25 minutes instead of 24 hours 
+            setTimeout(generateNextTeamStatPair, 1400000);
           }
         );
       } else {
         console.log('No new team-stat pair found, waiting to retry...');
         connection.release();
-        setTimeout(generateNextTeamStatPair, 1400000); // Wait 25 minutes before trying again
+        setTimeout(generateNextTeamStatPair, 1400000);
       }
     });
   });
