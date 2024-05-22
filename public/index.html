@@ -38,12 +38,19 @@
     }
     .alert-card {
       position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 95%; /* Make it nearly full width on small screens */
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 20px;
+      background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent background */
       z-index: 1050;
+      overflow-y: auto; /* Enable vertical scroll if content exceeds screen height */
       display: none;
+    }
+    .alert-card-content {
+      max-width: 800px; /* Limit max width for better readability */
+      margin: 0 auto; /* Center content horizontally */
     }
 
     /* Media Query for Larger Screens */
@@ -63,8 +70,8 @@
         width: auto; /* Allow natural width */
         margin: 8px;
       }
-      .alert-card {
-        width: 50%; /* Adjust width for better visibility on larger screens */
+      .alert-card-content {
+        max-width: 70%; /* Adjust max width for better visibility on larger screens */
       }
     }
   </style>
@@ -140,28 +147,32 @@
 
 <!-- Alert card for Previous Games -->
 <div id="previousGamesAlert" class="alert alert-info alert-card">
-  <button type="button" class="close" onclick="closeAlertCard()">&times;</button>
-  <h4 class="alert-heading">Welcome to All Time Teams</h4>
-  <p>Click <button type="button" class="btn btn-link p-0" onclick="playTodaysGame()">Play Today's Game</button> to play. Or see all of our games in the list below (more added all the time)!</p>
-  <table class="table table-bordered">
-    <thead>
-      <tr>
-        <th>Gameboard ID</th>
-        <th>Team Name</th>
-        <th>Stat Name</th>
-        <th>Play Now</th>
-      </tr>
-    </thead>
-    <tbody id="previousGamesTableBody">
-      <!-- Previous games will be dynamically inserted here -->
-    </tbody>
-  </table>
+  <div class="alert-card-content">
+    <button type="button" class="close" onclick="closeAlertCard()">&times;</button>
+    <h4 class="alert-heading">Welcome to All Time Teams</h4>
+    <p>Click <button type="button" class="btn btn-link p-0" onclick="playTodaysGame()">Play Today's Game</button> to play. Or see all of our games in the list below (more added all the time)!</p>
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Gameboard ID</th>
+          <th>Team Name</th>
+          <th>Stat Name</th>
+          <th>Play Now</th>
+        </tr>
+      </thead>
+      <tbody id="previousGamesTableBody">
+        <!-- Previous games will be dynamically inserted here -->
+      </tbody>
+    </table>
+  </div>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script>
+
+  
 document.addEventListener("DOMContentLoaded", function() {
   var submittedPlayers = [];
   var submissionButtonCount = 9;
