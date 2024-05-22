@@ -5,10 +5,8 @@ const pool = require('../db/db.js');
 router.post('/', (req, res) => {
   const { total_score, team_name, stat_name, gameboard_id } = req.body;
 
-  // Log the request body to check the values
   console.log('Request body:', req.body);
 
-  // Check if all necessary fields are provided
   if (total_score == null || team_name == null || stat_name == null || gameboard_id == null) {
     console.error('Missing one or more required fields: total_score, team_name, stat_name, gameboard_id');
     return res.status(400).json({ error: 'Missing one or more required fields' });
