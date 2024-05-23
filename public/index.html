@@ -7,14 +7,14 @@
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
   <style>
     body {
-      background-color: #71A95A;
+      background-color: #71A95A; /* Green like Wrigley Field grass */
       font-family: Arial, sans-serif;
-      color: #333;
-      padding: 0 5%;
+      color: #333; /* Ensuring good contrast */
+      padding: 0 5%; /* Padding for small screens */
     }
     .container {
       margin-top: 10px;
-      background-color: #FAFAD2;
+      background-color: #FAFAD2; /* Sand color */
       padding: 10px;
       border-radius: 5px;
     }
@@ -29,12 +29,12 @@
       padding: 8px;
     }
     th {
-      background-color: #f2f2f2;
+      background-color: #f2f2f2; /* Light gray header */
     }
     input[type="text"], button {
-      width: 100%;
-      margin: 4px 0;
-      font-size: 16px;
+      width: 100%; /* Full width for better accessibility */
+      margin: 4px 0; /* Spacing for touch targets */
+      font-size: 16px; /* Adequate font size for readability on mobile */
     }
     .alert-card {
       position: fixed;
@@ -43,18 +43,20 @@
       right: 0;
       bottom: 0;
       padding: 20px;
-      background-color: rgba(255, 255, 255, 0.9);
+      background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent background */
       z-index: 1050;
-      overflow-y: auto;
+      overflow-y: auto; /* Enable vertical scroll if content exceeds screen height */
       display: none;
     }
     .alert-card-content {
-      max-width: 800px;
-      margin: 0 auto;
+      max-width: 800px; /* Limit max width for better readability */
+      margin: 0 auto; /* Center content horizontally */
     }
+
+    /* Media Query for Larger Screens */
     @media (min-width: 768px) {
       body {
-        padding: 0 10%;
+        padding: 0 10%; /* Slightly larger padding on larger screens */
       }
       .container {
         margin-top: 20px;
@@ -65,11 +67,11 @@
         margin-top: 20px;
       }
       input[type="text"], button {
-        width: auto;
+        width: auto; /* Allow natural width */
         margin: 8px;
       }
       .alert-card-content {
-        max-width: 70%;
+        max-width: 70%; /* Adjust max width for better visibility on larger screens */
       }
     }
   </style>
@@ -172,7 +174,7 @@
 document.addEventListener("DOMContentLoaded", function() {
   var submittedPlayers = [];
   var submissionButtonCount = 9;
-  var enabledSubmitButtons = submissionButtonCount;
+  var enabledSubmitButtons = submissionButtonCount; // Track the number of enabled submit buttons
   var currentGame = {
     gameboard_id: '',
     team_name: '',
@@ -185,8 +187,11 @@ document.addEventListener("DOMContentLoaded", function() {
     fetch(baseUrl + '/fetch-previous-gameboards')
       .then(response => response.json())
       .then(gameboards => {
+        if (!Array.isArray(gameboards)) {
+          throw new Error('Invalid response format');
+        }
         var tableBody = document.getElementById('previousGamesTableBody');
-        tableBody.innerHTML = '';
+        tableBody.innerHTML = ''; // Clear existing rows
         gameboards.forEach(gameboard => {
           var row = document.createElement('tr');
           row.innerHTML = `
@@ -197,7 +202,7 @@ document.addEventListener("DOMContentLoaded", function() {
           `;
           tableBody.appendChild(row);
         });
-        document.getElementById('previousGamesAlert').style.display = 'block';
+        document.getElementById('previousGamesAlert').style.display = 'block'; // Show the alert card
       })
       .catch(error => {
         console.error('Error fetching previous gameboards:', error);
@@ -218,8 +223,8 @@ document.addEventListener("DOMContentLoaded", function() {
       .then(data => {
         if (data.gameboard) {
           updatePageWithGameboard(data.gameboard);
-          document.getElementById('highScore').innerText = data.high_score || 'N/A';
-          closeAlertCard();
+          document.getElementById('highScore').innerText = data.high_score || 'N/A'; // Fetch high score when a gameboard is loaded
+          closeAlertCard(); // Close the alert card
         } else {
           console.error('No gameboard data found for ID:', gameboardId);
         }
@@ -232,7 +237,7 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById('statLabel').innerText = gameboard.stat_name;
     currentGame.team_name = gameboard.team_name;
     currentGame.stat_name = gameboard.stat_name;
-    currentGame.gameboard_id = gameboard.id;
+    currentGame.gameboard_id = gameboard.id; // Ensure gameboard_id is set
   }
 
   function fetchTeamStatPair() {
@@ -251,11 +256,12 @@ document.addEventListener("DOMContentLoaded", function() {
   function updateLabels(team, stat, id) {
     currentGame.team_name = team;
     currentGame.stat_name = stat;
-    currentGame.gameboard_id = id;
+    currentGame.gameboard_id = id; // Ensure gameboard_id is set
     document.getElementById('teamLabel').innerText = team;
     document.getElementById('statLabel').innerText = stat;
     document.getElementById('teamLabel').setAttribute('data-id', id);
 
+    // Fetch and display the high score for the current gameboard
     fetch(`${window.location.protocol + '//' + window.location.hostname}/fetch-high-score/${id}`)
       .then(response => response.json())
       .then(data => {
@@ -289,7 +295,7 @@ document.addEventListener("DOMContentLoaded", function() {
       var cellPosition = row.insertCell(1);
       cellPosition.textContent = position;
 
-      var cellStat = row.insertCell(2);
+      var cellStat = row.insertCell(2);  // Directly use this cell to display stats
 
       var cellSubmit = row.insertCell(3);
       var button = document.createElement("button");
@@ -352,18 +358,18 @@ document.addEventListener("DOMContentLoaded", function() {
     var submitButton = event.target;
     if (submitButton.disabled) return;
     submitButton.disabled = true;
-    enabledSubmitButtons--;
+    enabledSubmitButtons--; // Decrement the count of enabled submit buttons
 
     var row = submitButton.closest("tr");
     var playerNameInput = row.cells[0].children[0];
     var playerName = playerNameInput.value.trim();
-    playerNameInput.disabled = true;
+    playerNameInput.disabled = true; // Disable the player name input field after submission
 
     if (submittedPlayers.includes(playerName)) {
       alert('Player has already been submitted. Please select a different player.');
       submitButton.disabled = false;
-      playerNameInput.disabled = false;
-      enabledSubmitButtons++;
+      playerNameInput.disabled = false; // Re-enable the input field if the player has already been submitted
+      enabledSubmitButtons++; // Increment the count of enabled submit buttons
       return;
     }
 
@@ -384,28 +390,29 @@ document.addEventListener("DOMContentLoaded", function() {
           statCell.classList.add('stat-square');
           updateTotalScore();
           submissionButtonCount--;
-          if (enabledSubmitButtons === 0) {
+          if (enabledSubmitButtons === 0) { // If all submit buttons are disabled
             var totalScore = document.getElementById('totalScore').textContent;
-            sendFinalScore(totalScore);
+            console.log('All buttons submitted. Total Score:', totalScore);
+            sendFinalScore(totalScore); // Update to send the correct information
           }
         } else {
           console.error('Error fetching data:', xhr.statusText);
           submitButton.disabled = false;
-          playerNameInput.disabled = false;
-          enabledSubmitButtons++;
+          playerNameInput.disabled = false; // Re-enable the input field if there was an error fetching data
+          enabledSubmitButtons++; // Increment the count of enabled submit buttons
         }
       };
       xhr.onerror = function () {
         console.error('Error fetching data.');
         submitButton.disabled = false;
-        playerNameInput.disabled = false;
-        enabledSubmitButtons++;
+        playerNameInput.disabled = false; // Re-enable the input field in case of an error
+        enabledSubmitButtons++; // Increment the count of enabled submit buttons
       };
       xhr.send();
     } else {
       submitButton.disabled = false;
-      playerNameInput.disabled = false;
-      enabledSubmitButtons++;
+      playerNameInput.disabled = false; // Re-enable the input field if it was empty
+      enabledSubmitButtons++; // Increment the count of enabled submit buttons
     }
   }
 
@@ -425,7 +432,7 @@ document.addEventListener("DOMContentLoaded", function() {
     fetch(baseUrl + '/saveScore', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(currentGame)
+      body: JSON.stringify(currentGame) // Ensure gameboard_id is included
     })
     .then(response => response.json())
     .then(result => {
@@ -435,12 +442,14 @@ document.addEventListener("DOMContentLoaded", function() {
     .catch(error => console.error('Failed to save score:', error));
   }
 
+  // Initial setup
   fetchTeamStatPair();
   addPlayerRows();
   document.getElementById('instructionsButton').addEventListener('click', function() {
     $('#instructionsModal').modal('show');
   });
 
+  // Show the welcome alert on initial load
   document.getElementById('previousGamesButton').click();
 });
 </script>
