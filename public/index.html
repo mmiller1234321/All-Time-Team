@@ -7,14 +7,14 @@
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
   <style>
     body {
-      background-color: #71A95A; /* Green like Wrigley Field grass */
+      background-color: #71A95A;
       font-family: Arial, sans-serif;
-      color: #333; /* Ensuring good contrast */
-      padding: 0 5%; /* Padding for small screens */
+      color: #333;
+      padding: 0 5%;
     }
     .container {
       margin-top: 10px;
-      background-color: #FAFAD2; /* Sand color */
+      background-color: #FAFAD2;
       padding: 10px;
       border-radius: 5px;
     }
@@ -29,12 +29,12 @@
       padding: 8px;
     }
     th {
-      background-color: #f2f2f2; /* Light gray header */
+      background-color: #f2f2f2;
     }
     input[type="text"], button {
-      width: 100%; /* Full width for better accessibility */
-      margin: 4px 0; /* Spacing for touch targets */
-      font-size: 16px; /* Adequate font size for readability on mobile */
+      width: 100%;
+      margin: 4px 0;
+      font-size: 16px;
     }
     .alert-card {
       position: fixed;
@@ -43,18 +43,18 @@
       right: 0;
       bottom: 0;
       padding: 20px;
-      background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent background */
+      background-color: rgba(255, 255, 255, 0.9);
       z-index: 1050;
-      overflow-y: auto; /* Enable vertical scroll if content exceeds screen height */
+      overflow-y: auto;
       display: none;
     }
     .alert-card-content {
-      max-width: 800px; /* Limit max width for better readability */
-      margin: 0 auto; /* Center content horizontally */
+      max-width: 800px;
+      margin: 0 auto;
     }
     @media (min-width: 768px) {
       body {
-        padding: 0 10%; /* Slightly larger padding on larger screens */
+        padding: 0 10%;
       }
       .container {
         margin-top: 20px;
@@ -65,11 +65,11 @@
         margin-top: 20px;
       }
       input[type="text"], button {
-        width: auto; /* Allow natural width */
+        width: auto;
         margin: 8px;
       }
       .alert-card-content {
-        max-width: 70%; /* Adjust max width for better visibility on larger screens */
+        max-width: 70%;
       }
     }
   </style>
@@ -196,7 +196,7 @@ document.addEventListener("DOMContentLoaded", function() {
             <td>${gameboard.id}</td>
             <td>${gameboard.team_name}</td>
             <td>${gameboard.stat_name}</td>
-            <td><button class="btn btn-link" onclick="loadGameboard(${gameboard.id})">Play Now!</button></td>
+            <td><button class="btn btn-link" onclick="loadGameboard(${gameboard.id}, '${gameboard.team_name}', '${gameboard.stat_name}')">Play Now!</button></td>
           `;
           tableBody.appendChild(row);
         });
@@ -215,7 +215,11 @@ document.addEventListener("DOMContentLoaded", function() {
     location.reload();
   };
 
-  window.loadGameboard = function(gameboardId) {
+  window.loadGameboard = function(gameboardId, teamName, statName) {
+    currentGame.gameboard_id = gameboardId;
+    currentGame.team_name = teamName;
+    currentGame.stat_name = statName;
+
     fetch(`${window.location.protocol + '//' + window.location.hostname}/gameboard/${gameboardId}`)
       .then(response => response.json())
       .then(data => {
@@ -231,7 +235,6 @@ document.addEventListener("DOMContentLoaded", function() {
   };
 
   function updatePageWithGameboard(gameboard) {
-    console.log('Loaded gameboard:', gameboard);
     document.getElementById('teamLabel').innerText = gameboard.team_name;
     document.getElementById('statLabel').innerText = gameboard.stat_name;
     currentGame.team_name = gameboard.team_name;
@@ -454,7 +457,6 @@ document.addEventListener("DOMContentLoaded", function() {
         <p>Team Name: ${teamName}</p>
         <p>Stat Name: ${statName}</p>
         <p>Gameboard ID: ${gameboardId}</p>
-        <button type="button" class="btn btn-secondary" onclick="closeAlertCard()">Close</button>
       </div>
     `;
     var alertCard = document.createElement('div');
@@ -473,6 +475,5 @@ document.addEventListener("DOMContentLoaded", function() {
   document.getElementById('previousGamesButton').click();
 });
 </script>
-
 </body>
 </html>
