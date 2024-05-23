@@ -148,7 +148,7 @@
   <div class="alert-card-content">
     <button type="button" class="close" onclick="closeAlertCard()">&times;</button>
     <h4 class="alert-heading">Available Games</h4>
-    <p>Welcome to All Time Teams. Please select a game to play from the list below. New games available regularly.</p>
+    <p>Welcome to All Time Team. Please select a game to play from the list below. New games available regularly.</p>
     <table class="table table-bordered">
       <thead>
         <tr>
@@ -196,7 +196,7 @@ document.addEventListener("DOMContentLoaded", function() {
             <td>${gameboard.id}</td>
             <td>${gameboard.team_name}</td>
             <td>${gameboard.stat_name}</td>
-            <td><button class="btn btn-link" onclick="loadGameboard(${gameboard.id}, '${gameboard.team_name}', '${gameboard.stat_name}')">Play Now!</button></td>
+            <td><button class="btn btn-link" onclick="loadGameboard(${gameboard.id})">Play Now!</button></td>
           `;
           tableBody.appendChild(row);
         });
@@ -215,11 +215,7 @@ document.addEventListener("DOMContentLoaded", function() {
     location.reload();
   };
 
-  window.loadGameboard = function(gameboardId, teamName, statName) {
-    currentGame.gameboard_id = gameboardId;
-    currentGame.team_name = teamName;
-    currentGame.stat_name = statName;
-
+  window.loadGameboard = function(gameboardId) {
     fetch(`${window.location.protocol + '//' + window.location.hostname}/gameboard/${gameboardId}`)
       .then(response => response.json())
       .then(data => {
@@ -235,6 +231,7 @@ document.addEventListener("DOMContentLoaded", function() {
   };
 
   function updatePageWithGameboard(gameboard) {
+    console.log('Loaded gameboard:', gameboard);
     document.getElementById('teamLabel').innerText = gameboard.team_name;
     document.getElementById('statLabel').innerText = gameboard.stat_name;
     currentGame.team_name = gameboard.team_name;
@@ -475,5 +472,6 @@ document.addEventListener("DOMContentLoaded", function() {
   document.getElementById('previousGamesButton').click();
 });
 </script>
+
 </body>
 </html>
