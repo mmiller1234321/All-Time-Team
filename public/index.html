@@ -182,27 +182,6 @@ document.addEventListener("DOMContentLoaded", function() {
     total_score: 0
   };
 
-  function updateLabels(team, stat, id) {
-    currentGame.team_name = team;
-    currentGame.stat_name = stat;
-    currentGame.gameboard_id = id; // Ensure gameboard_id is set
-    document.getElementById('teamLabel').innerText = team;
-    document.getElementById('statLabel').innerText = stat;
-    document.getElementById('teamLabel').setAttribute('data-id', id);
-
-    console.log('Updated labels with gameboard ID:', id); // Log gameboard ID
-
-    // Fetch and display the high score for the current gameboard
-    fetch(`${window.location.protocol + '//' + window.location.hostname}/fetch-high-score/${id}`)
-      .then(response => response.json())
-      .then(data => {
-        document.getElementById('highScore').innerText = data.high_score || 'N/A';
-      })
-      .catch(error => {
-        console.error('Error fetching high score:', error);
-      });
-  }
-
   document.getElementById('previousGamesButton').addEventListener('click', function() {
     var baseUrl = window.location.protocol + '//' + window.location.hostname;
     fetch(baseUrl + '/fetch-previous-gameboards')
@@ -273,6 +252,27 @@ document.addEventListener("DOMContentLoaded", function() {
       })
       .catch(error => {
         console.error('Error fetching team and stat pair:', error);
+      });
+  }
+
+  function updateLabels(team, stat, id) {
+    currentGame.team_name = team;
+    currentGame.stat_name = stat;
+    currentGame.gameboard_id = id; // Ensure gameboard_id is set
+    document.getElementById('teamLabel').innerText = team;
+    document.getElementById('statLabel').innerText = stat;
+    document.getElementById('teamLabel').setAttribute('data-id', id);
+
+    console.log('Updated labels with gameboard ID:', id); // Log gameboard ID
+
+    // Fetch and display the high score for the current gameboard
+    fetch(`${window.location.protocol + '//' + window.location.hostname}/fetch-high-score/${id}`)
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById('highScore').innerText = data.high_score || 'N/A';
+      })
+      .catch(error => {
+        console.error('Error fetching high score:', error);
       });
   }
 
@@ -362,10 +362,10 @@ document.addEventListener("DOMContentLoaded", function() {
           var submitButton = event.target;
           if (submitButton.disabled) return;
           if (!currentGame.gameboard_id) {
-            console.error("Gameboard ID is not set.");
-            alert("Gameboard not loaded properly, please reload or select another game.");
-            return; // Stop further execution
-          }
+    console.error("Gameboard ID is not set.");
+    alert("Gameboard not loaded properly, please reload or select another game.");
+    return; // Stop further execution
+  }
           submitButton.disabled = true;
           enabledSubmitButtons--; // Decrement the count of enabled submit buttons
 
@@ -485,6 +485,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 </body>
 </html>
+
 
 
 
