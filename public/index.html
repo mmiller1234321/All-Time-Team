@@ -7,14 +7,14 @@
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
   <style>
     body {
-      background-color: #71A95A; /* Green like Wrigley Field grass */
+      background-color: #71A95A;
       font-family: Arial, sans-serif;
-      color: #333; /* Ensuring good contrast */
-      padding: 0 5%; /* Padding for small screens */
+      color: #333;
+      padding: 0 5%;
     }
     .container {
       margin-top: 10px;
-      background-color: #FAFAD2; /* Sand color */
+      background-color: #FAFAD2;
       padding: 10px;
       border-radius: 5px;
     }
@@ -29,12 +29,12 @@
       padding: 8px;
     }
     th {
-      background-color: #f2f2f2; /* Light gray header */
+      background-color: #f2f2f2;
     }
     input[type="text"], button {
-      width: 100%; /* Full width for better accessibility */
-      margin: 4px 0; /* Spacing for touch targets */
-      font-size: 16px; /* Adequate font size for readability on mobile */
+      width: 100%;
+      margin: 4px 0;
+      font-size: 16px;
     }
     .alert-card {
       position: fixed;
@@ -43,20 +43,18 @@
       right: 0;
       bottom: 0;
       padding: 20px;
-      background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent background */
+      background-color: rgba(255, 255, 255, 0.9);
       z-index: 1050;
-      overflow-y: auto; /* Enable vertical scroll if content exceeds screen height */
+      overflow-y: auto;
       display: none;
     }
     .alert-card-content {
-      max-width: 800px; /* Limit max width for better readability */
-      margin: 0 auto; /* Center content horizontally */
+      max-width: 800px;
+      margin: 0 auto;
     }
-
-    /* Media Query for Larger Screens */
     @media (min-width: 768px) {
       body {
-        padding: 0 10%; /* Slightly larger padding on larger screens */
+        padding: 0 10%;
       }
       .container {
         margin-top: 20px;
@@ -67,11 +65,11 @@
         margin-top: 20px;
       }
       input[type="text"], button {
-        width: auto; /* Allow natural width */
+        width: auto;
         margin: 8px;
       }
       .alert-card-content {
-        max-width: 70%; /* Adjust max width for better visibility on larger screens */
+        max-width: 70%;
       }
     }
   </style>
@@ -95,7 +93,6 @@
       </tr>
     </thead>
     <tbody id="playerRows">
-      <!-- Table rows will be generated dynamically -->
     </tbody>
   </table>
 
@@ -145,7 +142,6 @@
   </div>
 </div>
 
-<!-- Alert card for Previous Games -->
 <div id="previousGamesAlert" class="alert alert-info alert-card">
   <div class="alert-card-content">
     <button type="button" class="close" onclick="closeAlertCard()">&times;</button>
@@ -160,7 +156,6 @@
         </tr>
       </thead>
       <tbody id="previousGamesTableBody">
-        <!-- Previous games will be dynamically inserted here -->
       </tbody>
     </table>
   </div>
@@ -173,7 +168,7 @@
 document.addEventListener("DOMContentLoaded", function() {
   var submittedPlayers = [];
   var submissionButtonCount = 9;
-  var enabledSubmitButtons = submissionButtonCount; // Track the number of enabled submit buttons
+  var enabledSubmitButtons = submissionButtonCount;
   var currentGame = {
     team_name: '',
     stat_name: '',
@@ -189,7 +184,7 @@ document.addEventListener("DOMContentLoaded", function() {
           throw new Error('Invalid response format');
         }
         var tableBody = document.getElementById('previousGamesTableBody');
-        tableBody.innerHTML = ''; // Clear existing rows
+        tableBody.innerHTML = '';
         gameboards.forEach(gameboard => {
           var row = document.createElement('tr');
           row.innerHTML = `
@@ -200,7 +195,7 @@ document.addEventListener("DOMContentLoaded", function() {
           `;
           tableBody.appendChild(row);
         });
-        document.getElementById('previousGamesAlert').style.display = 'block'; // Show the alert card
+        document.getElementById('previousGamesAlert').style.display = 'block';
       })
       .catch(error => {
         console.error('Error fetching previous gameboards:', error);
@@ -211,18 +206,14 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById('previousGamesAlert').style.display = 'none';
   };
 
-  window.playTodaysGame = function() {
-    location.reload();
-  };
-
   window.loadGameboard = function(gameboardId) {
     fetch(`${window.location.protocol + '//' + window.location.hostname}/gameboard/${gameboardId}`)
       .then(response => response.json())
       .then(data => {
         if (data.gameboard) {
           updatePageWithGameboard(data.gameboard);
-          document.getElementById('highScore').innerText = data.high_score || 'N/A'; // Fetch high score when a gameboard is loaded
-          closeAlertCard(); // Close the alert card
+          document.getElementById('highScore').innerText = data.high_score || 'N/A';
+          closeAlertCard();
         } else {
           console.error('No gameboard data found for ID:', gameboardId);
         }
@@ -231,12 +222,12 @@ document.addEventListener("DOMContentLoaded", function() {
   };
 
   function updatePageWithGameboard(gameboard) {
-    console.log('Loaded gameboard:', gameboard); // Log gameboard details
+    console.log('Loaded gameboard:', gameboard);
     document.getElementById('teamLabel').innerText = gameboard.team_name;
     document.getElementById('statLabel').innerText = gameboard.stat_name;
     currentGame.team_name = gameboard.team_name;
     currentGame.stat_name = gameboard.stat_name;
-    fetchHighScore(gameboard.team_name, gameboard.stat_name); // Fetch high score based on team and stat
+    fetchHighScore(gameboard.team_name, gameboard.stat_name);
   }
 
   function fetchTeamStatPair() {
@@ -257,10 +248,7 @@ document.addEventListener("DOMContentLoaded", function() {
     currentGame.stat_name = stat;
     document.getElementById('teamLabel').innerText = team;
     document.getElementById('statLabel').innerText = stat;
-
-    console.log('Updated labels with team:', team, 'and stat:', stat); // Log team and stat
-
-    // Fetch and display the high score for the current team and stat
+    console.log('Updated labels with team:', team, 'and stat:', stat);
     fetchHighScore(team, stat);
   }
 
@@ -298,7 +286,7 @@ document.addEventListener("DOMContentLoaded", function() {
       var cellPosition = row.insertCell(1);
       cellPosition.textContent = position;
 
-      var cellStat = row.insertCell(2);  // Directly use this cell to display stats
+      var cellStat = row.insertCell(2);
 
       var cellSubmit = row.insertCell(3);
       var button = document.createElement("button");
@@ -363,21 +351,21 @@ document.addEventListener("DOMContentLoaded", function() {
     if (!currentGame.team_name || !currentGame.stat_name) {
       console.error("Team or stat is not set.");
       alert("Game not loaded properly, please reload or select another game.");
-      return; // Stop further execution
+      return;
     }
     submitButton.disabled = true;
-    enabledSubmitButtons--; // Decrement the count of enabled submit buttons
+    enabledSubmitButtons--;
 
     var row = submitButton.closest("tr");
     var playerNameInput = row.cells[0].children[0];
     var playerName = playerNameInput.value.trim();
-    playerNameInput.disabled = true; // Disable the player name input field after submission
+    playerNameInput.disabled = true;
 
     if (submittedPlayers.includes(playerName)) {
       alert('Player has already been submitted. Please select a different player.');
       submitButton.disabled = false;
-      playerNameInput.disabled = false; // Re-enable the input field if the player has already been submitted
-      enabledSubmitButtons++; // Increment the count of enabled submit buttons
+      playerNameInput.disabled = false;
+      enabledSubmitButtons++;
       return;
     }
 
@@ -386,7 +374,7 @@ document.addEventListener("DOMContentLoaded", function() {
       var team = currentGame.team_name;
       var stat = currentGame.stat_name;
 
-      console.log(`Submitting player: ${playerName}, Team: ${team}, Stat: ${stat}`); // Log submission details
+      console.log(`Submitting player: ${playerName}, Team: ${team}, Stat: ${stat}`);
 
       var baseUrl = window.location.protocol + '//' + window.location.hostname;
       var xhr = new XMLHttpRequest();
@@ -398,35 +386,30 @@ document.addEventListener("DOMContentLoaded", function() {
           statCell.textContent = (statValue === 'null') ? 'N/A' : statValue;
           statCell.classList.add('stat-square');
           updateTotalScore();
-          // Fetch high score after the first player is submitted
-          if (submittedPlayers.length === 0) {
-            fetchHighScore(currentGame.team_name, currentGame.stat_name);
-          }
-          submissionButtonCount--;
-          if (enabledSubmitButtons === 0) { // If all submit buttons are disabled
+          if (enabledSubmitButtons === 0) {
             var totalScore = document.getElementById('totalScore').textContent;
             console.log('All buttons submitted. Total Score:', totalScore);
-            sendFinalScore(totalScore); // Update to send the correct information
+            sendFinalScore(totalScore);
+            fetchHighScore(currentGame.team_name, currentGame.stat_name);
           }
-          submittedPlayers.push(playerName);
         } else {
           console.error('Error fetching data:', xhr.statusText);
           submitButton.disabled = false;
-          playerNameInput.disabled = false; // Re-enable the input field if there was an error fetching data
-          enabledSubmitButtons++; // Increment the count of enabled submit buttons
+          playerNameInput.disabled = false;
+          enabledSubmitButtons++;
         }
       };
       xhr.onerror = function () {
         console.error('Error fetching data.');
         submitButton.disabled = false;
-        playerNameInput.disabled = false; // Re-enable the input field in case of an error
-        enabledSubmitButtons++; // Increment the count of enabled submit buttons
+        playerNameInput.disabled = false;
+        enabledSubmitButtons++;
       };
       xhr.send();
     } else {
       submitButton.disabled = false;
-      playerNameInput.disabled = false; // Re-enable the input field if it was empty
-      enabledSubmitButtons++; // Increment the count of enabled submit buttons
+      playerNameInput.disabled = false;
+      enabledSubmitButtons++;
     }
   }
 
@@ -455,7 +438,7 @@ document.addEventListener("DOMContentLoaded", function() {
     .then(response => response.json())
     .then(result => {
       console.log('Response from save-score:', result.message);
-      showAlertCard(totalScore, currentGame.team_name, currentGame.stat_name); // Show alert with details
+      showAlertCard(totalScore, currentGame.team_name, currentGame.stat_name);
     })
     .catch(error => console.error('Failed to save score:', error));
   }
@@ -477,17 +460,16 @@ document.addEventListener("DOMContentLoaded", function() {
     alertCard.style.display = 'block';
   }
 
-  // Initial setup
   fetchTeamStatPair();
   addPlayerRows();
   document.getElementById('instructionsButton').addEventListener('click', function() {
     $('#instructionsModal').modal('show');
   });
 
-  // Show the welcome alert on initial load
   document.getElementById('previousGamesButton').click();
 });
 </script>
 
 </body>
 </html>
+
