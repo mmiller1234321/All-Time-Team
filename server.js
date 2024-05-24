@@ -27,11 +27,11 @@ app.get('/fetch-previous-gameboards', (req, res) => {
   });
 });
 
-app.get('/fetch-high-score/:gameboardId', (req, res) => {
-  const { gameboardId } = req.params;
+app.get('/fetch-high-score/:teamName/:statName', (req, res) => {
+  const { teamName, statName } = req.params;
   pool.query(
-    'SELECT MAX(total_score) AS high_score FROM games WHERE gameboard_id = ?',
-    [gameboardId],
+    'SELECT MAX(total_score) AS high_score FROM games WHERE team_name = ? AND stat_name = ?',
+    [teamName, statName],
     (error, results) => {
       if (error) {
         console.error('Error fetching high score:', error);

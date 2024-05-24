@@ -3,20 +3,20 @@ const router = express.Router();
 const pool = require('../db/db.js');
 
 router.post('/', (req, res) => {
-  const { total_score, team_name, stat_name, gameboard_id } = req.body;
+  const { total_score, team_name, stat_name } = req.body;
 
   console.log('Request body:', req.body);
 
-  if (total_score == null || team_name == null || stat_name == null || gameboard_id == null) {
-    console.error('Missing one or more required fields: total_score, team_name, stat_name, gameboard_id');
+  if (total_score == null || team_name == null || stat_name == null) {
+    console.error('Missing one or more required fields: total_score, team_name, stat_name');
     return res.status(400).json({ error: 'Missing one or more required fields' });
   }
 
-  console.log(`Attempting to insert score: ${total_score}, for team: ${team_name}, stat: ${stat_name}, with gameboard ID: ${gameboard_id}`);
+  console.log(`Attempting to insert score: ${total_score}, for team: ${team_name}, stat: ${stat_name}`);
 
   pool.query(
-    'INSERT INTO games (total_score, team_name, stat_name, gameboard_id) VALUES (?, ?, ?, ?)',
-    [total_score, team_name, stat_name, gameboard_id],
+    'INSERT INTO games (total_score, team_name, stat_name) VALUES (?, ?, ?)',
+    [total_score, team_name, stat_name],
     (error, results) => {
       if (error) {
         console.error('Error inserting total score:', error);

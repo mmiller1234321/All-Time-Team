@@ -2,16 +2,17 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db/db.js');
 
-router.get('/:id', (req, res) => {
-  const gameboardId = req.params.id;
-  pool.query('SELECT * FROM gameboard WHERE id = ?', [gameboardId], (error, results) => {
+router.get('/:teamName/:statName', (req, res) => {
+  const teamName = req.params.teamName;
+  const statName = req.params.statName;
+  pool.query('SELECT * FROM gameboard WHERE team_name = ? AND stat_name = ?', [teamName, statName], (error, results) => {
     if (error) {
       console.error('Error fetching gameboard:', error);
       res.status(500).json({ error: 'Internal Server Error', message: error.message });
     } else if (results.length > 0) {
       pool.query(
-        'SELECT MAX(total_score) AS high_score FROM games WHERE gameboard_id = ?',
-        [gameboardId],
+        'SELECT MAX(total_score) AS high_score FROM games WHERE team_name = ? AND stat_name = ?',
+        [teamName, statName],
         (error, scoreResults) => {
           if (error) {
             console.error('Error fetching high score:', error);
@@ -28,6 +29,7 @@ router.get('/:id', (req, res) => {
 });
 
 module.exports = router;
+
 
 
 

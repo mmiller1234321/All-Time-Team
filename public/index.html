@@ -176,7 +176,6 @@ document.addEventListener("DOMContentLoaded", function() {
   var submissionButtonCount = 9;
   var enabledSubmitButtons = submissionButtonCount; // Track the number of enabled submit buttons
   var currentGame = {
-    gameboard_id: '',
     team_name: '',
     stat_name: '',
     total_score: 0
@@ -198,7 +197,7 @@ document.addEventListener("DOMContentLoaded", function() {
             <td>${gameboard.id}</td>
             <td>${gameboard.team_name}</td>
             <td>${gameboard.stat_name}</td>
-            <td><button class="btn btn-link" onclick="loadGameboard(${gameboard.id})">Play Now!</button></td>
+            <td><button class="btn btn-link" onclick="loadGameboard('${gameboard.team_name}', '${gameboard.stat_name}')">Play Now!</button></td>
           `;
           tableBody.appendChild(row);
         });
@@ -217,8 +216,8 @@ document.addEventListener("DOMContentLoaded", function() {
     location.reload();
   };
 
-  window.loadGameboard = function(gameboardId) {
-    fetch(`${window.location.protocol + '//' + window.location.hostname}/gameboard/${gameboardId}`)
+  window.loadGameboard = function(teamName, statName) {
+    fetch(`${window.location.protocol + '//' + window.location.hostname}/gameboard/${teamName}/${statName}`)
       .then(response => response.json())
       .then(data => {
         if (data.gameboard) {
@@ -226,7 +225,7 @@ document.addEventListener("DOMContentLoaded", function() {
           document.getElementById('highScore').innerText = data.high_score || 'N/A'; // Fetch high score when a gameboard is loaded
           closeAlertCard(); // Close the alert card
         } else {
-          console.error('No gameboard data found for ID:', gameboardId);
+          console.error('No gameboard data found for:', teamName, statName);
         }
       })
       .catch(error => console.error('Error loading gameboard:', error));
@@ -238,8 +237,7 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById('statLabel').innerText = gameboard.stat_name;
     currentGame.team_name = gameboard.team_name;
     currentGame.stat_name = gameboard.stat_name;
-    currentGame.gameboard_id = gameboard.id; // Ensure gameboard_id is set
-    console.log('Gameboard ID set:', currentGame.gameboard_id); // Log the gameboard ID
+    console.log('Gameboard set:', currentGame.team_name, currentGame.stat_name); // Log the gameboard details
   }
 
   function fetchTeamStatPair() {
@@ -247,7 +245,7 @@ document.addEventListener("DOMContentLoaded", function() {
     fetch(baseUrl + '/generateTeamStatPair/team-stat-pair')
       .then(response => response.json())
       .then(data => {
-        updateLabels(data.team, data.stat, data.id);
+        updateLabels(data.team, data.stat);
         displayOptimalScore(data.perfect_score);
       })
       .catch(error => {
@@ -255,18 +253,16 @@ document.addEventListener("DOMContentLoaded", function() {
       });
   }
 
-  function updateLabels(team, stat, id) {
+  function updateLabels(team, stat) {
     currentGame.team_name = team;
     currentGame.stat_name = stat;
-    currentGame.gameboard_id = id; // Ensure gameboard_id is set
     document.getElementById('teamLabel').innerText = team;
     document.getElementById('statLabel').innerText = stat;
-    document.getElementById('teamLabel').setAttribute('data-id', id);
 
-    console.log('Updated labels with gameboard ID:', id); // Log gameboard ID
+    console.log('Updated labels with team:', team, 'and stat:', stat); // Log the details
 
     // Fetch and display the high score for the current gameboard
-    fetch(`${window.location.protocol + '//' + window.location.hostname}/fetch-high-score/${id}`)
+    fetch(`${window.location.protocol + '//' + window.location.hostname}/fetch-high-score/${team}/${stat}`)
       .then(response => response.json())
       .then(data => {
         document.getElementById('highScore').innerText = data.high_score || 'N/A';
@@ -361,8 +357,8 @@ document.addEventListener("DOMContentLoaded", function() {
   function handleSubmit(event) {
     var submitButton = event.target;
     if (submitButton.disabled) return;
-    if (!currentGame.gameboard_id) {
-      console.error("Gameboard ID is not set.");
+    if (!currentGame.team_name || !currentGame.stat_name) {
+      console.error("Team name or stat name is not set.");
       alert("Gameboard not loaded properly, please reload or select another game.");
       return; // Stop further execution
     }
@@ -386,13 +382,12 @@ document.addEventListener("DOMContentLoaded", function() {
       var position = row.cells[1].textContent;
       var team = currentGame.team_name;
       var stat = currentGame.stat_name;
-      var id = currentGame.gameboard_id;
 
-      console.log(`Submitting player: ${playerName}, Team: ${team}, Stat: ${stat}, Gameboard ID: ${id}`); // Log submission details
+      console.log(`Submitting player: ${playerName}, Team: ${team}, Stat: ${stat}`); // Log submission details
 
       var baseUrl = window.location.protocol + '//' + window.location.hostname;
       var xhr = new XMLHttpRequest();
-      xhr.open('GET', baseUrl + '/search?playerName=' + encodeURIComponent(playerName) + '&position=' + encodeURIComponent(position) + '&team=' + encodeURIComponent(team) + '&stat=' + encodeURIComponent(stat) + '&id=' + encodeURIComponent(id), true);
+      xhr.open('GET', baseUrl + '/search?playerName=' + encodeURIComponent(playerName) + '&position=' + encodeURIComponent(position) + '&team=' + encodeURIComponent(team) + '&stat=' + encodeURIComponent(stat), true);
       xhr.onload = function () {
         if (xhr.status === 200) {
           var statCell = row.cells[2];
@@ -443,17 +438,17 @@ document.addEventListener("DOMContentLoaded", function() {
     fetch(baseUrl + '/saveScore', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(currentGame) // Ensure gameboard_id is included
+      body: JSON.stringify(currentGame)
     })
     .then(response => response.json())
     .then(result => {
       console.log('Response from save-score:', result.message);
-      showAlertCard(totalScore, currentGame.team_name, currentGame.stat_name, currentGame.gameboard_id); // Show alert with details
+      showAlertCard(totalScore, currentGame.team_name, currentGame.stat_name); // Show alert with details
     })
     .catch(error => console.error('Failed to save score:', error));
   }
 
-  function showAlertCard(totalScore, teamName, statName, gameboardId) {
+  function showAlertCard(totalScore, teamName, statName) {
     var alertContent = `
       <div class="alert-card-content">
         <button type="button" class="close" onclick="closeAlertCard()">&times;</button>
@@ -461,7 +456,6 @@ document.addEventListener("DOMContentLoaded", function() {
         <p>Total Score: ${totalScore}</p>
         <p>Team Name: ${teamName}</p>
         <p>Stat Name: ${statName}</p>
-        <p>Gameboard ID: ${gameboardId}</p>
       </div>
     `;
     var alertCard = document.createElement('div');
@@ -485,10 +479,3 @@ document.addEventListener("DOMContentLoaded", function() {
 
 </body>
 </html>
-
-
-
-
-
-
-
