@@ -398,12 +398,17 @@ document.addEventListener("DOMContentLoaded", function() {
           statCell.textContent = (statValue === 'null') ? 'N/A' : statValue;
           statCell.classList.add('stat-square');
           updateTotalScore();
+          // Fetch high score after the first player is submitted
+          if (submittedPlayers.length === 0) {
+            fetchHighScore(currentGame.team_name, currentGame.stat_name);
+          }
           submissionButtonCount--;
           if (enabledSubmitButtons === 0) { // If all submit buttons are disabled
             var totalScore = document.getElementById('totalScore').textContent;
             console.log('All buttons submitted. Total Score:', totalScore);
             sendFinalScore(totalScore); // Update to send the correct information
           }
+          submittedPlayers.push(playerName);
         } else {
           console.error('Error fetching data:', xhr.statusText);
           submitButton.disabled = false;
@@ -486,4 +491,3 @@ document.addEventListener("DOMContentLoaded", function() {
 
 </body>
 </html>
-
