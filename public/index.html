@@ -314,168 +314,174 @@ document.addEventListener("DOMContentLoaded", function() {
     var currentFocus;
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
-            if (this.readyState === 4 && this.status === 200) {
-              var suggestions = JSON.parse(this.responseText);
-              closeAllLists();
-              if (!inputElement.value || suggestions.length === 0) {
-                return false;
-              }
-              currentFocus = -1;
-              var autocompleteList = document.createElement("div");
-              autocompleteList.setAttribute("id", inputElement.id + "autocomplete-list");
-              autocompleteList.setAttribute("class", "autocomplete-items");
-              inputElement.parentNode.appendChild(autocompleteList);
-              suggestions.forEach(suggestion => {
-                var suggestionItem = document.createElement("div");
-                suggestionItem.innerHTML = "<strong>" + suggestion.fullName.substr(0, inputElement.value.length) + "</strong>" + suggestion.fullName.substr(inputElement.value.length);
-                suggestionItem.innerHTML += " <br><small>born in " + suggestion.birthYear + "</small>";
-                suggestionItem.innerHTML += "<input type='hidden' value='" + suggestion.fullName + "'>";
-                suggestionItem.addEventListener("click", function(e) {
-                  inputElement.value = this.getElementsByTagName("input")[0].value;
-                  closeAllLists();
-                });
-                autocompleteList.appendChild(suggestionItem);
-              });
-            }
-          };
-          var baseUrl = window.location.protocol + '//' + window.location.hostname;
-          xhr.open("GET", baseUrl + "/autocomplete?query=" + encodeURIComponent(inputElement.value), true);
-          xhr.send();
-
-          function closeAllLists(elmnt) {
-            var autocompleteItems = document.getElementsByClassName("autocomplete-items");
-            for (var i = 0; i < autocompleteItems.length; i++) {
-              if (elmnt !== autocompleteItems[i] && elmnt !== inputElement) {
-                autocompleteItems[i].parentNode.removeChild(autocompleteItems[i]);
-              }
-            }
-          }
+      if (this.readyState === 4 && this.status === 200) {
+        var suggestions = JSON.parse(this.responseText);
+        closeAllLists();
+        if (!inputElement.value || suggestions.length === 0) {
+          return false;
         }
-
-        document.addEventListener("input", function(e) {
-          if (e.target.matches(".player-input")) {
-            autocomplete(e.target);
-          }
-        });
-
-        function handleSubmit(event) {
-          var submitButton = event.target;
-          if (submitButton.disabled) return;
-
-          var row = submitButton.closest("tr");
-          var playerNameInput = row.cells[0].children[0];
-          var playerName = playerNameInput.value.trim();
-          playerNameInput.disabled = true; // Disable the player name input field after submission
-
-          if (submittedPlayers.includes(playerName)) {
-            alert('Player has already been submitted. Please select a different player.');
-            submitButton.disabled = false;
-            playerNameInput.disabled = false; // Re-enable the input field if the player has already been submitted
-            return;
-          }
-
-          if (playerName !== '') {
-            var position = row.cells[1].textContent;
-            var team = currentGame.team_name;
-            var stat = currentGame.stat_name;
-
-            if (!currentGame.gameboard_id) {
-              currentGame.gameboard_id = document.getElementById('teamLabel').getAttribute('data-id');
-              console.log('Retrieved gameboard ID:', currentGame.gameboard_id);
-            }
-
-            console.log(`Submitting player: ${playerName}, Team: ${team}, Stat: ${stat}, Gameboard ID: ${currentGame.gameboard_id}`); // Log submission details
-
-            var baseUrl = window.location.protocol + '//' + window.location.hostname;
-            var xhr = new XMLHttpRequest();
-            xhr.open('GET', baseUrl + '/search?playerName=' + encodeURIComponent(playerName) + '&position=' + encodeURIComponent(position) + '&team=' + encodeURIComponent(team) + '&stat=' + encodeURIComponent(stat) + '&id=' + encodeURIComponent(currentGame.gameboard_id), true);
-            xhr.onload = function () {
-              if (xhr.status === 200) {
-                var statCell = row.cells[2];
-                var statValue = xhr.responseText;
-                statCell.textContent = (statValue === 'null') ? 'N/A' : statValue;
-                statCell.classList.add('stat-square');
-                updateTotalScore();
-                submissionButtonCount--;
-                if (submissionButtonCount === 0) { // If all submit buttons are disabled
-                  var totalScore = document.getElementById('totalScore').textContent;
-                  console.log('All buttons submitted. Total Score:', totalScore);
-                  sendFinalScore(totalScore); // Update to send the correct information
-                }
-              } else {
-                console.error('Error fetching data:', xhr.statusText);
-                submitButton.disabled = false;
-                playerNameInput.disabled = false; // Re-enable the input field if there was an error fetching data
-              }
-            };
-            xhr.onerror = function () {
-              console.error('Error fetching data.');
-              submitButton.disabled = false;
-              playerNameInput.disabled = false; // Re-enable the input field in case of an error
-            };
-            xhr.send();
-          } else {
-            submitButton.disabled = false;
-            playerNameInput.disabled = false; // Re-enable the input field if it was empty
-          }
-        }
-
-        function updateTotalScore() {
-          var statSquares = document.querySelectorAll('.stat-square');
-          var totalScore = 0;
-          statSquares.forEach(square => {
-            var score = parseInt(square.textContent, 10);
-            if (!isNaN(score)) totalScore += score;
+        currentFocus = -1;
+        var autocompleteList = document.createElement("div");
+        autocompleteList.setAttribute("id", inputElement.id + "autocomplete-list");
+        autocompleteList.setAttribute("class", "autocomplete-items");
+        inputElement.parentNode.appendChild(autocompleteList);
+        suggestions.forEach(suggestion => {
+          var suggestionItem = document.createElement("div");
+          suggestionItem.innerHTML = "<strong>" + suggestion.fullName.substr(0, inputElement.value.length) + "</strong>" + suggestion.fullName.substr(inputElement.value.length);
+          suggestionItem.innerHTML += " <br><small>born in " + suggestion.birthYear + "</small>";
+          suggestionItem.innerHTML += "<input type='hidden' value='" + suggestion.fullName + "'>";
+          suggestionItem.addEventListener("click", function(e) {
+            inputElement.value = this.getElementsByTagName("input")[0].value;
+            closeAllLists();
           });
-          currentGame.total_score = totalScore;
-          document.getElementById('totalScore').textContent = totalScore;
-        }
-
-        function sendFinalScore(totalScore) {
-          var baseUrl = window.location.protocol + '//' + window.location.hostname;
-          fetch(baseUrl + '/saveScore', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(currentGame) // Ensure gameboard_id is included
-          })
-          .then(response => response.json())
-          .then(result => {
-            console.log('Response from save-score:', result.message);
-            showAlertCard(totalScore, currentGame.team_name, currentGame.stat_name, currentGame.gameboard_id); // Show alert with details
-          })
-          .catch(error => console.error('Failed to save score:', error));
-        }
-
-        function showAlertCard(totalScore, teamName, statName, gameboardId) {
-          var alertContent = `
-            <div class="alert-card-content">
-              <button type="button" class="close" onclick="closeAlertCard()">&times;</button>
-              <h4 class="alert-heading">All buttons submitted!</h4>
-              <p>Total Score: ${totalScore}</p>
-              <p>Team Name: ${teamName}</p>
-              <p>Stat Name: ${statName}</p>
-              <p>Gameboard ID: ${gameboardId}</p>
-            </div>
-          `;
-          var alertCard = document.createElement('div');
-          alertCard.className = 'alert alert-info alert-card';
-          alertCard.innerHTML = alertContent;
-          document.body.appendChild(alertCard);
-          alertCard.style.display = 'block';
-        }
-
-        // Initial setup
-        fetchTeamStatPair();
-        addPlayerRows();
-        document.getElementById('instructionsButton').addEventListener('click', function() {
-          $('#instructionsModal').modal('show');
+          autocompleteList.appendChild(suggestionItem);
         });
+      }
+    };
+    var baseUrl = window.location.protocol + '//' + window.location.hostname;
+    xhr.open("GET", baseUrl + "/autocomplete?query=" + encodeURIComponent(inputElement.value), true);
+    xhr.send();
 
-        // Show the welcome alert on initial load
-        document.getElementById('previousGamesButton').click();
-      });
+    function closeAllLists(elmnt) {
+      var autocompleteItems = document.getElementsByClassName("autocomplete-items");
+      for (var i = 0; i < autocompleteItems.length; i++) {
+        if (elmnt !== autocompleteItems[i] && elmnt !== inputElement) {
+          autocompleteItems[i].parentNode.removeChild(autocompleteItems[i]);
+        }
+      }
+    }
+  }
+
+  document.addEventListener("input", function(e) {
+    if (e.target.matches(".player-input")) {
+      autocomplete(e.target);
+    }
+  });
+
+  function handleSubmit(event) {
+    var submitButton = event.target;
+    if (submitButton.disabled) return;
+    submitButton.disabled = true;
+    enabledSubmitButtons--; // Decrement the count of enabled submit buttons
+
+    var row = submitButton.closest("tr");
+    var playerNameInput = row.cells[0].children[0];
+    var playerName = playerNameInput.value.trim();
+    playerNameInput.disabled = true; // Disable the player name input field after submission
+
+    if (submittedPlayers.includes(playerName)) {
+      alert('Player has already been submitted. Please select a different player.');
+      submitButton.disabled = false;
+      playerNameInput.disabled = false; // Re-enable the input field if the player has already been submitted
+      enabledSubmitButtons++; // Increment the count of enabled submit buttons
+      return;
+    }
+
+    if (playerName !== '') {
+      var position = row.cells[1].textContent;
+      var team = currentGame.team_name;
+      var stat = currentGame.stat_name;
+      var id = currentGame.gameboard_id;
+
+      console.log(`Submitting player: ${playerName}, Team: ${team}, Stat: ${stat}, Gameboard ID: ${id}`); // Log submission details
+
+      var baseUrl = window.location.protocol + '//' + window.location.hostname;
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', baseUrl + '/search?playerName=' + encodeURIComponent(playerName) + '&position=' + encodeURIComponent(position) + '&team=' + encodeURIComponent(team) + '&stat=' + encodeURIComponent(stat) + '&id=' + encodeURIComponent(id), true);
+      xhr.onload = function () {
+        if (xhr.status === 200) {
+          var statCell = row.cells[2];
+          var statValue = xhr.responseText;
+          statCell.textContent = (statValue === 'null') ? 'N/A' : statValue;
+          statCell.classList.add('stat-square');
+          updateTotalScore();
+          submissionButtonCount--;
+          if (enabledSubmitButtons === 0) { // If all submit buttons are disabled
+            var totalScore = document.getElementById('totalScore').textContent;
+            console.log('All buttons submitted. Total Score:', totalScore);
+            if (!currentGame.gameboard_id) {
+              console.error("Gameboard ID is not set. Retrieving again.");
+              fetchTeamStatPair();
+            } else {
+              sendFinalScore(totalScore); // Update to send the correct information
+            }
+          }
+        } else {
+          console.error('Error fetching data:', xhr.statusText);
+          submitButton.disabled = false;
+          playerNameInput.disabled = false; // Re-enable the input field if there was an error fetching data
+          enabledSubmitButtons++; // Increment the count of enabled submit buttons
+        }
+      };
+      xhr.onerror = function () {
+        console.error('Error fetching data.');
+        submitButton.disabled = false;
+        playerNameInput.disabled = false; // Re-enable the input field in case of an error
+        enabledSubmitButtons++; // Increment the count of enabled submit buttons
+      };
+      xhr.send();
+    } else {
+      submitButton.disabled = false;
+      playerNameInput.disabled = false; // Re-enable the input field if it was empty
+      enabledSubmitButtons++; // Increment the count of enabled submit buttons
+    }
+  }
+
+  function updateTotalScore() {
+    var statSquares = document.querySelectorAll('.stat-square');
+    var totalScore = 0;
+    statSquares.forEach(square => {
+      var score = parseInt(square.textContent, 10);
+      if (!isNaN(score)) totalScore += score;
+    });
+    currentGame.total_score = totalScore;
+    document.getElementById('totalScore').textContent = totalScore;
+  }
+
+  function sendFinalScore(totalScore) {
+    var baseUrl = window.location.protocol + '//' + window.location.hostname;
+    fetch(baseUrl + '/saveScore', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(currentGame) // Ensure gameboard_id is included
+    })
+    .then(response => response.json())
+    .then(result => {
+      console.log('Response from save-score:', result.message);
+      showAlertCard(totalScore, currentGame.team_name, currentGame.stat_name, currentGame.gameboard_id); // Show alert with details
+    })
+    .catch(error => console.error('Failed to save score:', error));
+  }
+
+  function showAlertCard(totalScore, teamName, statName, gameboardId) {
+    var alertContent = `
+      <div class="alert-card-content">
+        <button type="button" class="close" onclick="closeAlertCard()">&times;</button>
+        <h4 class="alert-heading">All buttons submitted!</h4>
+        <p>Total Score: ${totalScore}</p>
+        <p>Team Name: ${teamName}</p>
+        <p>Stat Name: ${statName}</p>
+        <p>Gameboard ID: ${gameboardId}</p>
+      </div>
+    `;
+    var alertCard = document.createElement('div');
+    alertCard.className = 'alert alert-info alert-card';
+    alertCard.innerHTML = alertContent;
+    document.body.appendChild(alertCard);
+    alertCard.style.display = 'block';
+  }
+
+  // Initial setup
+  fetchTeamStatPair();
+  addPlayerRows();
+  document.getElementById('instructionsButton').addEventListener('click', function() {
+    $('#instructionsModal').modal('show');
+  });
+
+  // Show the welcome alert on initial load
+  document.getElementById('previousGamesButton').click();
+});
 </script>
 
 </body>
 </html>
-
