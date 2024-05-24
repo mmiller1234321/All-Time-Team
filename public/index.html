@@ -234,11 +234,11 @@ document.addEventListener("DOMContentLoaded", function() {
 
   function updatePageWithGameboard(gameboard) {
     console.log('Loaded gameboard:', gameboard); // Log gameboard details
+    document.getElementById('teamLabel').innerText = gameboard.team_name;
+    document.getElementById('statLabel').innerText = gameboard.stat_name;
     currentGame.team_name = gameboard.team_name;
     currentGame.stat_name = gameboard.stat_name;
     currentGame.gameboard_id = gameboard.id; // Ensure gameboard_id is set
-    document.getElementById('teamLabel').innerText = gameboard.team_name;
-    document.getElementById('statLabel').innerText = gameboard.stat_name;
     console.log('Gameboard ID set:', currentGame.gameboard_id); // Log the gameboard ID
   }
 
@@ -262,6 +262,7 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById('teamLabel').innerText = team;
     document.getElementById('statLabel').innerText = stat;
     document.getElementById('teamLabel').setAttribute('data-id', id);
+
     console.log('Updated labels with gameboard ID:', id); // Log gameboard ID
 
     // Fetch and display the high score for the current gameboard
@@ -484,9 +485,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
 </body>
 </html>
-
-
-
 
 
 
