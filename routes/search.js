@@ -1,4 +1,3 @@
-
 const express = require('express');
 const router = express.Router();
 const pool = require('../db/db.js');
@@ -8,7 +7,6 @@ router.get('/', (req, res) => {
   const position = req.query.position;
   const team = req.query.team;
   const stat = req.query.stat;
-  const gameboardId = req.query.id;
 
   let query;
   let params;

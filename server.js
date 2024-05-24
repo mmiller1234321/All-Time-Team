@@ -27,11 +27,11 @@ app.get('/fetch-previous-gameboards', (req, res) => {
   });
 });
 
-app.get('/fetch-high-score/:teamName/:statName', (req, res) => {
-  const { teamName, statName } = req.params;
+app.get('/fetch-high-score', (req, res) => {
+  const { team, stat } = req.query;
   pool.query(
     'SELECT MAX(total_score) AS high_score FROM games WHERE team_name = ? AND stat_name = ?',
-    [teamName, statName],
+    [team, stat],
     (error, results) => {
       if (error) {
         console.error('Error fetching high score:', error);

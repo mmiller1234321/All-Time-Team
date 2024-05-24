@@ -150,7 +150,6 @@
   <div class="alert-card-content">
     <button type="button" class="close" onclick="closeAlertCard()">&times;</button>
     <h4 class="alert-heading">Welcome to All Time Teams</h4>
-    <p>Click <button type="button" class="btn btn-link p-0" onclick="playTodaysGame()">Play Today's Game</button> to play. Or see all of our games in the list below (more added all the time)!</p>
     <table class="table table-bordered">
       <thead>
         <tr>
@@ -197,7 +196,7 @@ document.addEventListener("DOMContentLoaded", function() {
             <td>${gameboard.id}</td>
             <td>${gameboard.team_name}</td>
             <td>${gameboard.stat_name}</td>
-            <td><button class="btn btn-link" onclick="loadGameboard('${gameboard.team_name}', '${gameboard.stat_name}')">Play Now!</button></td>
+            <td><button class="btn btn-link" onclick="loadGameboard(${gameboard.id})">Play Now!</button></td>
           `;
           tableBody.appendChild(row);
         });
@@ -216,8 +215,8 @@ document.addEventListener("DOMContentLoaded", function() {
     location.reload();
   };
 
-  window.loadGameboard = function(teamName, statName) {
-    fetch(`${window.location.protocol + '//' + window.location.hostname}/gameboard/${teamName}/${statName}`)
+  window.loadGameboard = function(gameboardId) {
+    fetch(`${window.location.protocol + '//' + window.location.hostname}/gameboard/${gameboardId}`)
       .then(response => response.json())
       .then(data => {
         if (data.gameboard) {
@@ -225,7 +224,7 @@ document.addEventListener("DOMContentLoaded", function() {
           document.getElementById('highScore').innerText = data.high_score || 'N/A'; // Fetch high score when a gameboard is loaded
           closeAlertCard(); // Close the alert card
         } else {
-          console.error('No gameboard data found for:', teamName, statName);
+          console.error('No gameboard data found for ID:', gameboardId);
         }
       })
       .catch(error => console.error('Error loading gameboard:', error));
@@ -237,7 +236,7 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById('statLabel').innerText = gameboard.stat_name;
     currentGame.team_name = gameboard.team_name;
     currentGame.stat_name = gameboard.stat_name;
-    console.log('Gameboard set:', currentGame.team_name, currentGame.stat_name); // Log the gameboard details
+    fetchHighScore(gameboard.team_name, gameboard.stat_name); // Fetch high score based on team and stat
   }
 
   function fetchTeamStatPair() {
@@ -259,10 +258,14 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById('teamLabel').innerText = team;
     document.getElementById('statLabel').innerText = stat;
 
-    console.log('Updated labels with team:', team, 'and stat:', stat); // Log the details
+    console.log('Updated labels with team:', team, 'and stat:', stat); // Log team and stat
 
-    // Fetch and display the high score for the current gameboard
-    fetch(`${window.location.protocol + '//' + window.location.hostname}/fetch-high-score/${team}/${stat}`)
+    // Fetch and display the high score for the current team and stat
+    fetchHighScore(team, stat);
+  }
+
+  function fetchHighScore(team, stat) {
+    fetch(`${window.location.protocol + '//' + window.location.hostname}/fetch-high-score?team=${encodeURIComponent(team)}&stat=${encodeURIComponent(stat)}`)
       .then(response => response.json())
       .then(data => {
         document.getElementById('highScore').innerText = data.high_score || 'N/A';
@@ -358,8 +361,8 @@ document.addEventListener("DOMContentLoaded", function() {
     var submitButton = event.target;
     if (submitButton.disabled) return;
     if (!currentGame.team_name || !currentGame.stat_name) {
-      console.error("Team name or stat name is not set.");
-      alert("Gameboard not loaded properly, please reload or select another game.");
+      console.error("Team or stat is not set.");
+      alert("Game not loaded properly, please reload or select another game.");
       return; // Stop further execution
     }
     submitButton.disabled = true;
@@ -438,7 +441,11 @@ document.addEventListener("DOMContentLoaded", function() {
     fetch(baseUrl + '/saveScore', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(currentGame)
+      body: JSON.stringify({
+        total_score: totalScore,
+        team_name: currentGame.team_name,
+        stat_name: currentGame.stat_name
+      })
     })
     .then(response => response.json())
     .then(result => {
@@ -479,3 +486,4 @@ document.addEventListener("DOMContentLoaded", function() {
 
 </body>
 </html>
+
