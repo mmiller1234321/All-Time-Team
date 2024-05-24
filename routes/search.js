@@ -1,3 +1,4 @@
+
 const express = require('express');
 const router = express.Router();
 const pool = require('../db/db.js');
@@ -147,4 +148,3 @@ router.get('/', (req, res) => {
 });
 
 module.exports = router;
-
