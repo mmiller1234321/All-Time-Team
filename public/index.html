@@ -361,20 +361,6 @@ document.addEventListener("DOMContentLoaded", function() {
         function handleSubmit(event) {
           var submitButton = event.target;
           if (submitButton.disabled) return;
-          
-          // Ensure gameboard ID is set before proceeding
-          if (!currentGame.gameboard_id) {
-            currentGame.gameboard_id = document.getElementById('teamLabel').getAttribute('data-id');
-            console.log('Retrieved gameboard ID:', currentGame.gameboard_id); // Log the retrieved gameboard ID
-            if (!currentGame.gameboard_id) {
-              console.error("Gameboard ID is not set.");
-              alert("Gameboard not loaded properly, please reload or select another game.");
-              return; // Stop further execution
-            }
-          }
-
-          submitButton.disabled = true;
-          enabledSubmitButtons--; // Decrement the count of enabled submit buttons
 
           var row = submitButton.closest("tr");
           var playerNameInput = row.cells[0].children[0];
@@ -385,7 +371,6 @@ document.addEventListener("DOMContentLoaded", function() {
             alert('Player has already been submitted. Please select a different player.');
             submitButton.disabled = false;
             playerNameInput.disabled = false; // Re-enable the input field if the player has already been submitted
-            enabledSubmitButtons++; // Increment the count of enabled submit buttons
             return;
           }
 
@@ -393,13 +378,17 @@ document.addEventListener("DOMContentLoaded", function() {
             var position = row.cells[1].textContent;
             var team = currentGame.team_name;
             var stat = currentGame.stat_name;
-            var id = currentGame.gameboard_id;
 
-            console.log(`Submitting player: ${playerName}, Team: ${team}, Stat: ${stat}, Gameboard ID: ${id}`); // Log submission details
+            if (!currentGame.gameboard_id) {
+              currentGame.gameboard_id = document.getElementById('teamLabel').getAttribute('data-id');
+              console.log('Retrieved gameboard ID:', currentGame.gameboard_id);
+            }
+
+            console.log(`Submitting player: ${playerName}, Team: ${team}, Stat: ${stat}, Gameboard ID: ${currentGame.gameboard_id}`); // Log submission details
 
             var baseUrl = window.location.protocol + '//' + window.location.hostname;
             var xhr = new XMLHttpRequest();
-            xhr.open('GET', baseUrl + '/search?playerName=' + encodeURIComponent(playerName) + '&position=' + encodeURIComponent(position) + '&team=' + encodeURIComponent(team) + '&stat=' + encodeURIComponent(stat) + '&id=' + encodeURIComponent(id), true);
+            xhr.open('GET', baseUrl + '/search?playerName=' + encodeURIComponent(playerName) + '&position=' + encodeURIComponent(position) + '&team=' + encodeURIComponent(team) + '&stat=' + encodeURIComponent(stat) + '&id=' + encodeURIComponent(currentGame.gameboard_id), true);
             xhr.onload = function () {
               if (xhr.status === 200) {
                 var statCell = row.cells[2];
@@ -408,7 +397,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 statCell.classList.add('stat-square');
                 updateTotalScore();
                 submissionButtonCount--;
-                if (enabledSubmitButtons === 0) { // If all submit buttons are disabled
+                if (submissionButtonCount === 0) { // If all submit buttons are disabled
                   var totalScore = document.getElementById('totalScore').textContent;
                   console.log('All buttons submitted. Total Score:', totalScore);
                   sendFinalScore(totalScore); // Update to send the correct information
@@ -417,20 +406,17 @@ document.addEventListener("DOMContentLoaded", function() {
                 console.error('Error fetching data:', xhr.statusText);
                 submitButton.disabled = false;
                 playerNameInput.disabled = false; // Re-enable the input field if there was an error fetching data
-                enabledSubmitButtons++; // Increment the count of enabled submit buttons
               }
             };
             xhr.onerror = function () {
               console.error('Error fetching data.');
               submitButton.disabled = false;
               playerNameInput.disabled = false; // Re-enable the input field in case of an error
-              enabledSubmitButtons++; // Increment the count of enabled submit buttons
             };
             xhr.send();
           } else {
             submitButton.disabled = false;
             playerNameInput.disabled = false; // Re-enable the input field if it was empty
-            enabledSubmitButtons++; // Increment the count of enabled submit buttons
           }
         }
 
@@ -492,3 +478,4 @@ document.addEventListener("DOMContentLoaded", function() {
 
 </body>
 </html>
+
