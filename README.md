@@ -11,12 +11,12 @@ This project is licensed under the [CC BY-NC-ND 4.0](https://creativecommons.org
 
 ## Project Link
 
-The project is deployed and can be accessed [here](https://alltimeteam-205f3b996ac7.herokuapp.com/).
+The project is deployed and can be accessed [here](https://www.alltimeteam.net).
 
 
 ## Version 2.1
 
-Updated "Click Here to Play" button. Debugged high score functionality.
+Updated "Click Here to Play" button. Debugged high score functionality. New game added every 24 hours. Ability to play previous games. New website address (www.alltimeteam.net). Optimal score coming soon and improved styling!
 
 ## Version 2.01
 
