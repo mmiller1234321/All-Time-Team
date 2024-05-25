@@ -37,13 +37,13 @@ function generateNextTeamStatPair() {
               console.log(`Inserted ${teamName} - ${statName} - ${perfectScore} into gameboard`);
             }
             connection.release();
-            setTimeout(generateNextTeamStatPair, 1400000); // Retry in 23 minutes
+            setTimeout(generateNextTeamStatPair, 86400000); // Retry in 24 hours
           }
         );
       } else {
         console.log('No new team-stat pair found, waiting to retry...');
         connection.release();
-        setTimeout(generateNextTeamStatPair, 1400000); // Retry in 23 minutes
+        setTimeout(generateNextTeamStatPair, 86400000); // Retry in 24 hours
       }
     });
   });
