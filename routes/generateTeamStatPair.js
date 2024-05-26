@@ -1,12 +1,17 @@
-
 const express = require('express');
 const router = express.Router();
 const pool = require('../db/db.js');
 
-let lastFetchedId = 0;
-
 function generateNextTeamStatPair() {
-  const query = 'SELECT team_name, stat_name, perfect_score, id FROM generated_tables WHERE id > ? ORDER BY id ASC LIMIT 1';
+  // Query to select the first available team-stat pair from generated_tables that isn't already in the gameboard
+  const query = `
+    SELECT gt.team_name, gt.stat_name, gt.perfect_score, gt.id 
+    FROM generated_tables AS gt
+    WHERE NOT EXISTS (
+      SELECT 1 FROM gameboard AS gb WHERE gt.team_name = gb.team_name AND gt.stat_name = gb.stat_name
+    )
+    ORDER BY gt.id ASC 
+    LIMIT 1`;
 
   pool.getConnection((err, connection) => {
     if (err) {
@@ -15,7 +20,7 @@ function generateNextTeamStatPair() {
       return;
     }
 
-    connection.query(query, [lastFetchedId], (error, results) => {
+    connection.query(query, (error, results) => {
       if (error) {
         console.error('Error executing MySQL query:', error);
         connection.release();
@@ -25,14 +30,13 @@ function generateNextTeamStatPair() {
 
       if (results.length > 0) {
         const { team_name: teamName, stat_name: statName, perfect_score: perfectScore, id } = results[0];
-        lastFetchedId = id; // Update lastFetchedId to the current record's id
 
         connection.query(
           'INSERT INTO gameboard (team_name, stat_name, perfect_score) VALUES (?, ?, ?)',
           [teamName, statName, perfectScore],
           (insertError) => {
             if (insertError) {
-              console.error('Error inserting data into gameboard table:', insertError);
+              console.error('Error inserting data into gameboard:', insertError);
             } else {
               console.log(`Inserted ${teamName} - ${statName} - ${perfectScore} into gameboard`);
             }
@@ -41,7 +45,7 @@ function generateNextTeamStatPair() {
           }
         );
       } else {
-        console.log('No new team-stat pair found, waiting to retry...');
+        console.log('No new unique team-stat pair found, waiting to retry...');
         connection.release();
         setTimeout(generateNextTeamStatPair, 86400000); // Retry in 24 hours
       }
