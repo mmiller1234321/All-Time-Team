@@ -387,6 +387,14 @@ document.addEventListener("DOMContentLoaded", function() {
           statCell.textContent = (statValue === 'null') ? 'N/A' : statValue;
           statCell.classList.add('stat-square');
           updateTotalScore();
+          
+          // Fetch high score after the first valid submission
+          if (submittedPlayers.length === 0) {
+            fetchHighScore(currentGame.team_name, currentGame.stat_name);
+          }
+          
+          submittedPlayers.push(playerName);
+          
           if (enabledSubmitButtons === 0) {
             var totalScore = document.getElementById('totalScore').textContent;
             console.log('All buttons submitted. Total Score:', totalScore);

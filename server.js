@@ -10,37 +10,6 @@ app.use(cors());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 
-// Middleware to block WordPress bot requests
-app.use((req, res, next) => {
-  const blockedPaths = [
-    '/wp-includes/wlwmanifest.xml',
-    '/administrator/index.php',
-    '/view-source:',
-    '/misc/ajax.js',
-    '/xmlrpc.php',
-    '/blog/wp-includes/wlwmanifest.xml',
-    '/web/wp-includes/wlwmanifest.xml',
-    '/wordpress/wp-includes/wlwmanifest.xml',
-    '/website/wp-includes/wlwmanifest.xml',
-    '/wp/wp-includes/wlwmanifest.xml',
-    '/news/wp-includes/wlwmanifest.xml',
-    '/2020/wp-includes/wlwmanifest.xml',
-    '/2019/wp-includes/wlwmanifest.xml',
-    '/shop/wp-includes/wlwmanifest.xml',
-    '/wp1/wp-includes/wlwmanifest.xml',
-    '/test/wp-includes/wlwmanifest.xml',
-    '/media/wp-includes/wlwmanifest.xml',
-    '/wp2/wp-includes/wlwmanifest.xml',
-    '/site/wp-includes/wlwmanifest.xml',
-    '/cms/wp-includes/wlwmanifest.xml',
-    '/sito/wp-includes/wlwmanifest.xml'
-  ];
-  if (blockedPaths.includes(req.path)) {
-    return res.status(404).send('Not Found');
-  }
-  next();
-});
-
 app.use('/autocomplete', require('./routes/autocomplete'));
 app.use('/search', require('./routes/search'));
 app.use('/generateTeamStatPair', require('./routes/generateTeamStatPair'));
