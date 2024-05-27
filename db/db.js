@@ -4,7 +4,7 @@ const mysql = require('mysql2');
 const pool = mysql.createPool({
   uri: process.env.CLEARDB_MAUVE_URL,
   waitForConnections: true,
-  connectionLimit: 10, // Limit the number of connections to prevent exceeding the max_user_connections
+  connectionLimit: 10,
   queueLimit: 0
 });
 
@@ -23,6 +23,7 @@ pool.on('error', (err) => {
 });
 
 module.exports = pool;
+
 
 
 

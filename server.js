@@ -10,6 +10,37 @@ app.use(cors());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 
+// Middleware to block WordPress bot requests
+app.use((req, res, next) => {
+  const blockedPaths = [
+    '/wp-includes/wlwmanifest.xml',
+    '/administrator/index.php',
+    '/view-source:',
+    '/misc/ajax.js',
+    '/xmlrpc.php',
+    '/blog/wp-includes/wlwmanifest.xml',
+    '/web/wp-includes/wlwmanifest.xml',
+    '/wordpress/wp-includes/wlwmanifest.xml',
+    '/website/wp-includes/wlwmanifest.xml',
+    '/wp/wp-includes/wlwmanifest.xml',
+    '/news/wp-includes/wlwmanifest.xml',
+    '/2020/wp-includes/wlwmanifest.xml',
+    '/2019/wp-includes/wlwmanifest.xml',
+    '/shop/wp-includes/wlwmanifest.xml',
+    '/wp1/wp-includes/wlwmanifest.xml',
+    '/test/wp-includes/wlwmanifest.xml',
+    '/media/wp-includes/wlwmanifest.xml',
+    '/wp2/wp-includes/wlwmanifest.xml',
+    '/site/wp-includes/wlwmanifest.xml',
+    '/cms/wp-includes/wlwmanifest.xml',
+    '/sito/wp-includes/wlwmanifest.xml'
+  ];
+  if (blockedPaths.includes(req.path)) {
+    return res.status(404).send('Not Found');
+  }
+  next();
+});
+
 app.use('/autocomplete', require('./routes/autocomplete'));
 app.use('/search', require('./routes/search'));
 app.use('/generateTeamStatPair', require('./routes/generateTeamStatPair'));
@@ -44,6 +75,31 @@ app.get('/fetch-high-score', (req, res) => {
       }
     }
   );
+});
+
+app.get('/search', (req, res) => {
+  const { playerName, position, team, stat } = req.query;
+  if (!playerName || !position || !team || !stat) {
+    return res.status(400).json({ error: 'Bad Request', message: 'Missing required query parameters' });
+  }
+  const query = `
+    SELECT MAX(b.${stat}) AS max_stat_value
+    FROM batting AS b
+    JOIN people AS p ON b.playerID = p.playerID
+    JOIN fielding AS f ON b.playerID = f.playerID
+    JOIN teams AS t ON b.teamID = t.teamID
+    WHERE CONCAT(p.nameFirst, ' ', p.nameLast) = ? 
+      AND f.POS = ? 
+      AND t.name = ? 
+  `;
+  pool.query(query, [playerName, position, team], (error, results) => {
+    if (error) {
+      console.error('Error executing MySQL query:', error);
+      res.status(500).send('Internal Server Error');
+    } else {
+      res.send(results[0] ? results[0].max_stat_value : 'N/A');
+    }
+  });
 });
 
 const PORT = process.env.PORT || 3000;
