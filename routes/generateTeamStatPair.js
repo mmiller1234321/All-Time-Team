@@ -11,26 +11,7 @@ function generateNextTeamStatPair() {
       return;
     }
 
-    // Check the number of entries in the gameboard table
-    connection.query('SELECT COUNT(*) AS count FROM gameboard', (error, results) => {
-      if (error) {
-        console.error(`[${new Date().toISOString()}] Error checking gameboard entries:`, error);
-        connection.release();
-        setTimeout(generateNextTeamStatPair, 1000 * 60 * 5); // Retry in 5 minutes on error
-        return;
-      }
-
-      const gameboardCount = results[0].count;
-
-      // If no entries are found, insert a new team-stat pair
-      if (gameboardCount === 0) {
-        insertNextTeamStatPair(connection);
-      } else {
-        connection.release();
-        console.log(`[${new Date().toISOString()}] Gameboard already has entries, scheduling next insertion.`);
-        setTimeout(generateNextTeamStatPair, 1000 * 60 * 10); // Retry in 10 minutes
-      }
-    });
+    insertNextTeamStatPair(connection);
   });
 }
 
