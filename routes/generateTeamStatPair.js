@@ -2,68 +2,69 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db/db.js');
 
+// Function to release the lock
+function releaseLock(connection) {
+  connection.query(
+    'UPDATE process_locks SET locked = FALSE WHERE lock_name = "team_stat_pair"',
+    (error) => {
+      if (error) {
+        console.error(`[${new Date().toISOString()}] Error releasing lock:`, error);
+      } else {
+        console.log(`[${new Date().toISOString()}] Lock released.`);
+      }
+    }
+  );
+}
+
 // Function to generate the next team-stat pair
 function generateNextTeamStatPair() {
   pool.getConnection((err, connection) => {
     if (err) {
       console.error(`[${new Date().toISOString()}] Error getting MySQL connection:`, err);
-      setTimeout(generateNextTeamStatPair, 1000 * 10); // Retry in 10 seconds on error
+      setTimeout(generateNextTeamStatPair, 1000 * 60 * 60 * 24); // Retry in 24 hours on error
       return;
     }
 
-    // Attempt to acquire the lock
-    acquireLock(connection, (lockAcquired) => {
-      if (lockAcquired) {
-        insertNextTeamStatPair(connection);
-      } else {
+    connection.query('SELECT locked FROM process_locks WHERE lock_name = "team_stat_pair"', (lockError, lockResults) => {
+      if (lockError) {
+        console.error(`[${new Date().toISOString()}] Error checking lock:`, lockError);
         connection.release();
-        setTimeout(generateNextTeamStatPair, 1000 * 60 * 10); // Retry in 10 minutes
+        setTimeout(generateNextTeamStatPair, 1000 * 60 * 60 * 24); // Retry in 24 hours on error
+        return;
       }
+
+      if (lockResults.length === 0 || lockResults[0].locked) {
+        console.log(`[${new Date().toISOString()}] Process is locked, skipping this cycle.`);
+        connection.release();
+        setTimeout(generateNextTeamStatPair, 1000 * 60 * 60 * 24); // Retry in 24 hours
+        return;
+      }
+
+      connection.query('UPDATE process_locks SET locked = TRUE WHERE lock_name = "team_stat_pair"', (updateError) => {
+        if (updateError) {
+          console.error(`[${new Date().toISOString()}] Error setting lock:`, updateError);
+          connection.release();
+          setTimeout(generateNextTeamStatPair, 1000 * 60 * 60 * 24); // Retry in 24 hours on error
+          return;
+        }
+
+        // Check the number of entries in the gameboard table
+        connection.query('SELECT COUNT(*) AS count FROM gameboard', (error, results) => {
+          if (error) {
+            console.error(`[${new Date().toISOString()}] Error checking gameboard entries:`, error);
+            releaseLock(connection);
+            connection.release();
+            setTimeout(generateNextTeamStatPair, 1000 * 60 * 60 * 24); // Retry in 24 hours on error
+            return;
+          }
+
+          const gameboardCount = results[0].count;
+
+          // Insert a new team-stat pair regardless of the current state of the gameboard table
+          insertNextTeamStatPair(connection);
+        });
+      });
     });
-  });
-}
-
-// Function to acquire a lock
-function acquireLock(connection, callback) {
-  const lockName = 'team_stat_pair_insert';
-
-  // Attempt to set the lock if it is not already set
-  const query = `
-    INSERT INTO process_locks (lock_name, locked) VALUES (?, TRUE)
-    ON DUPLICATE KEY UPDATE locked = IF(locked = FALSE, TRUE, locked);
-  `;
-
-  connection.query(query, [lockName], (err, results) => {
-    if (err) {
-      console.error(`[${new Date().toISOString()}] Error acquiring lock:`, err);
-      return callback(false);
-    }
-
-    // Check if the lock was successfully acquired
-    if (results.affectedRows === 1) {
-      console.log(`[${new Date().toISOString()}] Lock acquired successfully.`);
-      return callback(true);
-    } else {
-      console.log(`[${new Date().toISOString()}] Lock not acquired.`);
-      return callback(false);
-    }
-  });
-}
-
-// Function to release the lock
-function releaseLock(connection) {
-  const lockName = 'team_stat_pair_insert';
-
-  const query = `
-    UPDATE process_locks SET locked = FALSE WHERE lock_name = ?;
-  `;
-
-  connection.query(query, [lockName], (err) => {
-    if (err) {
-      console.error(`[${new Date().toISOString()}] Error releasing lock:`, err);
-    } else {
-      console.log(`[${new Date().toISOString()}] Lock released successfully.`);
-    }
   });
 }
 
@@ -83,7 +84,7 @@ function insertNextTeamStatPair(connection) {
       console.error(`[${new Date().toISOString()}] Error executing MySQL query:`, error);
       releaseLock(connection);
       connection.release();
-      setTimeout(generateNextTeamStatPair, 1000 * 60 * 5); // Retry in 5 minutes on error
+      setTimeout(generateNextTeamStatPair, 1000 * 60 * 60 * 24); // Retry in 24 hours on error
       return;
     }
 
@@ -101,14 +102,14 @@ function insertNextTeamStatPair(connection) {
           }
           releaseLock(connection);
           connection.release();
-          setTimeout(generateNextTeamStatPair, 1000 * 60 * 10); // Retry in 10 minutes
+          setTimeout(generateNextTeamStatPair, 1000 * 60 * 60 * 24); // Retry in 24 hours
         }
       );
     } else {
-      console.log(`[${new Date().toISOString()}] No new unique team-stat pair found, scheduling next check.`);
+      console.log(`[${new Date().toISOString()}] No new unique team-stat pair found, waiting to retry...`);
       releaseLock(connection);
       connection.release();
-      setTimeout(generateNextTeamStatPair, 1000 * 60 * 10); // Retry in 10 minutes
+      setTimeout(generateNextTeamStatPair, 1000 * 60 * 60 * 24); // Retry in 24 hours
     }
   });
 }
@@ -141,6 +142,7 @@ router.get('/team-stat-pair', (req, res) => {
 });
 
 module.exports = router;
+
 
 
 

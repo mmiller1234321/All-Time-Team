@@ -1,6 +1,20 @@
 const cron = require('node-cron');
 const pool = require('../db/db.js');
 
+// Function to release the lock
+function releaseLock(connection) {
+  connection.query(
+    'UPDATE process_locks SET locked = FALSE WHERE lock_name = "team_stat_pair"',
+    (error) => {
+      if (error) {
+        console.error(`[${new Date().toISOString()}] Error releasing lock:`, error);
+      } else {
+        console.log(`[${new Date().toISOString()}] Lock released.`);
+      }
+    }
+  );
+}
+
 // Function to insert the next team-stat pair
 function insertNextTeamStatPair() {
   pool.getConnection((err, connection) => {
@@ -9,8 +23,26 @@ function insertNextTeamStatPair() {
       return;
     }
 
-    acquireLock(connection, (lockAcquired) => {
-      if (lockAcquired) {
+    connection.query('SELECT locked FROM process_locks WHERE lock_name = "team_stat_pair"', (lockError, lockResults) => {
+      if (lockError) {
+        console.error(`[${new Date().toISOString()}] Backup Cron Job: Error checking lock:`, lockError);
+        connection.release();
+        return;
+      }
+
+      if (lockResults.length === 0 || lockResults[0].locked) {
+        console.log(`[${new Date().toISOString()}] Backup Cron Job: Process is locked, skipping this cycle.`);
+        connection.release();
+        return;
+      }
+
+      connection.query('UPDATE process_locks SET locked = TRUE WHERE lock_name = "team_stat_pair"', (updateError) => {
+        if (updateError) {
+          console.error(`[${new Date().toISOString()}] Backup Cron Job: Error setting lock:`, updateError);
+          connection.release();
+          return;
+        }
+
         const query = `
           SELECT gt.team_name, gt.stat_name, gt.perfect_score, gt.id 
           FROM generated_tables AS gt
@@ -45,62 +77,18 @@ function insertNextTeamStatPair() {
               }
             );
           } else {
-            console.log(`[${new Date().toISOString()}] Backup Cron Job: No new unique team-stat pair found.`);
+            console.log(`[${new Date().toISOString()}] Backup Cron Job: No new unique team-stat pair found, waiting to retry...`);
             releaseLock(connection);
             connection.release();
           }
         });
-      } else {
-        connection.release();
-      }
+      });
     });
   });
 }
 
-// Function to acquire a lock
-function acquireLock(connection, callback) {
-  const lockName = 'team_stat_pair_insert';
-
-  const query = `
-    INSERT INTO process_locks (lock_name, locked) VALUES (?, TRUE)
-    ON DUPLICATE KEY UPDATE locked = IF(locked = FALSE, TRUE, locked);
-  `;
-
-  connection.query(query, [lockName], (err, results) => {
-    if (err) {
-      console.error(`[${new Date().toISOString()}] Backup Cron Job: Error acquiring lock:`, err);
-      return callback(false);
-    }
-
-    if (results.affectedRows === 1) {
-      console.log(`[${new Date().toISOString()}] Backup Cron Job: Lock acquired successfully.`);
-      return callback(true);
-    } else {
-      console.log(`[${new Date().toISOString()}] Backup Cron Job: Lock not acquired.`);
-      return callback(false);
-    }
-  });
-}
-
-// Function to release the lock
-function releaseLock(connection) {
-  const lockName = 'team_stat_pair_insert';
-
-  const query = `
-    UPDATE process_locks SET locked = FALSE WHERE lock_name = ?;
-  `;
-
-  connection.query(query, [lockName], (err) => {
-    if (err) {
-      console.error(`[${new Date().toISOString()}] Backup Cron Job: Error releasing lock:`, err);
-    } else {
-      console.log(`[${new Date().toISOString()}] Backup Cron Job: Lock released successfully.`);
-    }
-  });
-}
-
-// Schedule the cron job to run every 10 minutes
-cron.schedule('*/10 * * * *', () => {
+// Schedule the cron job to run every 24 hours
+cron.schedule('0 0 * * *', () => {
   console.log(`[${new Date().toISOString()}] Running backup cron job to insert next team-stat pair.`);
   insertNextTeamStatPair();
 });
