@@ -5,6 +5,8 @@ const pool = require('../db/db.js');
 router.get('/', (req, res) => {
   const partialQuery = req.query.query;
 
+  console.log(`Autocomplete request received with query: ${partialQuery}`);
+
   const autocompleteQuery = `
     SELECT CONCAT(nameFirst, ' ', nameLast) AS fullName, birthYear
     FROM people
@@ -28,6 +30,7 @@ router.get('/', (req, res) => {
         const suggestions = results.map((row) => {
           return { fullName: row.fullName, birthYear: row.birthYear };
         });
+        console.log(`Suggestions: ${JSON.stringify(suggestions)}`);
         res.json(suggestions);
       }
     });

@@ -303,6 +303,7 @@ document.addEventListener("DOMContentLoaded", function() {
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
       if (this.readyState === 4 && this.status === 200) {
+        console.log(`Autocomplete response: ${this.responseText}`);
         var suggestions = JSON.parse(this.responseText);
         closeAllLists();
         if (!inputElement.value || suggestions.length === 0) {
@@ -327,6 +328,7 @@ document.addEventListener("DOMContentLoaded", function() {
       }
     };
     var baseUrl = window.location.protocol + '//' + window.location.hostname;
+    console.log(`Sending autocomplete request to ${baseUrl}/autocomplete?query=${encodeURIComponent(inputElement.value)}`);
     xhr.open("GET", baseUrl + "/autocomplete?query=" + encodeURIComponent(inputElement.value), true);
     xhr.send();
 
@@ -481,4 +483,3 @@ document.addEventListener("DOMContentLoaded", function() {
 
 </body>
 </html>
-

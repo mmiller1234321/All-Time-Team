@@ -6,7 +6,12 @@ const app = express();
 
 require('dotenv').config();
 
-app.use(cors());
+const corsOptions = {
+  origin: ['https://alltimeteam.net', 'https://www.alltimeteam.net'],
+  optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 
