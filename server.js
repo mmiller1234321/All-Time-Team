@@ -55,3 +55,6 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
+// Import and start the backup cron job
+require('./routes/backupCronJob');

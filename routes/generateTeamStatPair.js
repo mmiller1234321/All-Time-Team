@@ -27,7 +27,7 @@ function generateNextTeamStatPair() {
         insertNextTeamStatPair(connection);
       } else {
         connection.release();
-        console.log(`[${new Date().toISOString()}] Gameboard already has entries, not inserting a new pair.`);
+        console.log(`[${new Date().toISOString()}] Gameboard already has entries, scheduling next insertion.`);
         setTimeout(generateNextTeamStatPair, 1000 * 60 * 10); // Retry in 10 minutes
       }
     });
@@ -54,7 +54,7 @@ function insertNextTeamStatPair(connection) {
     }
 
     if (results.length > 0) {
-      const { team_name: teamName, stat_name: statName, perfect_score: perfectScore, id } = results[0];
+      const { team_name: teamName, stat_name: statName, perfect_score: perfectScore } = results[0];
 
       connection.query(
         'INSERT INTO gameboard (team_name, stat_name, perfect_score) VALUES (?, ?, ?)',
@@ -70,7 +70,7 @@ function insertNextTeamStatPair(connection) {
         }
       );
     } else {
-      console.log(`[${new Date().toISOString()}] No new unique team-stat pair found, waiting to retry...`);
+      console.log(`[${new Date().toISOString()}] No new unique team-stat pair found, scheduling next check.`);
       connection.release();
       setTimeout(generateNextTeamStatPair, 1000 * 60 * 10); // Retry in 10 minutes
     }
