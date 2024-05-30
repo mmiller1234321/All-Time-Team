@@ -11,7 +11,59 @@ function generateNextTeamStatPair() {
       return;
     }
 
-    insertNextTeamStatPair(connection);
+    // Attempt to acquire the lock
+    acquireLock(connection, (lockAcquired) => {
+      if (lockAcquired) {
+        insertNextTeamStatPair(connection);
+      } else {
+        connection.release();
+        setTimeout(generateNextTeamStatPair, 1000 * 60 * 10); // Retry in 10 minutes
+      }
+    });
+  });
+}
+
+// Function to acquire a lock
+function acquireLock(connection, callback) {
+  const lockName = 'team_stat_pair_insert';
+
+  // Attempt to set the lock if it is not already set
+  const query = `
+    INSERT INTO process_locks (lock_name, locked) VALUES (?, TRUE)
+    ON DUPLICATE KEY UPDATE locked = IF(locked = FALSE, TRUE, locked);
+  `;
+
+  connection.query(query, [lockName], (err, results) => {
+    if (err) {
+      console.error(`[${new Date().toISOString()}] Error acquiring lock:`, err);
+      return callback(false);
+    }
+
+    // Check if the lock was successfully acquired
+    if (results.affectedRows === 1) {
+      console.log(`[${new Date().toISOString()}] Lock acquired successfully.`);
+      return callback(true);
+    } else {
+      console.log(`[${new Date().toISOString()}] Lock not acquired.`);
+      return callback(false);
+    }
+  });
+}
+
+// Function to release the lock
+function releaseLock(connection) {
+  const lockName = 'team_stat_pair_insert';
+
+  const query = `
+    UPDATE process_locks SET locked = FALSE WHERE lock_name = ?;
+  `;
+
+  connection.query(query, [lockName], (err) => {
+    if (err) {
+      console.error(`[${new Date().toISOString()}] Error releasing lock:`, err);
+    } else {
+      console.log(`[${new Date().toISOString()}] Lock released successfully.`);
+    }
   });
 }
 
@@ -29,6 +81,7 @@ function insertNextTeamStatPair(connection) {
   connection.query(query, (error, results) => {
     if (error) {
       console.error(`[${new Date().toISOString()}] Error executing MySQL query:`, error);
+      releaseLock(connection);
       connection.release();
       setTimeout(generateNextTeamStatPair, 1000 * 60 * 5); // Retry in 5 minutes on error
       return;
@@ -46,12 +99,14 @@ function insertNextTeamStatPair(connection) {
           } else {
             console.log(`[${new Date().toISOString()}] Inserted ${teamName} - ${statName} - ${perfectScore} into gameboard`);
           }
+          releaseLock(connection);
           connection.release();
           setTimeout(generateNextTeamStatPair, 1000 * 60 * 10); // Retry in 10 minutes
         }
       );
     } else {
       console.log(`[${new Date().toISOString()}] No new unique team-stat pair found, scheduling next check.`);
+      releaseLock(connection);
       connection.release();
       setTimeout(generateNextTeamStatPair, 1000 * 60 * 10); // Retry in 10 minutes
     }
@@ -86,6 +141,8 @@ router.get('/team-stat-pair', (req, res) => {
 });
 
 module.exports = router;
+
+
 
 
 
