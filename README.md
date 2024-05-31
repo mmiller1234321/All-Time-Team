@@ -13,6 +13,9 @@ This project is licensed under the [CC BY-NC-ND 4.0](https://creativecommons.org
 
 The project is deployed and can be accessed [here](https://www.alltimeteam.net).
 
+## Version 2.1.1
+
+5.30.24 Updated bugs with timing of dropping new games. 
 
 ## Version 2.1
 
