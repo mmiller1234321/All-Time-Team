@@ -87,8 +87,9 @@ function insertNextTeamStatPair() {
   });
 }
 
-// Schedule the cron job to run every 24 hours
-cron.schedule('0 0 * * *', () => {
+// Schedule the cron job to run every 10 minutes
+cron.schedule('*/10 * * * *', () => {
   console.log(`[${new Date().toISOString()}] Running backup cron job to insert next team-stat pair.`);
   insertNextTeamStatPair();
 });
+

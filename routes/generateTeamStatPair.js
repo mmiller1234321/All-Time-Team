@@ -21,7 +21,7 @@ function generateNextTeamStatPair() {
   pool.getConnection((err, connection) => {
     if (err) {
       console.error(`[${new Date().toISOString()}] Error getting MySQL connection:`, err);
-      setTimeout(generateNextTeamStatPair, 1000 * 60 * 60 * 24); // Retry in 24 hours on error
+      setTimeout(generateNextTeamStatPair, 1000 * 60 * 10); // Retry in 10 minutes on error
       return;
     }
 
@@ -29,14 +29,14 @@ function generateNextTeamStatPair() {
       if (lockError) {
         console.error(`[${new Date().toISOString()}] Error checking lock:`, lockError);
         connection.release();
-        setTimeout(generateNextTeamStatPair, 1000 * 60 * 60 * 24); // Retry in 24 hours on error
+        setTimeout(generateNextTeamStatPair, 1000 * 60 * 10); // Retry in 10 minutes on error
         return;
       }
 
       if (lockResults.length === 0 || lockResults[0].locked) {
         console.log(`[${new Date().toISOString()}] Process is locked, skipping this cycle.`);
         connection.release();
-        setTimeout(generateNextTeamStatPair, 1000 * 60 * 60 * 24); // Retry in 24 hours
+        setTimeout(generateNextTeamStatPair, 1000 * 60 * 10); // Retry in 10 minutes
         return;
       }
 
@@ -44,7 +44,7 @@ function generateNextTeamStatPair() {
         if (updateError) {
           console.error(`[${new Date().toISOString()}] Error setting lock:`, updateError);
           connection.release();
-          setTimeout(generateNextTeamStatPair, 1000 * 60 * 60 * 24); // Retry in 24 hours on error
+          setTimeout(generateNextTeamStatPair, 1000 * 60 * 10); // Retry in 10 minutes on error
           return;
         }
 
@@ -54,7 +54,7 @@ function generateNextTeamStatPair() {
             console.error(`[${new Date().toISOString()}] Error checking gameboard entries:`, error);
             releaseLock(connection);
             connection.release();
-            setTimeout(generateNextTeamStatPair, 1000 * 60 * 60 * 24); // Retry in 24 hours on error
+            setTimeout(generateNextTeamStatPair, 1000 * 60 * 10); // Retry in 10 minutes on error
             return;
           }
 
@@ -84,7 +84,7 @@ function insertNextTeamStatPair(connection) {
       console.error(`[${new Date().toISOString()}] Error executing MySQL query:`, error);
       releaseLock(connection);
       connection.release();
-      setTimeout(generateNextTeamStatPair, 1000 * 60 * 60 * 24); // Retry in 24 hours on error
+      setTimeout(generateNextTeamStatPair, 1000 * 60 * 10); // Retry in 10 minutes on error
       return;
     }
 
@@ -102,14 +102,14 @@ function insertNextTeamStatPair(connection) {
           }
           releaseLock(connection);
           connection.release();
-          setTimeout(generateNextTeamStatPair, 1000 * 60 * 60 * 24); // Retry in 24 hours
+          setTimeout(generateNextTeamStatPair, 1000 * 60 * 10); // Retry in 10 minutes
         }
       );
     } else {
       console.log(`[${new Date().toISOString()}] No new unique team-stat pair found, waiting to retry...`);
       releaseLock(connection);
       connection.release();
-      setTimeout(generateNextTeamStatPair, 1000 * 60 * 60 * 24); // Retry in 24 hours
+      setTimeout(generateNextTeamStatPair, 1000 * 60 * 10); // Retry in 10 minutes
     }
   });
 }
@@ -142,6 +142,7 @@ router.get('/team-stat-pair', (req, res) => {
 });
 
 module.exports = router;
+
 
 
 
