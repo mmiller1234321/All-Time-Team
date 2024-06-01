@@ -93,3 +93,6 @@ cron.schedule('*/10 * * * *', () => {
   insertNextTeamStatPair();
 });
 
+// Initial execution on server start
+insertNextTeamStatPair();
+

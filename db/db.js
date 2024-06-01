@@ -11,15 +11,19 @@ const pool = mysql.createPool({
 pool.getConnection((err, connection) => {
   if (err) {
     console.error('Error connecting to MySQL:', err);
-    process.exit(1);
+    process.exit(1); // Exit the process if there's a connection error
+  } else {
+    console.log('Connected to MySQL database');
+    connection.release(); // Release the connection back to the pool
   }
-  console.log('Connected to MySQL database');
-  connection.release();
 });
 
 pool.on('error', (err) => {
   console.error('MySQL connection pool error:', err);
-  process.exit(1);
+  // Depending on the error type, you may want to restart the app or handle it differently
+  if (err.code === 'PROTOCOL_CONNECTION_LOST') {
+    process.exit(1); // Exit the process to trigger a restart
+  }
 });
 
 module.exports = pool;
