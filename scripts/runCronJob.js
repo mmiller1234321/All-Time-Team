@@ -1,4 +1,4 @@
-// routes/backupCronJob.js
+// scripts/runCronJob.js
 const pool = require('../db/db.js');
 
 // Function to insert the next team-stat pair
@@ -48,9 +48,5 @@ function insertNextTeamStatPair() {
   });
 }
 
-// Initial run to insert the first unique team-stat pair (if needed during app start)
-// insertNextTeamStatPair(); // Uncomment if you want to run this once when the app starts (optional)
-
-// Export the function for external invocation by Heroku Scheduler
-module.exports = { insertNextTeamStatPair };
-
+// Run the function
+insertNextTeamStatPair();
