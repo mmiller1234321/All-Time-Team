@@ -2,20 +2,6 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db/db.js');
 
-// Function to release the lock
-function releaseLock(connection) {
-  connection.query(
-    'UPDATE process_locks SET locked = FALSE WHERE lock_name = "team_stat_pair"',
-    (error) => {
-      if (error) {
-        console.error(`[${new Date().toISOString()}] Error releasing lock:`, error);
-      } else {
-        console.log(`[${new Date().toISOString()}] Lock released.`);
-      }
-    }
-  );
-}
-
 // Function to generate the next team-stat pair
 function generateNextTeamStatPair() {
   pool.getConnection((err, connection) => {
@@ -25,45 +11,19 @@ function generateNextTeamStatPair() {
       return;
     }
 
-    connection.query('SELECT locked FROM process_locks WHERE lock_name = "team_stat_pair"', (lockError, lockResults) => {
-      if (lockError) {
-        console.error(`[${new Date().toISOString()}] Error checking lock:`, lockError);
+    // Check the number of entries in the gameboard table
+    connection.query('SELECT COUNT(*) AS count FROM gameboard', (error, results) => {
+      if (error) {
+        console.error(`[${new Date().toISOString()}] Error checking gameboard entries:`, error);
         connection.release();
         setTimeout(generateNextTeamStatPair, 1000 * 60 * 10); // Retry in 10 minutes on error
         return;
       }
 
-      if (lockResults.length === 0 || lockResults[0].locked) {
-        console.log(`[${new Date().toISOString()}] Process is locked, skipping this cycle.`);
-        connection.release();
-        setTimeout(generateNextTeamStatPair, 1000 * 60 * 10); // Retry in 10 minutes
-        return;
-      }
+      const gameboardCount = results[0].count;
 
-      connection.query('UPDATE process_locks SET locked = TRUE WHERE lock_name = "team_stat_pair"', (updateError) => {
-        if (updateError) {
-          console.error(`[${new Date().toISOString()}] Error setting lock:`, updateError);
-          connection.release();
-          setTimeout(generateNextTeamStatPair, 1000 * 60 * 10); // Retry in 10 minutes on error
-          return;
-        }
-
-        // Check the number of entries in the gameboard table
-        connection.query('SELECT COUNT(*) AS count FROM gameboard', (error, results) => {
-          if (error) {
-            console.error(`[${new Date().toISOString()}] Error checking gameboard entries:`, error);
-            releaseLock(connection);
-            connection.release();
-            setTimeout(generateNextTeamStatPair, 1000 * 60 * 10); // Retry in 10 minutes on error
-            return;
-          }
-
-          const gameboardCount = results[0].count;
-
-          // Insert a new team-stat pair regardless of the current state of the gameboard table
-          insertNextTeamStatPair(connection);
-        });
-      });
+      // Insert a new team-stat pair regardless of the current state of the gameboard table
+      insertNextTeamStatPair(connection);
     });
   });
 }
@@ -82,7 +42,6 @@ function insertNextTeamStatPair(connection) {
   connection.query(query, (error, results) => {
     if (error) {
       console.error(`[${new Date().toISOString()}] Error executing MySQL query:`, error);
-      releaseLock(connection);
       connection.release();
       setTimeout(generateNextTeamStatPair, 1000 * 60 * 10); // Retry in 10 minutes on error
       return;
@@ -100,14 +59,12 @@ function insertNextTeamStatPair(connection) {
           } else {
             console.log(`[${new Date().toISOString()}] Inserted ${teamName} - ${statName} - ${perfectScore} into gameboard`);
           }
-          releaseLock(connection);
           connection.release();
           setTimeout(generateNextTeamStatPair, 1000 * 60 * 10); // Retry in 10 minutes
         }
       );
     } else {
       console.log(`[${new Date().toISOString()}] No new unique team-stat pair found, waiting to retry...`);
-      releaseLock(connection);
       connection.release();
       setTimeout(generateNextTeamStatPair, 1000 * 60 * 10); // Retry in 10 minutes
     }
@@ -142,6 +99,7 @@ router.get('/team-stat-pair', (req, res) => {
 });
 
 module.exports = router;
+
 
 
 
