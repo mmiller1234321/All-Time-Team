@@ -1,4 +1,3 @@
-// routes/backupCronJob.js
 const pool = require('../db/db.js');
 
 // Function to insert the next team-stat pair
@@ -53,4 +52,5 @@ function insertNextTeamStatPair() {
 
 // Export the function for external invocation by Heroku Scheduler
 module.exports = { insertNextTeamStatPair };
+
 

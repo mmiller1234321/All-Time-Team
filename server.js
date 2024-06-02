@@ -57,4 +57,6 @@ app.listen(PORT, () => {
 });
 
 // Import and start the backup cron job
-require('./routes/backupCronJob');
+const { insertNextTeamStatPair } = require('./routes/backupCronJob');
+insertNextTeamStatPair();
+

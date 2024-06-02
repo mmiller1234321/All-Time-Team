@@ -7,7 +7,6 @@ function generateNextTeamStatPair() {
   pool.getConnection((err, connection) => {
     if (err) {
       console.error(`[${new Date().toISOString()}] Error getting MySQL connection:`, err);
-      setTimeout(generateNextTeamStatPair, 1000 * 60 * 10); // Retry in 10 minutes on error
       return;
     }
 
@@ -16,11 +15,8 @@ function generateNextTeamStatPair() {
       if (error) {
         console.error(`[${new Date().toISOString()}] Error checking gameboard entries:`, error);
         connection.release();
-        setTimeout(generateNextTeamStatPair, 1000 * 60 * 10); // Retry in 10 minutes on error
         return;
       }
-
-      const gameboardCount = results[0].count;
 
       // Insert a new team-stat pair regardless of the current state of the gameboard table
       insertNextTeamStatPair(connection);
@@ -43,7 +39,6 @@ function insertNextTeamStatPair(connection) {
     if (error) {
       console.error(`[${new Date().toISOString()}] Error executing MySQL query:`, error);
       connection.release();
-      setTimeout(generateNextTeamStatPair, 1000 * 60 * 10); // Retry in 10 minutes on error
       return;
     }
 
@@ -60,13 +55,11 @@ function insertNextTeamStatPair(connection) {
             console.log(`[${new Date().toISOString()}] Inserted ${teamName} - ${statName} - ${perfectScore} into gameboard`);
           }
           connection.release();
-          setTimeout(generateNextTeamStatPair, 1000 * 60 * 10); // Retry in 10 minutes
         }
       );
     } else {
       console.log(`[${new Date().toISOString()}] No new unique team-stat pair found, waiting to retry...`);
       connection.release();
-      setTimeout(generateNextTeamStatPair, 1000 * 60 * 10); // Retry in 10 minutes
     }
   });
 }

@@ -1,4 +1,3 @@
-// scripts/runCronJob.js
 const pool = require('../db/db.js');
 
 // Function to insert the next team-stat pair
