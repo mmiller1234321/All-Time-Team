@@ -8,49 +8,68 @@ function insertNextTeamStatPair() {
       return;
     }
 
-    const query = `
-      SELECT gt.team_name, gt.stat_name, gt.perfect_score, gt.id 
-      FROM generated_tables AS gt
-      WHERE NOT EXISTS (
-        SELECT 1 FROM gameboard AS gb WHERE gt.team_name = gb.team_name AND gt.stat_name = gb.stat_name
-      )
-      ORDER BY gt.id ASC 
-      LIMIT 1`;
+    const checkRecentQuery = `
+      SELECT COUNT(*) AS count FROM gameboard 
+      WHERE created_at >= NOW() - INTERVAL 1 HOUR`;
 
-    connection.query(query, (error, results) => {
-      if (error) {
-        console.error(`[${new Date().toISOString()}] Backup Cron Job: Error executing MySQL query:`, error);
+    connection.query(checkRecentQuery, (checkError, checkResults) => {
+      if (checkError) {
+        console.error(`[${new Date().toISOString()}] Backup Cron Job: Error checking recent insertions:`, checkError);
         connection.release();
         return;
       }
 
-      if (results.length > 0) {
-        const { team_name: teamName, stat_name: statName, perfect_score: perfectScore } = results[0];
-
-        connection.query(
-          'INSERT INTO gameboard (team_name, stat_name, perfect_score) VALUES (?, ?, ?)',
-          [teamName, statName, perfectScore],
-          (insertError) => {
-            if (insertError) {
-              console.error(`[${new Date().toISOString()}] Backup Cron Job: Error inserting data into gameboard:`, insertError);
-            } else {
-              console.log(`[${new Date().toISOString()}] Backup Cron Job: Inserted ${teamName} - ${statName} - ${perfectScore} into gameboard`);
-            }
-            connection.release();
-          }
-        );
-      } else {
-        console.log(`[${new Date().toISOString()}] Backup Cron Job: No new unique team-stat pair found, waiting to retry...`);
+      if (checkResults[0].count > 0) {
+        console.log(`[${new Date().toISOString()}] Backup Cron Job: Recently inserted, skipping this cycle.`);
         connection.release();
+        return;
       }
+
+      const query = `
+        SELECT gt.team_name, gt.stat_name, gt.perfect_score, gt.id 
+        FROM generated_tables AS gt
+        WHERE NOT EXISTS (
+          SELECT 1 FROM gameboard AS gb WHERE gt.team_name = gb.team_name AND gt.stat_name = gb.stat_name
+        )
+        ORDER BY gt.id ASC 
+        LIMIT 1`;
+
+      connection.query(query, (error, results) => {
+        if (error) {
+          console.error(`[${new Date().toISOString()}] Backup Cron Job: Error executing MySQL query:`, error);
+          connection.release();
+          return;
+        }
+
+        if (results.length > 0) {
+          const { team_name: teamName, stat_name: statName, perfect_score: perfectScore } = results[0];
+
+          connection.query(
+            'INSERT INTO gameboard (team_name, stat_name, perfect_score) VALUES (?, ?, ?)',
+            [teamName, statName, perfectScore],
+            (insertError) => {
+              if (insertError) {
+                console.error(`[${new Date().toISOString()}] Backup Cron Job: Error inserting data into gameboard:`, insertError);
+              } else {
+                console.log(`[${new Date().toISOString()}] Backup Cron Job: Inserted ${teamName} - ${statName} - ${perfectScore} into gameboard`);
+              }
+              connection.release();
+            }
+          );
+        } else {
+          console.log(`[${new Date().toISOString()}] Backup Cron Job: No new unique team-stat pair found, waiting to retry...`);
+          connection.release();
+        }
+      });
     });
   });
 }
 
 // Initial run to insert the first unique team-stat pair (if needed during app start)
-// insertNextTeamStatPair(); // Uncomment if you want to run this once when the app starts (optional)
+insertNextTeamStatPair(); // Uncomment if you want to run this once when the app starts (optional)
 
 // Export the function for external invocation by Heroku Scheduler
 module.exports = { insertNextTeamStatPair };
+
 
 
