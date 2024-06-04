@@ -51,6 +51,25 @@ app.get('/fetch-high-score', (req, res) => {
   );
 });
 
+app.get('/gameboard/:id', (req, res) => {
+  const gameboardId = req.params.id;
+  const query = `
+    SELECT gb.*, 
+           (SELECT MAX(total_score) 
+            FROM games 
+            WHERE gameboard_id = ?) AS high_score 
+    FROM gameboard gb 
+    WHERE gb.id = ?`;
+  pool.query(query, [gameboardId, gameboardId], (err, results) => {
+    if (err) {
+      console.error('Error fetching gameboard:', err);
+      res.status(500).send('Server error');
+    } else {
+      res.json({ gameboard: results[0], high_score: results[1] });
+    }
+  });
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

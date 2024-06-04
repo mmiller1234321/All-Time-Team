@@ -162,6 +162,8 @@
   </div>
 </div>
 
+<input type="hidden" id="gameboardId" value="123"> <!-- Update this value dynamically -->
+
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
@@ -204,7 +206,8 @@ document.addEventListener("DOMContentLoaded", function() {
   });
 
   window.closeAlertCard = function() {
-    document.getElementById('previousGamesAlert').style.display = 'none';
+    document.querySelectorAll('.alert-card').forEach(alert => alert.style.display = 'none');
+    reloadGameboard();
   };
 
   window.loadGameboard = function(gameboardId) {
@@ -471,6 +474,27 @@ document.addEventListener("DOMContentLoaded", function() {
     alertCard.style.display = 'block';
   }
 
+  function reloadGameboard() {
+    // Assuming you have the current gameboard ID stored in a variable or element
+    const gameboardId = document.getElementById('gameboardId').value; // Update this line based on your actual setup
+
+    fetch(`${window.location.protocol + '//' + window.location.hostname}/gameboard/${gameboardId}`)
+      .then(response => response.json())
+      .then(data => {
+        updatePageWithGameboard(data.gameboard);
+        document.getElementById('highScore').innerText = data.high_score || 'N/A';
+      })
+      .catch(error => console.error('Error reloading gameboard:', error));
+  }
+
+  function updatePageWithGameboard(gameboard) {
+    document.getElementById('teamLabel').innerText = gameboard.team_name;
+    document.getElementById('statLabel').innerText = gameboard.stat_name;
+    currentGame.team_name = gameboard.team_name;
+    currentGame.stat_name = gameboard.stat_name;
+    fetchHighScore(gameboard.team_name, gameboard.stat_name);
+  }
+
   fetchTeamStatPair();
   addPlayerRows();
   document.getElementById('instructionsButton').addEventListener('click', function() {
@@ -483,5 +507,3 @@ document.addEventListener("DOMContentLoaded", function() {
 
 </body>
 </html>
-
-
