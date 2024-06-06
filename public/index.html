@@ -207,7 +207,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
   window.closeAlertCard = function() {
     document.querySelectorAll('.alert-card').forEach(alert => alert.style.display = 'none');
-    resetGameboard();
+    resetGame();
   };
 
   window.loadGameboard = function(gameboardId) {
@@ -224,19 +224,6 @@ document.addEventListener("DOMContentLoaded", function() {
       })
       .catch(error => console.error('Error loading gameboard:', error));
   };
-
-  function resetGameboard() {
-    submittedPlayers = [];
-    enabledSubmitButtons = submissionButtonCount;
-    document.querySelectorAll('.player-input').forEach(input => {
-      input.value = '';
-      input.disabled = false;
-    });
-    document.querySelectorAll('.btn-primary').forEach(button => {
-      button.disabled = false;
-    });
-    document.getElementById('totalScore').innerText = '0';
-  }
 
   function updatePageWithGameboard(gameboard) {
     console.log('Loaded gameboard:', gameboard);
@@ -498,6 +485,15 @@ document.addEventListener("DOMContentLoaded", function() {
     alertCard.style.display = 'block';
   }
 
+  function resetGame() {
+    document.getElementById('playerRows').innerHTML = '';
+    addPlayerRows();
+    document.getElementById('totalScore').innerText = '0';
+    fetchHighScore(currentGame.team_name, currentGame.stat_name); 
+    submittedPlayers = [];
+    enabledSubmitButtons = submissionButtonCount;
+  }
+
   function reloadGameboard() {
     const gameboardId = document.getElementById('gameboardId').value;
 
@@ -530,6 +526,5 @@ document.addEventListener("DOMContentLoaded", function() {
 
 </body>
 </html>
-
 
 
