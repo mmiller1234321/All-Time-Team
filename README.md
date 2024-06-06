@@ -34,8 +34,7 @@ High score functionality. New boards generated every 24 hours. Access to play pr
 
 Coming Soon:
 Optimal Score is not accurate. Working on it!
-Disable of name fields after submission.
-Get rid of white box around the number. It looks like a field you're supposed to type in. Thank you for the feedback users!
+
 
 ## Version 1.2
 
