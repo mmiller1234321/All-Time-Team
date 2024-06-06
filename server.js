@@ -21,6 +21,7 @@ app.use('/generateTeamStatPair', require('./routes/generateTeamStatPair'));
 app.use('/saveScore', require('./routes/saveScore'));
 app.use('/gameboard', require('./routes/gameboards'));
 
+// Route to fetch previous gameboards
 app.get('/fetch-previous-gameboards', (req, res) => {
   pool.query('SELECT id, team_name, stat_name FROM gameboard ORDER BY id DESC', (error, results) => {
     if (error) {
@@ -32,6 +33,7 @@ app.get('/fetch-previous-gameboards', (req, res) => {
   });
 });
 
+// Route to fetch high score based on team and stat combination
 app.get('/fetch-high-score', (req, res) => {
   const { team, stat } = req.query;
   pool.query(
@@ -51,21 +53,22 @@ app.get('/fetch-high-score', (req, res) => {
   );
 });
 
+// Route to fetch a specific gameboard and its high score
 app.get('/gameboard/:id', (req, res) => {
   const gameboardId = req.params.id;
   const query = `
     SELECT gb.*, 
            (SELECT MAX(total_score) 
             FROM games 
-            WHERE gameboard_id = ?) AS high_score 
+            WHERE team_name = gb.team_name AND stat_name = gb.stat_name) AS high_score 
     FROM gameboard gb 
     WHERE gb.id = ?`;
-  pool.query(query, [gameboardId, gameboardId], (err, results) => {
+  pool.query(query, [gameboardId], (err, results) => {
     if (err) {
       console.error('Error fetching gameboard:', err);
       res.status(500).send('Server error');
     } else {
-      res.json({ gameboard: results[0], high_score: results[1] });
+      res.json({ gameboard: results[0], high_score: results[0].high_score });
     }
   });
 });

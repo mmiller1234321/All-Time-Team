@@ -162,8 +162,6 @@
   </div>
 </div>
 
-<input type="hidden" id="gameboardId" value="123"> <!-- Update this value dynamically -->
-
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
@@ -257,10 +255,11 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 
   function fetchHighScore(team, stat) {
-    fetch(`${window.location.protocol + '//' + window.location.hostname}/fetch-high-score?team=${encodeURIComponent(team)}&stat=${encodeURIComponent(stat)}`)
+    var baseUrl = window.location.protocol + '//' + window.location.hostname;
+    fetch(baseUrl + '/fetch-high-score?team=' + encodeURIComponent(team) + '&stat=' + encodeURIComponent(stat))
       .then(response => response.json())
       .then(data => {
-        document.getElementById('highScore').innerText = data.high_score || 'N/A';
+        document.getElementById('highScore').innerText = data.highScore || 'N/A';
       })
       .catch(error => {
         console.error('Error fetching high score:', error);
@@ -517,3 +516,5 @@ document.addEventListener("DOMContentLoaded", function() {
 
 </body>
 </html>
+
+
