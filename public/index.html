@@ -388,7 +388,9 @@ document.addEventListener("DOMContentLoaded", function() {
       xhr.onload = function () {
         if (xhr.status === 200) {
           var statCell = row.cells[2];
-          var statValue = xhr.responseText;
+          var response = JSON.parse(xhr.responseText);
+          var statValue = response.maxStatValue;
+          var playerID = response.playerID;
           statCell.textContent = (statValue === 'null') ? '0' : statValue;
           statCell.classList.add('stat-square');
           updateTotalScore();
@@ -398,7 +400,7 @@ document.addEventListener("DOMContentLoaded", function() {
             fetchHighScore(currentGame.team_name, currentGame.stat_name);
           }
           
-          submittedPlayers.push({ name: playerName, position: position, statValue: statValue });
+          submittedPlayers.push({ name: playerName, position: position, statValue: statValue, playerID: playerID });
           
           if (enabledSubmitButtons === 0) {
             var totalScore = document.getElementById('totalScore').textContent;
@@ -468,8 +470,7 @@ document.addEventListener("DOMContentLoaded", function() {
         <ul>
           ${submittedPlayers.map(player => {
             if (parseInt(player.statValue, 10) > 0) {
-              const playerID = getPlayerID(player.name); // Implement this function to get playerID
-              return `<li>${player.position} <a href="https://www.baseball-reference.com/players/${playerID}.shtml" target="_blank">${player.name}</a> - ${player.statValue}</li>`;
+              return `<li>${player.position} <a href="https://www.baseball-reference.com/players/${player.playerID.charAt(0)}/${player.playerID}.shtml" target="_blank">${player.name}</a> - ${player.statValue}</li>`;
             } else {
               return `<li>${player.position} ${player.name} - ${player.statValue}</li>`;
             }
