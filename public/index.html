@@ -367,7 +367,7 @@ document.addEventListener("DOMContentLoaded", function() {
     var playerName = playerNameInput.value.trim();
     playerNameInput.disabled = true;
 
-    if (submittedPlayers.includes(playerName)) {
+    if (submittedPlayers.some(player => player.name === playerName)) {
       alert('Player has already been submitted. Please select a different player.');
       submitButton.disabled = false;
       playerNameInput.disabled = false;
@@ -389,7 +389,7 @@ document.addEventListener("DOMContentLoaded", function() {
         if (xhr.status === 200) {
           var statCell = row.cells[2];
           var statValue = xhr.responseText;
-          statCell.textContent = (statValue === 'null') ? 'N/A' : statValue;
+          statCell.textContent = (statValue === 'null') ? '0' : statValue;
           statCell.classList.add('stat-square');
           updateTotalScore();
           
@@ -398,7 +398,7 @@ document.addEventListener("DOMContentLoaded", function() {
             fetchHighScore(currentGame.team_name, currentGame.stat_name);
           }
           
-          submittedPlayers.push(playerName);
+          submittedPlayers.push({ name: playerName, position: position, statValue: statValue });
           
           if (enabledSubmitButtons === 0) {
             var totalScore = document.getElementById('totalScore').textContent;
@@ -461,10 +461,20 @@ document.addEventListener("DOMContentLoaded", function() {
     var alertContent = `
       <div class="alert-card-content">
         <button type="button" class="close" onclick="closeAlertCard()">&times;</button>
-        <h4 class="alert-heading">All buttons submitted!</h4>
+        <h4 class="alert-heading">All Time Team submitted</h4>
         <p>Total Score: ${totalScore}</p>
         <p>Team Name: ${teamName}</p>
         <p>Stat Name: ${statName}</p>
+        <ul>
+          ${submittedPlayers.map(player => {
+            if (parseInt(player.statValue, 10) > 0) {
+              const playerID = getPlayerID(player.name); // Implement this function to get playerID
+              return `<li>${player.position} <a href="https://www.baseball-reference.com/players/${playerID}.shtml" target="_blank">${player.name}</a> - ${player.statValue}</li>`;
+            } else {
+              return `<li>${player.position} ${player.name} - ${player.statValue}</li>`;
+            }
+          }).join('')}
+        </ul>
       </div>
     `;
     var alertCard = document.createElement('div');
@@ -475,8 +485,7 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 
   function reloadGameboard() {
-    // Assuming you have the current gameboard ID stored in a variable or element
-    const gameboardId = document.getElementById('gameboardId').value; // Update this line based on your actual setup
+    const gameboardId = document.getElementById('gameboardId').value;
 
     fetch(`${window.location.protocol + '//' + window.location.hostname}/gameboard/${gameboardId}`)
       .then(response => response.json())
