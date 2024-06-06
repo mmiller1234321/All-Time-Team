@@ -207,7 +207,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
   window.closeAlertCard = function() {
     document.querySelectorAll('.alert-card').forEach(alert => alert.style.display = 'none');
-    reloadGameboard();
+    resetGameboard();
   };
 
   window.loadGameboard = function(gameboardId) {
@@ -224,6 +224,19 @@ document.addEventListener("DOMContentLoaded", function() {
       })
       .catch(error => console.error('Error loading gameboard:', error));
   };
+
+  function resetGameboard() {
+    submittedPlayers = [];
+    enabledSubmitButtons = submissionButtonCount;
+    document.querySelectorAll('.player-input').forEach(input => {
+      input.value = '';
+      input.disabled = false;
+    });
+    document.querySelectorAll('.btn-primary').forEach(button => {
+      button.disabled = false;
+    });
+    document.getElementById('totalScore').innerText = '0';
+  }
 
   function updatePageWithGameboard(gameboard) {
     console.log('Loaded gameboard:', gameboard);
