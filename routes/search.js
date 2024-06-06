@@ -13,7 +13,7 @@ router.get('/', (req, res) => {
 
   if (team === 'Los Angeles Angels of Anaheim') {
     query = `
-      SELECT b.playerID, MAX(b.${stat}) AS max_stat_value
+      SELECT MAX(b.${stat}) AS max_stat_value, b.playerID
       FROM batting AS b
       JOIN people AS p ON b.playerID = p.playerID
       JOIN fielding AS f ON b.playerID = f.playerID
@@ -26,7 +26,7 @@ router.get('/', (req, res) => {
     params = [playerName, position, team, 'California Angels', 'Anaheim Angels'];
   } else if (team === 'Cleveland Indians' || team === 'Cleveland Guardians') {
     query = `
-      SELECT b.playerID, MAX(b.${stat}) AS max_stat_value
+      SELECT MAX(b.${stat}) AS max_stat_value, b.playerID
       FROM batting AS b
       JOIN people AS p ON b.playerID = p.playerID
       JOIN fielding AS f ON b.playerID = f.playerID
@@ -39,7 +39,7 @@ router.get('/', (req, res) => {
     params = [playerName, position, team, 'Cleveland Indians'];
   } else if (team === 'Washington Nationals') {
     query = `
-      SELECT b.playerID, MAX(b.${stat}) AS max_stat_value
+      SELECT MAX(b.${stat}) AS max_stat_value, b.playerID
       FROM batting AS b
       JOIN people AS p ON b.playerID = p.playerID
       JOIN fielding AS f ON b.playerID = f.playerID
@@ -52,7 +52,7 @@ router.get('/', (req, res) => {
     params = [playerName, position, team, 'Montreal Expos'];
   } else if (team === 'San Francisco Giants') {
     query = `
-      SELECT b.playerID, MAX(b.${stat}) AS max_stat_value
+      SELECT MAX(b.${stat}) AS max_stat_value, b.playerID
       FROM batting AS b
       JOIN people AS p ON b.playerID = p.playerID
       JOIN fielding AS f ON b.playerID = f.playerID
@@ -65,7 +65,7 @@ router.get('/', (req, res) => {
     params = [playerName, position, team, 'New York Giants'];
   } else if (team === 'Los Angeles Dodgers') {
     query = `
-      SELECT b.playerID, MAX(b.${stat}) AS max_stat_value
+      SELECT MAX(b.${stat}) AS max_stat_value, b.playerID
       FROM batting AS b
       JOIN people AS p ON b.playerID = p.playerID
       JOIN fielding AS f ON b.playerID = f.playerID
@@ -78,7 +78,7 @@ router.get('/', (req, res) => {
     params = [playerName, position, team, 'Brooklyn Dodgers'];
   } else if (team === 'Texas Rangers') {
     query = `
-      SELECT b.playerID, MAX(b.${stat}) AS max_stat_value
+      SELECT MAX(b.${stat}) AS max_stat_value, b.playerID
       FROM batting AS b
       JOIN people AS p ON b.playerID = p.playerID
       JOIN fielding AS f ON b.playerID = f.playerID
@@ -91,7 +91,7 @@ router.get('/', (req, res) => {
     params = [playerName, position, team, 'Washington Senators'];
   } else if (team === 'Atlanta Braves') {
     query = `
-      SELECT b.playerID, MAX(b.${stat}) AS max_stat_value
+      SELECT MAX(b.${stat}) AS max_stat_value, b.playerID
       FROM batting AS b
       JOIN people AS p ON b.playerID = p.playerID
       JOIN fielding AS f ON b.playerID = f.playerID
@@ -104,7 +104,7 @@ router.get('/', (req, res) => {
     params = [playerName, position, team, 'Milwaukee Braves'];
   } else if (team === 'Oakland Athletics' || team === 'Kansas City Athletics' || team === 'Philadelphia Athletics') {
     query = `
-      SELECT b.playerID, MAX(b.${stat}) AS max_stat_value
+      SELECT MAX(b.${stat}) AS max_stat_value, b.playerID
       FROM batting AS b
       JOIN people AS p ON b.playerID = p.playerID
       JOIN fielding AS f ON b.playerID = f.playerID
@@ -117,7 +117,7 @@ router.get('/', (req, res) => {
     params = [playerName, position, team, 'Kansas City Athletics', 'Philadelphia Athletics'];
   } else {
     query = `
-      SELECT b.playerID, MAX(b.${stat}) AS max_stat_value
+      SELECT MAX(b.${stat}) AS max_stat_value, b.playerID
       FROM batting AS b
       JOIN people AS p ON b.playerID = p.playerID
       JOIN fielding AS f ON b.playerID = f.playerID
