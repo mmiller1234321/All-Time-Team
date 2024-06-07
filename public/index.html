@@ -59,6 +59,12 @@
       width: 50px;
       height: auto;
     }
+    .alert-card .team-logo {
+      display: block;
+      margin: 20px auto;
+      width: 100px;
+      height: auto;
+    }
     #fixedLogo {
       position: fixed;
       bottom: 20px;
@@ -141,7 +147,7 @@
   <div class="alert-card-content">
     <button type="button" class="close" onclick="closeAlertCard()">&times;</button>
     <h4 class="alert-heading">Welcome to All Time Teams</h4>
-    <img src="" id="alertTeamLogo" class="team-logo" alt="Team Logo" loading="lazy" onerror="handleImageError(this)">
+    <img src="favicon.png" id="alertTeamLogo" class="team-logo" alt="Team Logo" loading="lazy" onerror="handleImageError(this)">
     <table class="table table-bordered">
       <thead>
         <tr>
@@ -256,10 +262,10 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 
   function fetchHighScore(team, stat) {
-    fetch(`${window.location.protocol + '//' + window.location.hostname}/fetch-high-score?team=${encodeURIComponent(team)}&stat=${encodeURIComponent(stat)}`)
+    fetch(`${window.location.protocol + '//' + window.location.hostname}/search/getHighScore?team_name=${encodeURIComponent(team)}&stat_name=${encodeURIComponent(stat)}`)
       .then(response => response.json())
       .then(data => {
-        document.getElementById('highScore').innerText = data.high_score || 'N/A';
+        document.getElementById('highScore').innerText = data.highScore || 'N/A';
       })
       .catch(error => {
         console.error('Error fetching high score:', error);
@@ -476,6 +482,7 @@ document.addEventListener("DOMContentLoaded", function() {
             }
           }).join('')}
         </ul>
+        <img src="/logos/${teamName.replace(/\s+/g, '-').toLowerCase()}.svg" class="team-logo" alt="Team Logo" loading="lazy" onerror="handleImageError(this)">
       </div>
     `;
     var alertCard = document.createElement('div');
