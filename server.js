@@ -15,11 +15,6 @@ app.use(cors(corsOptions));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 
-// Serve logos with caching
-app.use('/logos', express.static(path.join(__dirname, 'seeds'), {
-  maxAge: '1y' // Cache for one year
-}));
-
 app.use('/autocomplete', require('./routes/autocomplete'));
 app.use('/search', require('./routes/search'));
 app.use('/generateTeamStatPair', require('./routes/generateTeamStatPair'));
@@ -58,19 +53,12 @@ app.get('/fetch-high-score', (req, res) => {
 
 app.get('/gameboard/:id', (req, res) => {
   const gameboardId = req.params.id;
-  const query = `
-    SELECT gb.*, 
-           (SELECT MAX(total_score) 
-            FROM games 
-            WHERE gameboard_id = ?) AS high_score 
-    FROM gameboard gb 
-    WHERE gb.id = ?`;
-  pool.query(query, [gameboardId, gameboardId], (err, results) => {
+  pool.query('SELECT * FROM gameboard WHERE id = ?', [gameboardId], (err, results) => {
     if (err) {
       console.error('Error fetching gameboard:', err);
       res.status(500).send('Server error');
     } else {
-      res.json({ gameboard: results[0], high_score: results[1] });
+      res.json({ gameboard: results[0] });
     }
   });
 });
@@ -83,3 +71,5 @@ app.listen(PORT, () => {
 // Import and start the backup cron job
 const { insertNextTeamStatPair } = require('./routes/backupCronJob');
 insertNextTeamStatPair();
+
+

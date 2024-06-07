@@ -38,6 +38,22 @@
       margin: 4px 0;
       font-size: 16px;
     }
+    .alert-card {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 20px;
+      background-color: rgba(255, 255, 255, 0.9);
+      z-index: 1050;
+      overflow-y: auto;
+      display: none;
+    }
+    .alert-card-content {
+      max-width: 800px;
+      margin: 0 auto;
+    }
     @media (min-width: 768px) {
       body {
         padding: 0 10%;
@@ -54,24 +70,9 @@
         width: auto;
         margin: 8px;
       }
-    }
-    .team-logo {
-      width: 50px;
-      height: auto;
-    }
-    .alert-card .team-logo {
-      display: block;
-      margin: 20px auto;
-      width: 100px;
-      height: auto;
-    }
-    #fixedLogo {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      width: 80px;
-      height: auto;
-      z-index: 1000;
+      .alert-card-content {
+        max-width: 70%;
+      }
     }
   </style>
 </head>
@@ -147,7 +148,6 @@
   <div class="alert-card-content">
     <button type="button" class="close" onclick="closeAlertCard()">&times;</button>
     <h4 class="alert-heading">Welcome to All Time Teams</h4>
-    <img src="favicon.png" id="alertTeamLogo" class="team-logo" alt="Team Logo" loading="lazy" onerror="handleImageError(this)">
     <table class="table table-bordered">
       <thead>
         <tr>
@@ -162,8 +162,6 @@
     </table>
   </div>
 </div>
-
-<img src="" id="fixedLogo" class="team-logo" alt="Team Logo" loading="lazy" onerror="handleImageError(this)"> <!-- Fixed position logo -->
 
 <input type="hidden" id="gameboardId" value="123"> <!-- Update this value dynamically -->
 
@@ -210,7 +208,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
   window.closeAlertCard = function() {
     document.querySelectorAll('.alert-card').forEach(alert => alert.style.display = 'none');
-    resetGame();
+    reloadGameboard();
   };
 
   window.loadGameboard = function(gameboardId) {
@@ -219,7 +217,7 @@ document.addEventListener("DOMContentLoaded", function() {
       .then(data => {
         if (data.gameboard) {
           updatePageWithGameboard(data.gameboard);
-          document.getElementById('highScore').innerText = data.high_score || 'N/A';
+          fetchHighScore(data.gameboard.team_name, data.gameboard.stat_name);
           closeAlertCard();
         } else {
           console.error('No gameboard data found for ID:', gameboardId);
@@ -234,8 +232,6 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById('statLabel').innerText = gameboard.stat_name;
     currentGame.team_name = gameboard.team_name;
     currentGame.stat_name = gameboard.stat_name;
-    fetchHighScore(gameboard.team_name, gameboard.stat_name);
-    updateLogo(gameboard.team_name);
   }
 
   function fetchTeamStatPair() {
@@ -258,14 +254,13 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById('statLabel').innerText = stat;
     console.log('Updated labels with team:', team, 'and stat:', stat);
     fetchHighScore(team, stat);
-    updateLogo(team);
   }
 
   function fetchHighScore(team, stat) {
-    fetch(`${window.location.protocol + '//' + window.location.hostname}/search/getHighScore?team_name=${encodeURIComponent(team)}&stat_name=${encodeURIComponent(stat)}`)
+    fetch(`${window.location.protocol + '//' + window.location.hostname}/fetch-high-score?team=${encodeURIComponent(team)}&stat=${encodeURIComponent(stat)}`)
       .then(response => response.json())
       .then(data => {
-        document.getElementById('highScore').innerText = data.highScore || 'N/A';
+        document.getElementById('highScore').innerText = data.high_score || 'N/A';
       })
       .catch(error => {
         console.error('Error fetching high score:', error);
@@ -472,7 +467,6 @@ document.addEventListener("DOMContentLoaded", function() {
         <p>Total Score: ${totalScore}</p>
         <p>Team Name: ${teamName}</p>
         <p>Stat Name: ${statName}</p>
-        <img src="/logos/${teamName.replace(/\s+/g, '-').toLowerCase()}.svg" class="team-logo" alt="Team Logo" loading="lazy" onerror="handleImageError(this)">
         <ul>
           ${submittedPlayers.map(player => {
             if (parseInt(player.statValue, 10) > 0) {
@@ -482,7 +476,6 @@ document.addEventListener("DOMContentLoaded", function() {
             }
           }).join('')}
         </ul>
-        <img src="/logos/${teamName.replace(/\s+/g, '-').toLowerCase()}.svg" class="team-logo" alt="Team Logo" loading="lazy" onerror="handleImageError(this)">
       </div>
     `;
     var alertCard = document.createElement('div');
@@ -492,29 +485,6 @@ document.addEventListener("DOMContentLoaded", function() {
     alertCard.style.display = 'block';
   }
 
-  function updateLogo(teamName) {
-    var logoUrl = `/logos/${teamName.replace(/\s+/g, '-').toLowerCase()}.svg`;
-    var fixedLogo = document.getElementById('fixedLogo');
-    var alertLogo = document.getElementById('alertTeamLogo');
-
-    fixedLogo.src = logoUrl;
-    alertLogo.src = logoUrl;
-  }
-
-  function handleImageError(img) {
-    console.error('Error loading image:', img.src);
-    img.style.display = 'none';
-  }
-
-  function resetGame() {
-    document.getElementById('playerRows').innerHTML = '';
-    addPlayerRows();
-    document.getElementById('totalScore').innerText = '0';
-    fetchHighScore(currentGame.team_name, currentGame.stat_name); 
-    submittedPlayers = [];
-    enabledSubmitButtons = submissionButtonCount;
-  }
-
   function reloadGameboard() {
     const gameboardId = document.getElementById('gameboardId').value;
 
@@ -522,7 +492,7 @@ document.addEventListener("DOMContentLoaded", function() {
       .then(response => response.json())
       .then(data => {
         updatePageWithGameboard(data.gameboard);
-        document.getElementById('highScore').innerText = data.high_score || 'N/A';
+        fetchHighScore(data.gameboard.team_name, data.gameboard.stat_name);
       })
       .catch(error => console.error('Error reloading gameboard:', error));
   }
@@ -533,7 +503,6 @@ document.addEventListener("DOMContentLoaded", function() {
     currentGame.team_name = gameboard.team_name;
     currentGame.stat_name = gameboard.stat_name;
     fetchHighScore(gameboard.team_name, gameboard.stat_name);
-    updateLogo(gameboard.team_name);
   }
 
   fetchTeamStatPair();
@@ -548,5 +517,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
 </body>
 </html>
+
 
   
