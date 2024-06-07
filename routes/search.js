@@ -3,19 +3,19 @@ const router = express.Router();
 const pool = require('../db/db.js');
 
 const getHighScore = (team_name, stat_name) => {
-    return new Promise((resolve, reject) => {
-        const query = `
-            SELECT MAX(total_score) as high_score 
-            FROM games 
-            WHERE team_name = ? AND stat_name = ?
-        `;
-        pool.query(query, [team_name, stat_name], (error, results) => {
-            if (error) {
-                return reject(error);
-            }
-            resolve(results[0].high_score || 0);
-        });
+  return new Promise((resolve, reject) => {
+    const query = `
+      SELECT MAX(total_score) as high_score 
+      FROM games 
+      WHERE team_name = ? AND stat_name = ?
+    `;
+    pool.query(query, [team_name, stat_name], (error, results) => {
+      if (error) {
+        return reject(error);
+      }
+      resolve(results[0].high_score || 0);
     });
+  });
 };
 
 router.get('/', (req, res) => {
@@ -172,14 +172,14 @@ router.get('/', (req, res) => {
 });
 
 router.get('/getHighScore', async (req, res) => {
-    const { team_name, stat_name } = req.query;
+  const { team_name, stat_name } = req.query;
 
-    try {
-        const highScore = await getHighScore(team_name, stat_name);
-        res.json({ highScore });
-    } catch (error) {
-        res.status(500).send(error.toString());
-    }
+  try {
+    const highScore = await getHighScore(team_name, stat_name);
+    res.json({ highScore });
+  } catch (error) {
+    res.status(500).send(error.toString());
+  }
 });
 
 module.exports = router;

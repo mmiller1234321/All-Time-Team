@@ -83,4 +83,3 @@ app.listen(PORT, () => {
 // Import and start the backup cron job
 const { insertNextTeamStatPair } = require('./routes/backupCronJob');
 insertNextTeamStatPair();
-
