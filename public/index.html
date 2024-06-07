@@ -6,7 +6,6 @@
   <title>All Time Teams</title>
   <link rel="icon" href="favicon.png" type="image/png">
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-  <link href="alert-card.css" rel="stylesheet">
   <style>
     body {
       background-color: #71A95A;
@@ -208,7 +207,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
   window.closeAlertCard = function() {
     document.querySelectorAll('.alert-card').forEach(alert => alert.style.display = 'none');
-    reloadGameboard();
+    resetGame();
   };
 
   window.loadGameboard = function(gameboardId) {
@@ -217,7 +216,7 @@ document.addEventListener("DOMContentLoaded", function() {
       .then(data => {
         if (data.gameboard) {
           updatePageWithGameboard(data.gameboard);
-          fetchHighScore(data.gameboard.team_name, data.gameboard.stat_name);
+          document.getElementById('highScore').innerText = data.high_score || 'N/A';
           closeAlertCard();
         } else {
           console.error('No gameboard data found for ID:', gameboardId);
@@ -232,6 +231,7 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById('statLabel').innerText = gameboard.stat_name;
     currentGame.team_name = gameboard.team_name;
     currentGame.stat_name = gameboard.stat_name;
+    fetchHighScore(gameboard.team_name, gameboard.stat_name);
   }
 
   function fetchTeamStatPair() {
@@ -485,6 +485,15 @@ document.addEventListener("DOMContentLoaded", function() {
     alertCard.style.display = 'block';
   }
 
+  function resetGame() {
+    document.getElementById('playerRows').innerHTML = '';
+    addPlayerRows();
+    document.getElementById('totalScore').innerText = '0';
+    fetchHighScore(currentGame.team_name, currentGame.stat_name); 
+    submittedPlayers = [];
+    enabledSubmitButtons = submissionButtonCount;
+  }
+
   function reloadGameboard() {
     const gameboardId = document.getElementById('gameboardId').value;
 
@@ -492,7 +501,7 @@ document.addEventListener("DOMContentLoaded", function() {
       .then(response => response.json())
       .then(data => {
         updatePageWithGameboard(data.gameboard);
-        fetchHighScore(data.gameboard.team_name, data.gameboard.stat_name);
+        document.getElementById('highScore').innerText = data.high_score || 'N/A';
       })
       .catch(error => console.error('Error reloading gameboard:', error));
   }
