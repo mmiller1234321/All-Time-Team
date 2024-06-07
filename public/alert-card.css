@@ -1,0 +1,54 @@
+/* alert-card.css */
+.alert-card {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.9);
+    z-index: 1050;
+    overflow-y: auto;
+    display: none;
+}
+
+.alert-card-content {
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.team-logo {
+    width: 100px;
+    height: auto;
+    margin: 10px 0;
+}
+
+.alert-card-content .team-logo {
+    width: 50px;
+    height: auto;
+    display: block;
+    margin: 0 auto 10px auto;
+}
+
+@media (min-width: 768px) {
+    .alert-card-content {
+        max-width: 70%;
+    }
+    .team-logo {
+        width: 80px;
+    }
+    .alert-card-content .team-logo {
+        width: 70px;
+    }
+}
+
+/* Additional styling for logo in a designated area */
+#fixed-logo {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 80px;
+    height: auto;
+    z-index: 1000;
+}

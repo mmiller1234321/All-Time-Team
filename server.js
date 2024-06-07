@@ -15,6 +15,11 @@ app.use(cors(corsOptions));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 
+// Serve logos with caching
+app.use('/logos', express.static(path.join(__dirname, 'seeds'), {
+  maxAge: '1y' // Cache for one year
+}));
+
 app.use('/autocomplete', require('./routes/autocomplete'));
 app.use('/search', require('./routes/search'));
 app.use('/generateTeamStatPair', require('./routes/generateTeamStatPair'));
