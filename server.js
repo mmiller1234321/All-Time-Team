@@ -43,9 +43,9 @@ app.get('/fetch-high-score', (req, res) => {
         return res.status(500).json({ error: 'Internal Server Error', message: error.message });
       }
       if (results.length === 0 || results[0].high_score === null) {
-        res.json({ high_score: 'N/A' });
+        res.set('Cache-Control', 'no-store').json({ high_score: 'N/A' });
       } else {
-        res.json({ high_score: results[0].high_score });
+        res.set('Cache-Control', 'no-store').json({ high_score: results[0].high_score });
       }
     }
   );
@@ -71,5 +71,6 @@ app.listen(PORT, () => {
 // Import and start the backup cron job
 const { insertNextTeamStatPair } = require('./routes/backupCronJob');
 insertNextTeamStatPair();
+
 
 
