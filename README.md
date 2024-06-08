@@ -34,6 +34,9 @@ High score functionality. New boards generated every 24 hours. Access to play pr
 
 Coming Soon:
 Optimal Score is not accurate. Working on it!
+Add pictures and team logos.
+User stats.
+Pitcher boards.
 
 
 ## Version 1.2
